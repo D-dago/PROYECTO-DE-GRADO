@@ -50,7 +50,7 @@ export function RecommendationsPage() {
         <input name="municipality" placeholder="Municipio" />
         <input name="area" placeholder="Área" />
         <input name="modality" placeholder="Modalidad" />
-        <label>Presupuesto aproximado
+        <label>Presupuesto
           <select name="maximumCost" defaultValue="">
             {budgetRanges.map((range) => <option key={range.value} value={range.value}>{range.label}</option>)}
           </select>

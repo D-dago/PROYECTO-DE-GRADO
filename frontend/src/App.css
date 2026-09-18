@@ -20,6 +20,10 @@
   --gold: #f2a93b;
 }
 
+html {
+  background: var(--bg-2);
+}
+
 body {
   background: radial-gradient(circle at 12% -8%, #6a1a41 0%, transparent 42%), linear-gradient(165deg, var(--bg), var(--bg-2));
   background-attachment: fixed;
@@ -72,6 +76,7 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .simple-form, .filter-form { display: grid; gap: 1rem; max-width: 36rem; }
 .simple-form h2, .simple-form h3 { color: var(--cream); }
 .simple-form label { display: grid; gap: .4rem; color: var(--cream-muted); }
+.filter-form label { display: grid; gap: .4rem; color: var(--cream-muted); align-self: end; }
 .simple-form small { color: var(--cream-muted); }
 .simple-form input, .simple-form select, .filter-form input, .filter-form select { padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
 .simple-form button, .filter-form button, .career-card button { padding: .8rem 1.2rem; border: 0; border-radius: 999px; background: var(--green); color: #fff; cursor: pointer; font-weight: 600; transition: filter .15s; }

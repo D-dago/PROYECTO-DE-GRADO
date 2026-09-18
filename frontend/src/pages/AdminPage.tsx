@@ -6,12 +6,17 @@ import type { Career, Compatibility, Institution, Student } from '../services/ap
 const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
 
 export function AdminPage() {
-  const [message, setMessage] = useState('')
+  const [success, setSuccess] = useState('')
+  const [error, setError] = useState('')
   const [dashboard, setDashboard] = useState<{ students: number; institutions: number; careers: number; compatibilityRules: number } | null>(null)
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [careers, setCareers] = useState<Career[]>([])
   const [compatibilities, setCompatibilities] = useState<Compatibility[]>([])
   const [students, setStudents] = useState<Student[]>([])
+
+  function report(message: string, isError = false) {
+    if (isError) { setError(message); setSuccess('') } else { setSuccess(message); setError('') }
+  }
 
   async function loadAll() {
     try {
@@ -23,8 +28,8 @@ export function AdminPage() {
       setCareers(careersData)
       setCompatibilities(compatibilitiesData)
       setStudents(studentsData)
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Se requiere una sesión de administrador.')
+    } catch (loadError) {
+      report(loadError instanceof Error ? loadError.message : 'Se requiere una sesión de administrador.', true)
     }
   }
 
@@ -36,17 +41,18 @@ export function AdminPage() {
       <h1>Panel de datos</h1>
       {dashboard && <div className="dashboard-grid">{Object.entries(dashboard).map(([key, value]) => <strong key={key}>{value}<small> {key}</small></strong>)}</div>}
       <p className="empty-state">Carga únicamente información institucional verificada. La aplicación no incluye datos inventados.</p>
-      {message && <p className="success-message">{message}</p>}
+      {success && <p className="success-message">{success}</p>}
+      {error && <p className="error-message">{error}</p>}
 
-      <InstitutionsSection institutions={institutions} onChanged={loadAll} report={setMessage} />
-      <CareersSection careers={careers} institutions={institutions} onChanged={loadAll} report={setMessage} />
-      <CompatibilitiesSection compatibilities={compatibilities} careers={careers} onChanged={loadAll} report={setMessage} />
-      <StudentsSection students={students} onChanged={loadAll} report={setMessage} />
+      <InstitutionsSection institutions={institutions} onChanged={loadAll} report={report} />
+      <CareersSection careers={careers} institutions={institutions} onChanged={loadAll} report={report} />
+      <CompatibilitiesSection compatibilities={compatibilities} careers={careers} onChanged={loadAll} report={report} />
+      <StudentsSection students={students} onChanged={loadAll} report={report} />
     </main>
   )
 }
 
-function InstitutionsSection({ institutions, onChanged, report }: { institutions: Institution[]; onChanged: () => void; report: (message: string) => void }) {
+function InstitutionsSection({ institutions, onChanged, report }: { institutions: Institution[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Institution | null>(null)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -59,12 +65,12 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
       setEditing(null)
       event.currentTarget.reset()
       onChanged()
-    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la institución.') }
+    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la institución.', true) }
   }
 
   async function toggleActive(institution: Institution) {
     try { await appApi.setInstitutionActive(institution.id, !institution.isActive); onChanged() }
-    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.') }
+    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
   }
 
   return (
@@ -103,7 +109,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
   )
 }
 
-function CareersSection({ careers, institutions, onChanged, report }: { careers: Career[]; institutions: Institution[]; onChanged: () => void; report: (message: string) => void }) {
+function CareersSection({ careers, institutions, onChanged, report }: { careers: Career[]; institutions: Institution[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Career | null>(null)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -117,12 +123,12 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
       setEditing(null)
       event.currentTarget.reset()
       onChanged()
-    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la carrera.') }
+    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la carrera.', true) }
   }
 
   async function toggleActive(career: Career) {
     try { await appApi.setCareerActive(career.id, !career.isActive); onChanged() }
-    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.') }
+    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
   }
 
   return (
@@ -169,7 +175,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
   )
 }
 
-function CompatibilitiesSection({ compatibilities, careers, onChanged, report }: { compatibilities: Compatibility[]; careers: Career[]; onChanged: () => void; report: (message: string) => void }) {
+function CompatibilitiesSection({ compatibilities, careers, onChanged, report }: { compatibilities: Compatibility[]; careers: Career[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Compatibility | null>(null)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -183,12 +189,12 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
       setEditing(null)
       event.currentTarget.reset()
       onChanged()
-    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la regla.') }
+    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la regla.', true) }
   }
 
   async function remove(compatibility: Compatibility) {
     try { await appApi.deleteCompatibility(compatibility.id); onChanged() }
-    catch (error) { report(error instanceof Error ? error.message : 'No se pudo eliminar la regla.') }
+    catch (error) { report(error instanceof Error ? error.message : 'No se pudo eliminar la regla.', true) }
   }
 
   return (
@@ -234,10 +240,10 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
   )
 }
 
-function StudentsSection({ students, onChanged, report }: { students: Student[]; onChanged: () => void; report: (message: string) => void }) {
+function StudentsSection({ students, onChanged, report }: { students: Student[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   async function toggleActive(student: Student) {
     try { await appApi.setStudentActive(student.id, !student.isActive); onChanged() }
-    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.') }
+    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
   }
 
   return (
