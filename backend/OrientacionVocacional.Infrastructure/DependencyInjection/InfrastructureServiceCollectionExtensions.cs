@@ -20,7 +20,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new InvalidOperationException("ConnectionStrings:PostgreSQL no esta configurada.");
+            throw new InvalidOperationException("ConnectionStrings:PostgreSQL no está configurada.");
         }
 
         services.AddDbContext<OrientacionVocacionalDbContext>(options =>

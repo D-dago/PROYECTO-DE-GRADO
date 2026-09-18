@@ -24,7 +24,7 @@ public sealed class AdminCatalogController(ICatalogService service) : Controller
     public async Task<ActionResult<CareerResponse>> CreateCareer(CareerRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateCareerAsync(request, cancellationToken);
-        return result is null ? BadRequest(new { message = "La institucion no existe o esta inactiva." }) : Ok(result);
+        return result is null ? BadRequest(new { message = "La institución no existe o está inactiva." }) : Ok(result);
     }
 
     [HttpPut("institutions/{id:guid}")]
@@ -37,7 +37,7 @@ public sealed class AdminCatalogController(ICatalogService service) : Controller
     public async Task<ActionResult<IReadOnlyList<CompatibilityResponse>>> Compatibilities(CancellationToken cancellationToken) => Ok(await service.GetCompatibilitiesAsync(cancellationToken));
 
     [HttpPost("compatibilities")]
-    public async Task<IActionResult> AddCompatibility(CompatibilityRequest request, CancellationToken cancellationToken) => await service.AddCompatibilityAsync(request, cancellationToken) ? NoContent() : BadRequest(new { message = "Regla invalida o carrera inexistente." });
+    public async Task<IActionResult> AddCompatibility(CompatibilityRequest request, CancellationToken cancellationToken) => await service.AddCompatibilityAsync(request, cancellationToken) ? NoContent() : BadRequest(new { message = "Regla inválida o carrera inexistente." });
 
     [HttpPut("compatibilities/{id:guid}")]
     public async Task<IActionResult> UpdateCompatibility(Guid id, CompatibilityRequest request, CancellationToken cancellationToken) => await service.UpdateCompatibilityAsync(id, request, cancellationToken) ? NoContent() : NotFound();

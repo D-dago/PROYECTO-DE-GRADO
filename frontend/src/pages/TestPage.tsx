@@ -8,7 +8,7 @@ const options = [
 ]
 
 const dimensions = new Map([
-  ['R', 'Realista'], ['I', 'Investigador'], ['A', 'Artistico'],
+  ['R', 'Realista'], ['I', 'Investigador'], ['A', 'Artístico'],
   ['S', 'Social'], ['E', 'Emprendedor'], ['C', 'Convencional'],
 ])
 
@@ -64,15 +64,15 @@ export function TestPage() {
 
   return (
     <main className="test-shell">
-      <header className="test-header"><span className="eyebrow">Orientacion vocacional</span><span className="version-label">RIASEC · 60 preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
+      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">RIASEC · 60 preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
       <section className="quiz-panel" aria-live="polite">
-        <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre que actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, 60)} <span>de 60</span></strong></div>
+        <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, 60)} <span>de 60</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>
         <div className="question-meta"><span className="dimension-tag">{question.dimension} · {dimensions.get(question.dimension)}</span><span>{Math.round(progress)}% completado</span></div>
         <p className="question-text">{question.text}</p>
         <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={() => void answer(option.value)} disabled={saving}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
         {error && <p className="error-message">{error}</p>}
-        <p className="quiz-hint">Elige la opcion que mejor describa tu forma de ser.</p>
+        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser.</p>
       </section>
     </main>
   )
@@ -80,5 +80,5 @@ export function TestPage() {
 
 function ResultView({ result }: { result: RiasecResult }) {
   const scores = [['R', result.rScore], ['I', result.iScore], ['A', result.aScore], ['S', result.sScore], ['E', result.eScore], ['C', result.cScore]]
-  return <main className="test-shell result-shell"><header className="test-header"><span className="eyebrow">Orientacion vocacional</span><span className="version-label">Resultado guardado</span></header><section className="result-panel"><span className="eyebrow">Test terminado</span><h1>Tu perfil RIASEC</h1><p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p><div className="score-list">{scores.map(([code, score]) => <div key={code} className="score-row"><strong>{code}</strong><div className="score-bar"><span style={{ width: `${Number(score) / 50 * 100}%` }} /></div><span>{score}</span></div>)}</div><p className="result-note">Este resultado resume tus respuestas. Es una herramienta de orientacion vocacional, no un diagnostico psicologico ni determina obligatoriamente una profesion.</p><a className="start-link" href="/recomendaciones">Ver recomendaciones</a></section></main>
+  return <main className="test-shell result-shell"><header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">Resultado guardado</span></header><section className="result-panel"><span className="eyebrow">Test terminado</span><h1>Tu perfil RIASEC</h1><p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p><div className="score-list">{scores.map(([code, score]) => <div key={code} className="score-row"><strong>{code}</strong><div className="score-bar"><span style={{ width: `${Number(score) / 50 * 100}%` }} /></div><span>{score}</span></div>)}</div><p className="result-note">Este resultado resume tus respuestas. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.</p><a className="start-link" href="/recomendaciones">Ver recomendaciones</a></section></main>
 }

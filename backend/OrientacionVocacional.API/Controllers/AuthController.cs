@@ -17,7 +17,7 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     {
         var response = await authService.RegisterAsync(request, cancellationToken);
         return response is null
-            ? Conflict(new { message = "El correo ya esta registrado." })
+            ? Conflict(new { message = "El correo ya está registrado." })
             : Created("api/auth/me", response);
     }
 
@@ -29,7 +29,7 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     {
         var response = await authService.LoginAsync(request, cancellationToken);
         return response is null
-            ? Unauthorized(new { message = "Credenciales invalidas." })
+            ? Unauthorized(new { message = "Credenciales inválidas." })
             : Ok(response);
     }
 

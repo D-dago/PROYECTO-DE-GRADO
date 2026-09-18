@@ -88,7 +88,7 @@ public sealed class TestService(
             .SingleOrDefaultAsync(candidate => candidate.Id == request.QuestionId && candidate.IsActive, cancellationToken);
         if (question is null)
         {
-            return (false, "La pregunta no existe o no esta activa.", null);
+            return (false, "La pregunta no existe o no está activa.", null);
         }
         if (attempt.Answers.Any(answer => answer.QuestionId == request.QuestionId))
         {

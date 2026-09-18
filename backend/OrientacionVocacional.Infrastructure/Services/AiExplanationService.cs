@@ -25,6 +25,12 @@ public sealed class AiExplanationService(IHttpClientFactory httpClientFactory, I
             using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
             return document.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "Explicación mediante IA no disponible actualmente.";
         }
-        catch (HttpRequestException) { return "Explicación mediante IA no disponible actualmente."; }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException or KeyNotFoundException)
+        {
+            // La IA es un complemento opcional: si el proveedor tarda, se cae la red o
+            // devuelve un formato inesperado, las recomendaciones estructuradas no deben
+            // fallar por eso.
+            return "Explicación mediante IA no disponible actualmente.";
+        }
     }
 }
