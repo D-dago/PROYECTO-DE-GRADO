@@ -185,6 +185,27 @@ public sealed class RiasecTests
         Assert.Single(await service.GetHistoryAsync(userId, CancellationToken.None));
     }
 
+    [Fact]
+    public async Task Public_catalog_hides_inactive_careers_but_admin_listing_shows_all()
+    {
+        await using var context = CreateContext();
+        var institution = new Institution { Id = Guid.NewGuid(), Name = "DATOS DE PRUEBA", Type = "DATOS DE PRUEBA", Status = "ACTIVA" };
+        context.Institutions.Add(institution);
+        var activeCareer = new Career { Id = Guid.NewGuid(), Name = "Carrera activa", Status = "ACTIVA", InstitutionId = institution.Id, Institution = institution, IsActive = true };
+        var inactiveCareer = new Career { Id = Guid.NewGuid(), Name = "Carrera inactiva", Status = "ACTIVA", InstitutionId = institution.Id, Institution = institution, IsActive = false };
+        context.Careers.AddRange(activeCareer, inactiveCareer);
+        await context.SaveChangesAsync();
+        var service = new Infrastructure.Services.CatalogService(context, new NoAi());
+
+        var publicCareers = await service.GetCareersAsync(CancellationToken.None);
+        var adminCareers = await service.GetAllCareersForAdminAsync(CancellationToken.None);
+
+        Assert.Single(publicCareers);
+        Assert.Equal("Carrera activa", publicCareers[0].Name);
+        Assert.Equal(2, adminCareers.Count);
+        Assert.Contains(adminCareers, item => item.Name == "Carrera inactiva");
+    }
+
     private static TestService CreateService(OrientacionVocacionalDbContext context) =>
         new(context, new RiasecScoringService());
 

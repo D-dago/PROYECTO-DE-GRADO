@@ -5,7 +5,7 @@ public sealed record CareerResponse(Guid Id, string Name, string? Area, string? 
 public sealed record RecommendationResponse(IReadOnlyList<CareerResponse> Items, Guid HistoryId, string? AiMessage);
 public sealed record HistoryResponse(Guid Id, Guid TestAttemptId, DateTime CreatedAtUtc, string? FilterSummary);
 public sealed record AdminDashboardResponse(int Students, int Institutions, int Careers, int CompatibilityRules);
-public sealed record CompatibilityResponse(Guid Id, Guid CareerId, string Dimension, int CompatibilityLevel, string Rule);
+public sealed record CompatibilityResponse(Guid Id, Guid CareerId, string CareerName, string Dimension, int CompatibilityLevel, string Rule);
 public sealed record StudentAdminResponse(Guid Id, string Email, string FirstName, string LastName, bool IsActive, DateTime CreatedAtUtc);
 
 public sealed class InstitutionRequest

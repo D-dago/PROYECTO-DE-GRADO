@@ -17,6 +17,9 @@ public sealed class AdminCatalogController(ICatalogService service) : Controller
     [HttpPost("institutions")]
     public async Task<ActionResult<InstitutionResponse>> CreateInstitution(InstitutionRequest request, CancellationToken cancellationToken) => Ok(await service.CreateInstitutionAsync(request, cancellationToken));
 
+    [HttpGet("careers")]
+    public async Task<ActionResult<IReadOnlyList<CareerResponse>>> Careers(CancellationToken cancellationToken) => Ok(await service.GetAllCareersForAdminAsync(cancellationToken));
+
     [HttpPost("careers")]
     public async Task<ActionResult<CareerResponse>> CreateCareer(CareerRequest request, CancellationToken cancellationToken)
     {

@@ -6,6 +6,7 @@ public interface ICatalogService
 {
     Task<IReadOnlyList<InstitutionResponse>> GetInstitutionsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<CareerResponse>> GetCareersAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<CareerResponse>> GetAllCareersForAdminAsync(CancellationToken cancellationToken);
     Task<InstitutionResponse> CreateInstitutionAsync(InstitutionRequest request, CancellationToken cancellationToken);
     Task<CareerResponse?> CreateCareerAsync(CareerRequest request, CancellationToken cancellationToken);
     Task<bool> SetInstitutionActiveAsync(Guid id, bool active, CancellationToken cancellationToken);

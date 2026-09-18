@@ -19,6 +19,12 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         return careers.Select(item => ToCareer(item, 0, "Compatibilidad pendiente de regla.")).ToList();
     }
 
+    public async Task<IReadOnlyList<CareerResponse>> GetAllCareersForAdminAsync(CancellationToken cancellationToken)
+    {
+        var careers = await db.Careers.AsNoTracking().Include(item => item.Institution).OrderBy(item => item.Name).ToListAsync(cancellationToken);
+        return careers.Select(item => ToCareer(item, 0, "Compatibilidad pendiente de regla.")).ToList();
+    }
+
     public async Task<InstitutionResponse> CreateInstitutionAsync(InstitutionRequest request, CancellationToken cancellationToken)
     {
         var item = new Institution { Id = Guid.NewGuid(), Name = request.Name.Trim(), Type = request.Type.Trim(), Location = request.Location?.Trim(), Municipality = request.Municipality?.Trim(), Status = request.Status.Trim(), Source = request.Source?.Trim(), IsActive = request.IsActive, LastUpdatedUtc = DateTime.UtcNow };
@@ -95,7 +101,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         await db.SaveChangesAsync(cancellationToken); await db.Entry(item).Reference(x => x.Institution).LoadAsync(cancellationToken); return ToCareer(item, 0, "Compatibilidad pendiente de regla.");
     }
 
-    public async Task<IReadOnlyList<CompatibilityResponse>> GetCompatibilitiesAsync(CancellationToken cancellationToken) => await db.CareerCompatibilities.AsNoTracking().OrderBy(x => x.Dimension).Select(x => new CompatibilityResponse(x.Id, x.CareerId, x.Dimension, x.CompatibilityLevel, x.Rule)).ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<CompatibilityResponse>> GetCompatibilitiesAsync(CancellationToken cancellationToken) => await db.CareerCompatibilities.AsNoTracking().Include(x => x.Career).OrderBy(x => x.Dimension).Select(x => new CompatibilityResponse(x.Id, x.CareerId, x.Career.Name, x.Dimension, x.CompatibilityLevel, x.Rule)).ToListAsync(cancellationToken);
     public async Task<bool> UpdateCompatibilityAsync(Guid id, CompatibilityRequest request, CancellationToken cancellationToken)
     {
         var item = await db.CareerCompatibilities.FindAsync([id], cancellationToken); if (item is null) return false; item.Dimension = request.Dimension.ToUpperInvariant(); item.CompatibilityLevel = request.CompatibilityLevel; item.Rule = request.Rule.Trim(); await db.SaveChangesAsync(cancellationToken); return true;
