@@ -53,6 +53,31 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("OrientacionVocacional.Domain.Entities.AssignedQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TestAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("TestAttemptId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("assigned_questions", (string)null);
+                });
+
             modelBuilder.Entity("OrientacionVocacional.Domain.Entities.Career", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1004,6 +1029,25 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                     b.Navigation("TestAttempt");
                 });
 
+            modelBuilder.Entity("OrientacionVocacional.Domain.Entities.AssignedQuestion", b =>
+                {
+                    b.HasOne("OrientacionVocacional.Domain.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OrientacionVocacional.Domain.Entities.TestAttempt", "TestAttempt")
+                        .WithMany("AssignedQuestions")
+                        .HasForeignKey("TestAttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("TestAttempt");
+                });
+
             modelBuilder.Entity("OrientacionVocacional.Domain.Entities.Career", b =>
                 {
                     b.HasOne("OrientacionVocacional.Domain.Entities.Institution", "Institution")
@@ -1112,6 +1156,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("OrientacionVocacional.Domain.Entities.TestAttempt", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("AssignedQuestions");
 
                     b.Navigation("RiasecProfile");
                 });

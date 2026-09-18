@@ -12,11 +12,6 @@ namespace OrientacionVocacional.API.Controllers;
 [Authorize(Roles = RoleNames.Student)]
 public sealed class TestController(ITestService testService) : ControllerBase
 {
-    [HttpGet("questions")]
-    public async Task<ActionResult<IReadOnlyList<QuestionResponse>>> GetQuestions(
-        CancellationToken cancellationToken) =>
-        Ok(await testService.GetQuestionsAsync(cancellationToken));
-
     [HttpPost("attempts")]
     public async Task<ActionResult<TestAttemptResponse>> CreateAttempt(CancellationToken cancellationToken) =>
         Ok(await testService.CreateAttemptAsync(GetUserId(), cancellationToken));
@@ -28,6 +23,15 @@ public sealed class TestController(ITestService testService) : ControllerBase
     {
         var attempt = await testService.GetAttemptAsync(GetUserId(), attemptId, cancellationToken);
         return attempt is null ? NotFound() : Ok(attempt);
+    }
+
+    [HttpGet("attempts/{attemptId:guid}/questions")]
+    public async Task<ActionResult<IReadOnlyList<QuestionResponse>>> GetAssignedQuestions(
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        var questions = await testService.GetAssignedQuestionsAsync(GetUserId(), attemptId, cancellationToken);
+        return questions is null ? NotFound() : Ok(questions);
     }
 
     [HttpPost("attempts/{attemptId:guid}/answers")]

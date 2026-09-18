@@ -12,5 +12,6 @@ public sealed class TestAttempt
     public required string TestVersion { get; set; }
     public User User { get; set; } = null!;
     public ICollection<Answer> Answers { get; } = [];
+    public ICollection<AssignedQuestion> AssignedQuestions { get; } = [];
     public RiasecProfile? RiasecProfile { get; set; }
 }

@@ -6,7 +6,7 @@ namespace OrientacionVocacional.Infrastructure.Services;
 
 public sealed class RiasecScoringService : IRiasecScoringService
 {
-    private static readonly string[] DimensionOrder = ["R", "I", "A", "S", "E", "C"];
+    private static readonly string[] DimensionOrder = RiasecTestConstants.DimensionOrder;
 
     public RiasecScoreResult Calculate(IEnumerable<Answer> answers)
     {

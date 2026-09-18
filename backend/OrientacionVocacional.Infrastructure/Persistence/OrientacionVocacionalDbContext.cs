@@ -15,6 +15,7 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<TestAttempt> TestAttempts => Set<TestAttempt>();
     public DbSet<Answer> Answers => Set<Answer>();
+    public DbSet<AssignedQuestion> AssignedQuestions => Set<AssignedQuestion>();
     public DbSet<RiasecProfile> RiasecProfiles => Set<RiasecProfile>();
     public DbSet<Institution> Institutions => Set<Institution>();
     public DbSet<Career> Careers => Set<Career>();
@@ -100,6 +101,21 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
             entity.HasOne(answer => answer.Question)
                 .WithMany(question => question.Answers)
                 .HasForeignKey(answer => answer.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AssignedQuestion>(entity =>
+        {
+            entity.ToTable("assigned_questions");
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => new { item.TestAttemptId, item.QuestionId }).IsUnique();
+            entity.HasOne(item => item.TestAttempt)
+                .WithMany(attempt => attempt.AssignedQuestions)
+                .HasForeignKey(item => item.TestAttemptId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(item => item.Question)
+                .WithMany()
+                .HasForeignKey(item => item.QuestionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

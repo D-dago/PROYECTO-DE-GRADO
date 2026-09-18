@@ -12,20 +12,11 @@ public sealed class TestService(
     OrientacionVocacionalDbContext dbContext,
     IRiasecScoringService scoringService) : ITestService
 {
-    public async Task<IReadOnlyList<QuestionResponse>> GetQuestionsAsync(CancellationToken cancellationToken)
-    {
-        return await dbContext.Questions
-            .Where(question => question.IsActive)
-            .OrderBy(question => question.Order)
-            .Select(question => new QuestionResponse(
-                question.Id, question.Code, question.Text, question.Dimension, question.Order))
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<TestAttemptResponse> CreateAttemptAsync(Guid userId, CancellationToken cancellationToken)
     {
         var current = await dbContext.TestAttempts
             .Include(attempt => attempt.Answers)
+            .Include(attempt => attempt.AssignedQuestions)
             .SingleOrDefaultAsync(
                 attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress,
                 cancellationToken);
@@ -42,6 +33,7 @@ public sealed class TestService(
             TestVersion = RiasecTestConstants.Version
         };
         dbContext.TestAttempts.Add(attempt);
+        await AssignQuestionsAsync(attempt, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return ToAttemptResponse(attempt, await GetCoinsAsync(userId, cancellationToken));
     }
@@ -53,10 +45,30 @@ public sealed class TestService(
     {
         var attempt = await dbContext.TestAttempts
             .Include(candidate => candidate.Answers)
+            .Include(candidate => candidate.AssignedQuestions)
             .SingleOrDefaultAsync(
                 candidate => candidate.Id == attemptId && candidate.UserId == userId,
                 cancellationToken);
         return attempt is null ? null : ToAttemptResponse(attempt, await GetCoinsAsync(userId, cancellationToken));
+    }
+
+    public async Task<IReadOnlyList<QuestionResponse>?> GetAssignedQuestionsAsync(
+        Guid userId,
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        var attemptExists = await dbContext.TestAttempts
+            .AnyAsync(candidate => candidate.Id == attemptId && candidate.UserId == userId, cancellationToken);
+        if (!attemptExists) return null;
+
+        return await dbContext.AssignedQuestions
+            .Where(assigned => assigned.TestAttemptId == attemptId)
+            .Include(assigned => assigned.Question)
+            .OrderBy(assigned => assigned.Order)
+            .Select(assigned => new QuestionResponse(
+                assigned.Question.Id, assigned.Question.Code, assigned.Question.Text,
+                assigned.Question.Dimension, assigned.Order))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<(bool Success, string? Error, TestAttemptResponse? Attempt)> SubmitAnswerAsync(
@@ -72,6 +84,7 @@ public sealed class TestService(
 
         var attempt = await dbContext.TestAttempts
             .Include(candidate => candidate.Answers)
+            .Include(candidate => candidate.AssignedQuestions)
             .SingleOrDefaultAsync(
                 candidate => candidate.Id == attemptId && candidate.UserId == userId,
                 cancellationToken);
@@ -82,6 +95,10 @@ public sealed class TestService(
         if (attempt.Status != TestAttemptStatus.InProgress)
         {
             return (false, "El intento ya fue completado.", null);
+        }
+        if (attempt.AssignedQuestions.All(assigned => assigned.QuestionId != request.QuestionId))
+        {
+            return (false, "Esa pregunta no forma parte de este intento.", null);
         }
 
         var question = await dbContext.Questions
@@ -116,6 +133,7 @@ public sealed class TestService(
         var attempt = await dbContext.TestAttempts
             .Include(candidate => candidate.Answers)
                 .ThenInclude(answer => answer.Question)
+            .Include(candidate => candidate.AssignedQuestions)
             .Include(candidate => candidate.RiasecProfile)
             .SingleOrDefaultAsync(
                 candidate => candidate.Id == attemptId && candidate.UserId == userId,
@@ -128,9 +146,9 @@ public sealed class TestService(
         {
             return (true, null, ToResultResponse(attempt.RiasecProfile));
         }
-        if (attempt.Answers.Count != RiasecTestConstants.TotalQuestions)
+        if (attempt.Answers.Count != attempt.AssignedQuestions.Count)
         {
-            return (false, "El test debe tener 60 respuestas antes de finalizar.", null);
+            return (false, $"El test debe tener {attempt.AssignedQuestions.Count} respuestas antes de finalizar.", null);
         }
 
         var score = scoringService.Calculate(attempt.Answers);
@@ -157,9 +175,6 @@ public sealed class TestService(
         return (true, null, ToResultResponse(profile));
     }
 
-    private async Task<int> GetCoinsAsync(Guid userId, CancellationToken cancellationToken) =>
-        await dbContext.Users.Where(candidate => candidate.Id == userId).Select(candidate => candidate.Coins).SingleAsync(cancellationToken);
-
     public async Task<RiasecResultResponse?> GetResultAsync(
         Guid userId,
         Guid attemptId,
@@ -173,14 +188,52 @@ public sealed class TestService(
         return profile is null ? null : ToResultResponse(profile);
     }
 
+    /// <summary>
+    /// Sortea 2 preguntas por dimension (12 en total) del banco de 10 por dimension,
+    /// intercaladas R,I,A,S,E,C,R,I,A,S,E,C para que nunca aparezcan dos preguntas
+    /// seguidas de la misma dimension dentro del intento.
+    /// </summary>
+    private async Task AssignQuestionsAsync(TestAttempt attempt, CancellationToken cancellationToken)
+    {
+        var pool = await dbContext.Questions
+            .Where(question => question.IsActive)
+            .ToListAsync(cancellationToken);
+        var byDimension = RiasecTestConstants.DimensionOrder.ToDictionary(
+            dimension => dimension,
+            dimension => pool.Where(question => question.Dimension == dimension)
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(RiasecTestConstants.QuestionsPerDimensionPerAttempt)
+                .ToList());
+
+        var order = 1;
+        for (var round = 0; round < RiasecTestConstants.QuestionsPerDimensionPerAttempt; round++)
+        {
+            foreach (var dimension in RiasecTestConstants.DimensionOrder)
+            {
+                var question = byDimension[dimension][round];
+                dbContext.AssignedQuestions.Add(new AssignedQuestion
+                {
+                    Id = Guid.NewGuid(),
+                    TestAttemptId = attempt.Id,
+                    QuestionId = question.Id,
+                    Order = order++
+                });
+            }
+        }
+    }
+
+    private async Task<int> GetCoinsAsync(Guid userId, CancellationToken cancellationToken) =>
+        await dbContext.Users.Where(candidate => candidate.Id == userId).Select(candidate => candidate.Coins).SingleAsync(cancellationToken);
+
     private static TestAttemptResponse ToAttemptResponse(TestAttempt attempt, int coins)
     {
         var answered = attempt.Answers.Count;
+        var total = attempt.AssignedQuestions.Count;
         return new TestAttemptResponse(
             attempt.Id,
             answered,
-            RiasecTestConstants.TotalQuestions,
-            Math.Round(answered * 100m / RiasecTestConstants.TotalQuestions, 2),
+            total,
+            total == 0 ? 0 : Math.Round(answered * 100m / total, 2),
             attempt.Status.ToString().ToUpperInvariant(),
             coins);
     }

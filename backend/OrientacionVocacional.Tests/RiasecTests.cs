@@ -49,16 +49,75 @@ public sealed class RiasecTests
     }
 
     [Fact]
+    public async Task Attempt_gets_twelve_questions_two_per_dimension()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
+
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+
+        Assert.NotNull(assigned);
+        Assert.Equal(12, assigned!.Count);
+        Assert.Equal(12, assigned.Select(question => question.Id).Distinct().Count());
+        foreach (var dimension in new[] { "R", "I", "A", "S", "E", "C" })
+        {
+            Assert.Equal(2, assigned.Count(question => question.Dimension == dimension));
+        }
+        // Nunca dos preguntas seguidas de la misma dimension.
+        for (var index = 1; index < assigned.Count; index++)
+        {
+            Assert.NotEqual(assigned[index - 1].Dimension, assigned[index].Dimension);
+        }
+        Assert.Equal(12, attempt.Total);
+    }
+
+    [Fact]
+    public async Task Resuming_an_attempt_keeps_the_same_assigned_questions()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var created = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var firstDraw = await service.GetAssignedQuestionsAsync(userId, created.AttemptId, CancellationToken.None);
+
+        var resumed = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var secondDraw = await service.GetAssignedQuestionsAsync(userId, resumed.AttemptId, CancellationToken.None);
+
+        Assert.Equal(created.AttemptId, resumed.AttemptId);
+        Assert.Equal(firstDraw!.Select(q => q.Id), secondDraw!.Select(q => q.Id));
+    }
+
+    [Fact]
+    public async Task Inactive_questions_are_never_assigned()
+    {
+        await using var context = CreateContext();
+        var inactiveQuestion = await context.Questions.FirstAsync(question => question.Dimension == "R");
+        inactiveQuestion.IsActive = false;
+        await context.SaveChangesAsync();
+        var service = CreateService(context);
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+
+        var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+
+        Assert.Equal(2, assigned!.Count(question => question.Dimension == "R"));
+        Assert.DoesNotContain(assigned!, question => question.Id == inactiveQuestion.Id);
+    }
+
+    [Fact]
     public async Task Answer_value_must_be_between_one_and_five()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
-        var question = await context.Questions.FirstAsync();
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+        var questionId = assigned![0].Id;
 
-        var zero = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 0 }, CancellationToken.None);
-        var six = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 6 }, CancellationToken.None);
+        var zero = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = questionId, Value = 0 }, CancellationToken.None);
+        var six = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = questionId, Value = 6 }, CancellationToken.None);
 
         Assert.False(zero.Success);
         Assert.False(six.Success);
@@ -71,10 +130,10 @@ public sealed class RiasecTests
         var service = CreateService(context);
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
-        var questions = await context.Questions.OrderBy(question => question.Order).Take(2).ToListAsync();
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
-        var one = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = questions[0].Id, Value = 1 }, CancellationToken.None);
-        var five = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = questions[1].Id, Value = 5 }, CancellationToken.None);
+        var one = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned![0].Id, Value = 1 }, CancellationToken.None);
+        var five = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned[1].Id, Value = 5 }, CancellationToken.None);
 
         Assert.True(one.Success);
         Assert.True(five.Success);
@@ -87,8 +146,8 @@ public sealed class RiasecTests
         var service = CreateService(context);
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
-        var question = await context.Questions.FirstAsync();
-        var request = new OrientacionVocacional.Application.Contracts.SubmitAnswerRequest { QuestionId = question.Id, Value = 1 };
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+        var request = new OrientacionVocacional.Application.Contracts.SubmitAnswerRequest { QuestionId = assigned![0].Id, Value = 1 };
 
         var first = await service.SubmitAnswerAsync(userId, attempt.AttemptId, request, CancellationToken.None);
         var duplicate = await service.SubmitAnswerAsync(userId, attempt.AttemptId, request, CancellationToken.None);
@@ -98,15 +157,33 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Cannot_complete_with_fifty_nine_answers_but_can_with_sixty()
+    public async Task Answering_a_question_not_assigned_to_the_attempt_is_rejected()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
-        var questions = await context.Questions.OrderBy(question => question.Order).ToListAsync();
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+        var assignedIds = assigned!.Select(question => question.Id).ToHashSet();
+        var allQuestions = await context.Questions.ToListAsync();
+        var unassignedQuestion = allQuestions.First(question => !assignedIds.Contains(question.Id));
 
-        foreach (var question in questions.Take(59))
+        var result = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = unassignedQuestion.Id, Value = 3 }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.Equal("Esa pregunta no forma parte de este intento.", result.Error);
+    }
+
+    [Fact]
+    public async Task Cannot_complete_with_eleven_answers_but_can_with_twelve()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+
+        foreach (var question in assigned!.Take(11))
         {
             var response = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 3 }, CancellationToken.None);
             Assert.True(response.Success);
@@ -114,26 +191,26 @@ public sealed class RiasecTests
 
         var incomplete = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
         Assert.False(incomplete.Success);
-        Assert.Equal("El test debe tener 60 respuestas antes de finalizar.", incomplete.Error);
+        Assert.Equal("El test debe tener 12 respuestas antes de finalizar.", incomplete.Error);
 
-        var last = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = questions[59].Id, Value = 3 }, CancellationToken.None);
+        var last = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned![11].Id, Value = 3 }, CancellationToken.None);
         var complete = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
 
         Assert.True(last.Success);
         Assert.True(complete.Success);
         Assert.NotNull(complete.Result);
-        Assert.Equal(30, complete.Result!.RScore);
+        Assert.Equal(6, complete.Result!.RScore); // 2 preguntas x valor 3
         Assert.Equal("RI", complete.Result.PrimaryCode);
         Assert.Equal("A", complete.Result.SecondaryCode);
-        Assert.Equal(60, last.Attempt!.Coins);
+        Assert.Equal(12, last.Attempt!.Coins);
 
         var afterCompletion = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
-        Assert.Equal(110, afterCompletion!.Coins);
+        Assert.Equal(62, afterCompletion!.Coins); // 12 respuestas + 50 de bono
 
         var completedAgain = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
         var afterSecondComplete = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
         Assert.True(completedAgain.Success);
-        Assert.Equal(110, afterSecondComplete!.Coins);
+        Assert.Equal(62, afterSecondComplete!.Coins);
     }
 
     [Fact]
@@ -150,21 +227,6 @@ public sealed class RiasecTests
 
         Assert.NotNull(visible);
         Assert.Null(hidden);
-    }
-
-    [Fact]
-    public async Task Inactive_questions_are_not_returned()
-    {
-        await using var context = CreateContext();
-        var question = await context.Questions.FirstAsync();
-        question.IsActive = false;
-        await context.SaveChangesAsync();
-        var service = CreateService(context);
-
-        var questions = await service.GetQuestionsAsync(CancellationToken.None);
-
-        Assert.Equal(59, questions.Count);
-        Assert.DoesNotContain(questions, item => item.Id == question.Id);
     }
 
     [Fact]
