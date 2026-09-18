@@ -57,13 +57,14 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const data = Object.fromEntries(new FormData(event.currentTarget))
+    const form = event.currentTarget
+    const data = Object.fromEntries(new FormData(form))
     try {
       if (editing) await appApi.updateInstitution(editing.id, { ...data, isActive: editing.isActive })
       else await appApi.createInstitution(data)
       report(editing ? 'Institución actualizada.' : 'Institución guardada.')
       setEditing(null)
-      event.currentTarget.reset()
+      form.reset()
       onChanged()
     } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la institución.', true) }
   }
@@ -114,14 +115,15 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const data = Object.fromEntries(new FormData(event.currentTarget))
+    const form = event.currentTarget
+    const data = Object.fromEntries(new FormData(form))
     const body = { ...data, durationMonths: data.durationMonths ? Number(data.durationMonths) : null, cost: data.cost ? Number(data.cost) : null, isActive: editing ? editing.isActive : true }
     try {
       if (editing) await appApi.updateCareer(editing.id, body)
       else await appApi.createCareer(body)
       report(editing ? 'Carrera actualizada.' : 'Carrera guardada.')
       setEditing(null)
-      event.currentTarget.reset()
+      form.reset()
       onChanged()
     } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la carrera.', true) }
   }
@@ -180,14 +182,15 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const data = Object.fromEntries(new FormData(event.currentTarget))
+    const form = event.currentTarget
+    const data = Object.fromEntries(new FormData(form))
     const body = { careerId: editing?.careerId ?? data.careerId, dimension: data.dimension, compatibilityLevel: Number(data.compatibilityLevel), rule: data.rule }
     try {
       if (editing) await appApi.updateCompatibility(editing.id, body)
       else await appApi.addCompatibility(body)
       report(editing ? 'Regla actualizada.' : 'Regla creada.')
       setEditing(null)
-      event.currentTarget.reset()
+      form.reset()
       onChanged()
     } catch (error) { report(error instanceof Error ? error.message : 'No se pudo guardar la regla.', true) }
   }

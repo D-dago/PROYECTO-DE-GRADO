@@ -12,13 +12,17 @@ const links = [
 export function Header() {
   const token = localStorage.getItem('accessToken')
   const role = token ? getTokenRole(token) : ''
+  const isStudent = role === 'ESTUDIANTE'
   const path = window.location.pathname
   const [profile, setProfile] = useState<{ firstName: string; coins: number } | null>(null)
 
   useEffect(() => {
-    if (!token) { setProfile(null); return }
+    // El perfil (y las monedas) solo existen para estudiantes: el backend
+    // rechaza /student/profile con 403 para un administrador, asi que ni
+    // se intenta pedir en ese caso.
+    if (!token || !isStudent) { setProfile(null); return }
     void appApi.getProfile().then(setProfile).catch(() => setProfile(null))
-  }, [token])
+  }, [token, isStudent])
 
   function logout() {
     localStorage.removeItem('accessToken')
@@ -30,15 +34,15 @@ export function Header() {
       <a href="/" className="app-logo"><span className="app-logo-mark">OV</span> Orientación Vocacional</a>
       {token && (
         <nav className="app-header-nav">
-          {links.map((link) => <a key={link.path} href={link.path} className={path === link.path ? 'active' : ''}>{link.label}</a>)}
+          {isStudent && links.map((link) => <a key={link.path} href={link.path} className={path === link.path ? 'active' : ''}>{link.label}</a>)}
           {role === 'ADMINISTRADOR' && <a href="/admin" className={path === '/admin' ? 'active' : ''}>Administración</a>}
         </nav>
       )}
       <div className="app-header-actions">
-        {token && <span className="coin-badge" title="Monedas acumuladas">🪙 {profile?.coins ?? '···'}</span>}
+        {token && isStudent && <span className="coin-badge" title="Monedas acumuladas">🪙 {profile?.coins ?? '···'}</span>}
         {token ? (
           <>
-            <span className="app-user">{profile?.firstName ?? ''}</span>
+            <span className="app-user">{isStudent ? (profile?.firstName ?? '') : 'Administrador'}</span>
             <button type="button" className="header-logout" onClick={logout}>Salir</button>
           </>
         ) : (

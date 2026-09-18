@@ -22,8 +22,11 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
     throw new Error(body?.message ?? `Error HTTP ${response.status}`)
   }
 
-  if (response.status === 204) return undefined as T
-  return response.json() as Promise<T>
+  // Ademas de 204, cualquier respuesta exitosa con cuerpo vacio (un 200 sin
+  // contenido, por ejemplo) rompe response.json(). Se lee como texto primero
+  // para no depender de que cada endpoint use el status code exacto.
+  const text = await response.text()
+  return (text ? JSON.parse(text) : undefined) as T
 }
 
 export const api = {

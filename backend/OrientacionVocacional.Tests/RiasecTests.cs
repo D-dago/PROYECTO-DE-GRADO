@@ -211,8 +211,11 @@ public sealed class RiasecTests
 
         Assert.Single(publicCareers);
         Assert.Equal("Carrera activa", publicCareers[0].Name);
+        Assert.True(publicCareers[0].IsActive);
         Assert.Equal(2, adminCareers.Count);
         Assert.Contains(adminCareers, item => item.Name == "Carrera inactiva");
+        Assert.False(adminCareers.Single(item => item.Name == "Carrera inactiva").IsActive);
+        Assert.True(adminCareers.Single(item => item.Name == "Carrera activa").IsActive);
     }
 
     private static TestService CreateService(OrientacionVocacionalDbContext context) =>

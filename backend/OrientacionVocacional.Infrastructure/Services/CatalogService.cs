@@ -121,5 +121,5 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
     }
 
     private static InstitutionResponse ToInstitution(Institution item) => new(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive);
-    private static CareerResponse ToCareer(Career item, int compatibility, string reason) => new(item.Id, item.Name, item.Area, item.Level, item.Modality, item.DurationMonths, item.Cost, item.Status, item.Source, item.LastUpdatedUtc, item.InstitutionId, item.Institution?.Name ?? "Información pendiente de actualización", compatibility, reason);
+    private static CareerResponse ToCareer(Career item, int compatibility, string reason) => new(item.Id, item.Name, item.Area, item.Level, item.Modality, item.DurationMonths, item.Cost, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.InstitutionId, item.Institution?.Name ?? "Información pendiente de actualización", compatibility, reason);
 }
