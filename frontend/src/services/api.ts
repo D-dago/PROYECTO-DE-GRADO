@@ -12,6 +12,12 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   })
 
   if (!response.ok) {
+    if (response.status === 401 && token) {
+      // La sesion expiro o el token ya no es valido: se limpia y se manda a login
+      // en vez de dejar que cada pantalla falle con un error generico.
+      localStorage.removeItem('accessToken')
+      if (window.location.pathname !== '/login') window.location.href = '/login'
+    }
     const body = await response.json().catch(() => null) as { message?: string } | null
     throw new Error(body?.message ?? `Error HTTP ${response.status}`)
   }

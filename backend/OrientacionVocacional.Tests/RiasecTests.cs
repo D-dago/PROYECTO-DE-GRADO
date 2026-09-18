@@ -209,13 +209,5 @@ public sealed class RiasecTests
     private static TestService CreateService(OrientacionVocacionalDbContext context) =>
         new(context, new RiasecScoringService());
 
-    private static OrientacionVocacionalDbContext CreateContext()
-    {
-        var options = new DbContextOptionsBuilder<OrientacionVocacionalDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        var context = new OrientacionVocacionalDbContext(options);
-        context.Database.EnsureCreated();
-        return context;
-    }
+    private static OrientacionVocacionalDbContext CreateContext() => TestSupport.CreateContext();
 }
