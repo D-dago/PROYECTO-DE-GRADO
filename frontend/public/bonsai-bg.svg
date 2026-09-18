@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff9ec7" stop-opacity="0.55" />
+      <stop offset="45%" stop-color="#e8558f" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#e8558f" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="ridgeBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a1230" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#2a0a1a" stop-opacity="0.75" />
+    </linearGradient>
+    <linearGradient id="ridgeFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c0510" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#12040c" stop-opacity="0.95" />
+    </linearGradient>
+    <radialGradient id="bloom" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffc3de" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#ff8fc0" stop-opacity="0.7" />
+    </radialGradient>
+  </defs>
+
+  <!-- Luna / resplandor -->
+  <circle cx="1180" cy="230" r="260" fill="url(#moonGlow)" />
+  <circle cx="1180" cy="230" r="90" fill="#ffd7e8" opacity="0.5" />
+
+  <!-- Niebla -->
+  <rect x="0" y="480" width="1600" height="60" fill="#f5e9f0" opacity="0.04" />
+  <rect x="0" y="620" width="1600" height="80" fill="#f5e9f0" opacity="0.05" />
+
+  <!-- Cordillera, capa lejana -->
+  <path d="M0,620 L120,560 L260,610 L400,540 L560,600 L720,520 L900,590 L1080,530 L1260,600 L1440,540 L1600,600 L1600,900 L0,900 Z" fill="url(#ridgeBack)" />
+
+  <!-- Cordillera, capa cercana -->
+  <path d="M0,720 L150,660 L320,710 L480,640 L650,700 L820,630 L1000,690 L1180,620 L1360,700 L1600,650 L1600,900 L0,900 Z" fill="url(#ridgeFront)" />
+
+  <!-- Rama de bonsai / cerezo, desde la esquina inferior derecha -->
+  <g stroke="#160810" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.92">
+    <path d="M1600,900 C1480,780 1430,700 1380,600 C1340,520 1360,470 1320,410" />
+    <path d="M1380,600 C1300,560 1230,540 1150,500" />
+    <path d="M1340,520 C1270,470 1220,430 1150,380" />
+    <path d="M1320,410 C1260,360 1230,320 1190,260" />
+    <path d="M1230,470 C1180,450 1120,455 1070,430" />
+  </g>
+
+  <!-- Flores -->
+  <g>
+    <circle cx="1150" cy="500" r="14" fill="url(#bloom)" />
+    <circle cx="1120" cy="480" r="9" fill="url(#bloom)" />
+    <circle cx="1090" cy="435" r="11" fill="url(#bloom)" />
+    <circle cx="1070" cy="430" r="8" fill="url(#bloom)" />
+    <circle cx="1150" cy="380" r="12" fill="url(#bloom)" />
+    <circle cx="1120" cy="360" r="8" fill="url(#bloom)" />
+    <circle cx="1190" cy="260" r="15" fill="url(#bloom)" />
+    <circle cx="1215" cy="235" r="9" fill="url(#bloom)" />
+    <circle cx="1230" cy="470" r="10" fill="url(#bloom)" />
+    <circle cx="1320" cy="410" r="13" fill="url(#bloom)" />
+    <circle cx="1345" cy="390" r="8" fill="url(#bloom)" />
+    <!-- petalos cayendo -->
+    <circle cx="1010" cy="520" r="4" fill="#ffb3d6" opacity="0.7" />
+    <circle cx="960" cy="600" r="3" fill="#ffb3d6" opacity="0.5" />
+    <circle cx="1250" cy="560" r="3.5" fill="#ffb3d6" opacity="0.6" />
+  </g>
+</svg>
