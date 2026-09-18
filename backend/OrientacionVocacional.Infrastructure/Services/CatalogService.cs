@@ -69,12 +69,16 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         if (filter.MaximumCost.HasValue) query = query.Where(item => item.Cost == null || item.Cost <= filter.MaximumCost);
         if (filter.MaximumDurationMonths.HasValue) query = query.Where(item => item.DurationMonths == null || item.DurationMonths <= filter.MaximumDurationMonths);
         var careers = await query.ToListAsync(cancellationToken);
-        var recommendations = careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / 50, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
+        var recommendations = careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / OrientacionVocacional.Domain.Constants.RiasecTestConstants.MaxDimensionScore, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
         var history = new RecommendationHistory { Id = Guid.NewGuid(), UserId = userId, TestAttemptId = profile.TestAttemptId, FilterSummary = JsonSerializer.Serialize(filter) };
         db.RecommendationHistories.Add(history);
         await db.SaveChangesAsync(cancellationToken);
         var result = new RiasecResultResponse(profile.Id, profile.TestAttemptId, profile.RScore, profile.IScore, profile.AScore, profile.SScore, profile.EScore, profile.CScore, profile.PrimaryCode, profile.SecondaryCode, profile.CreatedAtUtc, profile.AlgorithmVersion);
-        return new RecommendationResponse(recommendations, history.Id, await ai.ExplainAsync(result, recommendations, cancellationToken));
+        var aiMessage = await ai.ExplainAsync(result, recommendations, cancellationToken);
+        return new RecommendationResponse(
+            recommendations, history.Id, aiMessage,
+            RiasecInterpretationBuilder.Build(profile.PrimaryCode, profile.SecondaryCode),
+            aiMessage != AiExplanationService.UnavailableMessage);
     }
 
     public async Task<IReadOnlyList<HistoryResponse>> GetHistoryAsync(Guid userId, CancellationToken cancellationToken) => await db.RecommendationHistories.AsNoTracking().Where(item => item.UserId == userId).OrderByDescending(item => item.CreatedAtUtc).Select(item => new HistoryResponse(item.Id, item.TestAttemptId, item.CreatedAtUtc, item.FilterSummary)).ToListAsync(cancellationToken);

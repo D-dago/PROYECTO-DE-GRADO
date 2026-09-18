@@ -140,7 +140,24 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .score-list { display: grid; gap: .9rem; }
 .score-row { display: grid; grid-template-columns: 1.4rem 1fr 2rem; gap: .8rem; align-items: center; color: var(--cream); }
 .score-bar { height: .45rem; background: rgba(255, 255, 255, .12); border-radius: 999px; }
-.result-note { color: var(--cream-muted); max-width: 42ch; margin-top: 2rem; }
+.result-note { color: var(--cream-muted); max-width: 60ch; margin-top: 2rem; }
+.result-heading { color: var(--cream); font-size: 1.25rem; margin: 2.2rem 0 .9rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+.source-tag { font-size: .72rem; font-weight: 600; padding: .2rem .6rem; border-radius: 999px; background: rgba(236, 47, 143, .18); color: var(--accent); letter-spacing: .03em; }
+.dimension-cards { display: grid; gap: .8rem; margin-bottom: 2rem; }
+.dimension-card { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border: 1px solid rgba(255, 255, 255, .1); border-radius: 14px; background: rgba(255, 255, 255, .04); }
+.dimension-letter { flex: none; display: grid; place-content: center; width: 3rem; height: 3rem; border-radius: 12px; background: var(--accent); color: #fff; font-size: 1.5rem; }
+.dimension-card h3 { margin: 0 0 .2rem; color: var(--cream); font-size: 1.05rem; }
+.dimension-card p { margin: 0; color: var(--cream-muted); line-height: 1.4; }
+.result-explanation { color: var(--cream); line-height: 1.6; max-width: 60ch; white-space: pre-line; }
+.area-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.area-chip { padding: .4rem .9rem; border-radius: 999px; background: rgba(33, 184, 118, .16); color: #6fe5b0; font-size: .9rem; }
+.result-careers { display: grid; gap: .8rem; }
+.result-career { padding: 1rem 1.2rem; border-radius: 14px; background: var(--panel); color: var(--ink); }
+.result-career h3 { margin: .3rem 0; color: var(--ink); font-size: 1.1rem; }
+.result-career p { margin: .2rem 0; color: var(--muted); }
+.result-career .result-career-institution { color: var(--ink); font-weight: 600; }
+.result-career-match { color: var(--accent-dark); font-weight: 700; font-size: .85rem; }
+.result-career .cost-tier { margin-left: 0; margin-top: .4rem; }
 
 @media (max-width: 640px) {
   .quiz-topline { align-items: flex-start; flex-direction: column; }

@@ -10,6 +10,9 @@ public static class RiasecTestConstants
     public const int QuestionsPerDimension = 10; // tamano del banco por dimension
     public const int QuestionsPerDimensionPerAttempt = 2; // cuantas de esas 10 se sortean por intento
     public static readonly string[] DimensionOrder = ["R", "I", "A", "S", "E", "C"];
+    // Puntaje maximo posible por dimension (2 preguntas x valor 5). Las compatibilidades
+    // se calculan contra este maximo; antes era 50 (10 preguntas x 5) y dejaba todo en ~20%.
+    public static int MaxDimensionScore => QuestionsPerDimensionPerAttempt * 5;
     public static int TotalQuestions => DimensionOrder.Length * QuestionsPerDimensionPerAttempt;
     public const int CoinsPerAnswer = 1;
     public const int CompletionBonusCoins = 50;

@@ -243,7 +243,7 @@ public sealed class RiasecTests
         context.Careers.Add(career);
         context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "R", CompatibilityLevel = 100, Rule = "Coincide con la dimension principal." });
         var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = "RIASEC-60-V1" };
-        var profile = new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 50, IScore = 20, AScore = 10, SScore = 10, EScore = 10, CScore = 10, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = "RIASEC-60-V1" };
+        var profile = new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 10, IScore = 6, AScore = 4, SScore = 4, EScore = 4, CScore = 4, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = "RIASEC-12-V2" };
         context.TestAttempts.Add(attempt); context.RiasecProfiles.Add(profile);
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
@@ -278,6 +278,59 @@ public sealed class RiasecTests
         Assert.Contains(adminCareers, item => item.Name == "Carrera inactiva");
         Assert.False(adminCareers.Single(item => item.Name == "Carrera inactiva").IsActive);
         Assert.True(adminCareers.Single(item => item.Name == "Carrera activa").IsActive);
+    }
+
+    [Fact]
+    public async Task Compatibility_uses_the_twelve_question_scale_max_score_gives_full_match()
+    {
+        await using var context = CreateContext();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var institution = new Institution { Id = Guid.NewGuid(), Name = "DATOS DE PRUEBA", Type = "Privada", Status = "PRUEBA" };
+        var career = new Career { Id = Guid.NewGuid(), Name = "Carrera de prueba", Status = "PRUEBA", InstitutionId = institution.Id, Institution = institution };
+        context.Institutions.Add(institution);
+        context.Careers.Add(career);
+        context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "I", CompatibilityLevel = 100, Rule = "Investigador." });
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = "RIASEC-12-V2" };
+        context.TestAttempts.Add(attempt);
+        // Puntaje maximo en I (2 preguntas x 5 = 10) y la mitad en R.
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 5, IScore = 10, AScore = 2, SScore = 2, EScore = 2, CScore = 2, PrimaryCode = "IR", SecondaryCode = "A", AlgorithmVersion = "RIASEC-12-V2" });
+        await context.SaveChangesAsync();
+        var service = new Infrastructure.Services.CatalogService(context, new NoAi());
+
+        var result = await service.GetRecommendationsAsync(userId, new RecommendationFilterRequest(), CancellationToken.None);
+
+        Assert.Equal(100, result!.Items.Single().Compatibility);
+    }
+
+    [Fact]
+    public void Interpretation_explains_each_letter_and_suggests_areas()
+    {
+        var interpretation = RiasecInterpretationBuilder.Build("RI", "A");
+
+        Assert.Equal("RIA", interpretation.Code);
+        Assert.Equal(new[] { "Realista", "Investigador", "Artístico" }, interpretation.Dimensions.Select(item => item.Name));
+        Assert.All(interpretation.Dimensions, item => Assert.StartsWith("Te atrae", item.Description));
+        Assert.NotEmpty(interpretation.SuggestedAreas);
+        Assert.Contains("RIA", interpretation.Summary);
+    }
+
+    [Fact]
+    public async Task Recommendations_include_profile_interpretation_and_flag_ai_unavailable()
+    {
+        await using var context = CreateContext();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = "RIASEC-12-V2" };
+        context.TestAttempts.Add(attempt);
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 8, IScore = 6, AScore = 4, SScore = 2, EScore = 2, CScore = 2, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = "RIASEC-12-V2" });
+        await context.SaveChangesAsync();
+        var service = new Infrastructure.Services.CatalogService(context, new NoAi());
+
+        var result = await service.GetRecommendationsAsync(userId, new RecommendationFilterRequest(), CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal("RIA", result!.Interpretation.Code);
+        Assert.False(result.AiGenerated);
+        Assert.Empty(result.Items);
     }
 
     private static TestService CreateService(OrientacionVocacionalDbContext context) =>

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { riasecApi } from '../services/riasecApi'
 import type { Attempt, Question, RiasecResult } from '../types/riasec'
+import { RiasecResult as ResultView } from '../components/RiasecResult'
 
 const options = [
   { value: 1, label: 'Nada' }, { value: 2, label: 'Poco' }, { value: 3, label: 'Neutral' },
@@ -120,9 +121,4 @@ function QuestionText({ text }: { text: string }) {
   return <p className="question-text">{match[1]}<span className="question-example">{match[2]}</span></p>
 }
 
-const MAX_DIMENSION_SCORE = 10 // 2 preguntas por dimension x valor maximo 5
 
-function ResultView({ result }: { result: RiasecResult }) {
-  const scores = [['R', result.rScore], ['I', result.iScore], ['A', result.aScore], ['S', result.sScore], ['E', result.eScore], ['C', result.cScore]]
-  return <main className="test-shell result-shell"><header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">Resultado guardado</span></header><section className="result-panel"><span className="eyebrow">Test terminado</span><h1>Tu perfil RIASEC</h1><p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p><div className="score-list">{scores.map(([code, score]) => <div key={code} className="score-row"><strong>{code}</strong><div className="score-bar"><span style={{ width: `${Number(score) / MAX_DIMENSION_SCORE * 100}%` }} /></div><span>{score}</span></div>)}</div><p className="result-note">Este resultado resume tus respuestas. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.</p><a className="start-link" href="/recomendaciones">Ver recomendaciones</a></section></main>
-}
