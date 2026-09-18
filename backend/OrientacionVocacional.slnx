@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="OrientacionVocacional.API/OrientacionVocacional.API.csproj" />
+  <Project Path="OrientacionVocacional.Application/OrientacionVocacional.Application.csproj" />
+  <Project Path="OrientacionVocacional.Domain/OrientacionVocacional.Domain.csproj" />
+  <Project Path="OrientacionVocacional.Infrastructure/OrientacionVocacional.Infrastructure.csproj" />
+  <Project Path="OrientacionVocacional.Tests/OrientacionVocacional.Tests.csproj" />
+</Solution>

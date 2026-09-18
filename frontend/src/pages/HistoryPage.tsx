@@ -1,0 +1,4 @@
+import { useEffect, useState } from 'react'
+import { appApi } from '../services/appApi'
+
+export function HistoryPage() { const [items, setItems] = useState<{ id: string; testAttemptId: string; createdAtUtc: string; filterSummary?: string }[]>([]); useEffect(() => { void appApi.history().then(setItems) }, []); return <main className="content-shell"><span className="eyebrow">Seguimiento</span><h1>Historial</h1>{items.length === 0 ? <p className="empty-state">Todavía no hay recomendaciones guardadas.</p> : items.map(item => <article className="history-row" key={item.id}><strong>{new Date(item.createdAtUtc).toLocaleString()}</strong><span>{item.filterSummary ?? 'Sin filtros'}</span></article>)}</main> }

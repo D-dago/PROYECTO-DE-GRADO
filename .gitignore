@@ -1,0 +1,14 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# .NET
+**/bin/
+**/obj/
+
+# Local secrets and environment files
+*.user
+*.suo
+**/.env
+!**/.env.example
