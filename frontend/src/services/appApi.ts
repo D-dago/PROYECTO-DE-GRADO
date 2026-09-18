@@ -10,6 +10,7 @@ export type Student = { id: string; email: string; firstName: string; lastName: 
 export const appApi = {
   register: (body: unknown) => request<{ accessToken: string }>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: (body: unknown) => request<{ accessToken: string; role: string }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+  googleLogin: (idToken: string) => request<{ accessToken: string; role: string }>('/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
   getProfile: () => request<StudentProfile>('/student/profile'),
   updateProfile: (body: unknown) => request<StudentProfile>('/student/profile', { method: 'PUT', body: JSON.stringify(body) }),
   institutions: () => request<Institution[]>('/catalog/institutions'),

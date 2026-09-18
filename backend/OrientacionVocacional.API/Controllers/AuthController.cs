@@ -7,8 +7,31 @@ namespace OrientacionVocacional.API.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController(IAuthService authService) : ControllerBase
+public sealed class AuthController(IAuthService authService, IGoogleTokenValidator googleValidator) : ControllerBase
 {
+    public sealed record GoogleLoginRequest(string IdToken);
+
+    [HttpPost("google")]
+    [AllowAnonymous]
+    public async Task<ActionResult<AuthResponse>> GoogleLogin(
+        GoogleLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!googleValidator.IsConfigured)
+        {
+            return StatusCode(503, new { message = "El inicio con Google no está configurado en el servidor (falta Google:ClientId)." });
+        }
+
+        var identity = await googleValidator.ValidateAsync(request.IdToken, cancellationToken);
+        if (identity is null)
+        {
+            return Unauthorized(new { message = "No se pudo validar tu cuenta de Google." });
+        }
+
+        var response = await authService.LoginExternalAsync(identity.Email, identity.FirstName, identity.LastName, cancellationToken);
+        return response is null ? Unauthorized(new { message = "Tu cuenta está desactivada." }) : Ok(response);
+    }
+
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Register(

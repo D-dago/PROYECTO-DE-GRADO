@@ -27,7 +27,10 @@ public static class InfrastructureServiceCollectionExtensions
             options.UseNpgsql(connectionString));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
+        services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.SectionName));
         services.AddHttpClient("ai");
+        services.AddHttpClient("google");
+        services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IStudentProfileService, StudentProfileService>();

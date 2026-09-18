@@ -82,6 +82,15 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .simple-form input, .simple-form select, .filter-form input, .filter-form select { padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
 .simple-form button, .filter-form button, .career-card button { padding: .8rem 1.2rem; border: 0; border-radius: 999px; background: var(--green); color: #fff; cursor: pointer; font-weight: 600; transition: filter .15s; }
 .simple-form button:hover, .filter-form button:hover, .career-card button:hover { filter: brightness(.92); }
+.password-field { position: relative; display: block; }
+.password-field input { width: 100%; box-sizing: border-box; padding-right: 3rem; }
+.simple-form .password-toggle { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); width: auto; padding: .4rem; background: transparent; color: var(--muted); border-radius: 8px; line-height: 0; }
+.simple-form .password-toggle:hover { color: var(--accent-dark); filter: none; }
+.form-divider { display: flex; align-items: center; gap: .8rem; color: var(--cream-muted); font-size: .85rem; margin: 1.2rem 0 .8rem; max-width: 36rem; }
+.form-divider::before, .form-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, .18); }
+.google-slot { max-width: 36rem; min-height: 44px; }
+.google-fallback { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; width: 100%; max-width: 36rem; box-sizing: border-box; padding: .75rem 1rem; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: #3c4043; font-weight: 600; cursor: pointer; font-size: .95rem; }
+.google-fallback:hover { background: #f4f4f4; }
 .success-message { color: #4fe0a4; }
 .error-message { color: #ff7597; margin-top: 1rem; }
 .status-message { color: var(--cream-muted); }

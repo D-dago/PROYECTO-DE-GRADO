@@ -71,6 +71,46 @@ public sealed class AuthService(
         return verification == PasswordVerificationResult.Failed ? null : CreateToken(user);
     }
 
+    /// <summary>
+    /// Login con un proveedor externo (Google) ya validado: si el correo existe
+    /// entra con esa cuenta; si no, crea un estudiante nuevo con una contrasena
+    /// aleatoria inutilizable (solo podra entrar por el proveedor).
+    /// </summary>
+    public async Task<AuthResponse?> LoginExternalAsync(
+        string email,
+        string firstName,
+        string lastName,
+        CancellationToken cancellationToken)
+    {
+        var normalized = NormalizeEmail(email);
+        var user = await dbContext.Users
+            .Include(candidate => candidate.Role)
+            .SingleOrDefaultAsync(candidate => candidate.Email == normalized, cancellationToken);
+
+        if (user is not null)
+        {
+            return user.IsActive ? CreateToken(user) : null;
+        }
+
+        var studentRole = await dbContext.Roles
+            .SingleAsync(role => role.Name == RoleNames.Student, cancellationToken);
+        user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = normalized,
+            FirstName = firstName.Trim(),
+            LastName = lastName.Trim(),
+            RoleId = studentRole.Id,
+            Role = studentRole,
+            PasswordHash = string.Empty
+        };
+        user.PasswordHash = passwordHasher.HashPassword(user, Guid.NewGuid().ToString("N"));
+        user.StudentProfile = new StudentProfile { Id = Guid.NewGuid(), User = user };
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return CreateToken(user);
+    }
+
     private AuthResponse CreateToken(User user)
     {
         var options = jwtOptions.Value;

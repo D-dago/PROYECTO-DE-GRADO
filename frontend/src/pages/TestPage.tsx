@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { riasecApi } from '../services/riasecApi'
 import type { Attempt, Question, RiasecResult } from '../types/riasec'
 
@@ -41,7 +41,14 @@ export function TestPage() {
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { void loadTest() }, [])
+  // React StrictMode (dev) ejecuta los efectos dos veces: sin este guard se crean
+  // dos intentos en paralelo y el usuario queda con dos "en progreso".
+  const started = useRef(false)
+  useEffect(() => {
+    if (started.current) return
+    started.current = true
+    void loadTest()
+  }, [])
 
   async function answer(value: number) {
     if (!attempt || !questions[currentIndex] || saving) return

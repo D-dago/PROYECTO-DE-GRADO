@@ -17,9 +17,9 @@ public sealed class TestService(
         var current = await dbContext.TestAttempts
             .Include(attempt => attempt.Answers)
             .Include(attempt => attempt.AssignedQuestions)
-            .SingleOrDefaultAsync(
-                attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress,
-                cancellationToken);
+            .Where(attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress)
+            .OrderByDescending(attempt => attempt.StartedAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (current is not null)
         {
