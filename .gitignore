@@ -12,3 +12,8 @@ frontend/.env
 *.suo
 **/.env
 !**/.env.example
+# Imagenes de referencia sueltas en la raiz (no son assets de la app)
+/*.jpg
+/*.jpeg
+/*.png
+!frontend/**
