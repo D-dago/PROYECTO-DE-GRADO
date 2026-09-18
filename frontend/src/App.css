@@ -113,6 +113,8 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .progress-track span, .score-bar span { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
 .question-meta { text-transform: none; letter-spacing: 0; font-size: .85rem; }
 .dimension-tag { color: #2ecc82; font-weight: 700; }
+.timer-badge { display: inline-flex; align-items: center; gap: .25rem; padding: .2rem .6rem; border-radius: 999px; background: rgba(255, 255, 255, .08); color: var(--cream-muted); font-variant-numeric: tabular-nums; }
+.timer-badge.timer-low { background: rgba(255, 117, 151, .18); color: #ff7597; }
 .question-text { color: var(--cream); font-size: clamp(1.4rem, 3vw, 2.3rem); line-height: 1.15; max-width: 28ch; margin: 3rem 0; }
 .answer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .7rem; }
 .answer-grid button { border: 1px solid rgba(255, 255, 255, .14); border-radius: 14px; background: rgba(255, 255, 255, .03); color: var(--cream); min-height: 6.5rem; cursor: pointer; display: grid; place-content: center; gap: .4rem; transition: background .15s, border .15s, transform .15s; }

@@ -12,6 +12,9 @@ const dimensions = new Map([
   ['S', 'Social'], ['E', 'Emprendedor'], ['C', 'Convencional'],
 ])
 
+const QUESTION_SECONDS = 20
+const AUTO_ANSWER_VALUE = 3 // "Neutral": lo que se registra si se acaba el tiempo sin responder
+
 export function TestPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [attempt, setAttempt] = useState<Attempt | null>(null)
@@ -20,6 +23,7 @@ export function TestPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [timeLeft, setTimeLeft] = useState(QUESTION_SECONDS)
 
   async function loadTest() {
     try {
@@ -54,6 +58,28 @@ export function TestPage() {
     } finally { setSaving(false) }
   }
 
+  // Cronometro por pregunta: se reinicia cada vez que cambia currentIndex. Si llega a
+  // cero sin respuesta, se auto-responde "Neutral" y se avanza (igual que un click
+  // manual), para no dejar el intento con preguntas huerfanas que nunca se podrian
+  // volver a contestar y bloquearian la finalizacion del test.
+  useEffect(() => {
+    if (loading || result || !attempt) return
+    setTimeLeft(QUESTION_SECONDS)
+    const startedAt = Date.now()
+    const interval = setInterval(() => {
+      const remaining = QUESTION_SECONDS - Math.floor((Date.now() - startedAt) / 1000)
+      if (remaining <= 0) {
+        clearInterval(interval)
+        setTimeLeft(0)
+        void answer(AUTO_ANSWER_VALUE)
+      } else {
+        setTimeLeft(remaining)
+      }
+    }, 250)
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, loading, result, attempt])
+
   if (loading) return <main className="test-shell"><p className="status-message">Cargando tu test...</p></main>
   if (error && !attempt) return <main className="test-shell"><p className="error-message">{error}</p></main>
   if (result) return <ResultView result={result} />
@@ -68,11 +94,11 @@ export function TestPage() {
       <section className="quiz-panel" aria-live="polite">
         <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, 60)} <span>de 60</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>
-        <div className="question-meta"><span className="dimension-tag">{question.dimension} · {dimensions.get(question.dimension)}</span><span>{Math.round(progress)}% completado</span></div>
+        <div className="question-meta"><span className="dimension-tag">{question.dimension} · {dimensions.get(question.dimension)}</span><span className={`timer-badge${timeLeft <= 5 ? ' timer-low' : ''}`}>⏱ {timeLeft}s</span><span>{Math.round(progress)}% completado</span></div>
         <p className="question-text">{question.text}</p>
         <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={() => void answer(option.value)} disabled={saving}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
         {error && <p className="error-message">{error}</p>}
-        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser.</p>
+        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser. Si el tiempo se acaba, se registra "Neutral" y avanza sola.</p>
       </section>
     </main>
   )

@@ -7,93 +7,111 @@ public static class RiasecQuestionSeed
     private static readonly (string Dimension, string[] Texts)[] Dimensions =
     [
         ("R", [
-            "Me gustaría usar herramientas para reparar algo.",
-            "Prefiero aprender haciendo que solo leyendo.",
-            "Me interesa montar o desarmar objetos para entenderlos.",
-            "Disfruto realizar trabajos que requieren coordinación manual.",
-            "Me gustaría trabajar con máquinas o equipos.",
-            "Me atraen las actividades al aire libre con tareas prácticas.",
-            "Me interesa construir algo siguiendo un plano.",
-            "Disfruto encontrar y corregir una falla técnica.",
-            "Me gustaría aprender a manejar instrumentos o herramientas técnicas.",
-            "Prefiero una tarea práctica con un resultado visible."
+            "Reparar cosas con herramientas",
+            "Aprender haciendo, no leyendo",
+            "Desarmar objetos para entenderlos",
+            "Trabajo manual y coordinado",
+            "Usar máquinas o equipos",
+            "Trabajo práctico al aire libre",
+            "Construir siguiendo un plano",
+            "Corregir una falla técnica",
+            "Manejar herramientas técnicas",
+            "Tareas con resultado visible"
         ]),
         ("I", [
-            "Me gusta descubrir cómo funciona algo.",
-            "Disfruto resolver acertijos o problemas lógicos.",
-            "Me interesa analizar información antes de decidir.",
-            "Me gustaría realizar experimentos para comprobar una idea.",
-            "Me interesa comparar datos para encontrar patrones.",
-            "Disfruto hacer preguntas para llegar a una explicación.",
-            "Me gustaría investigar un problema hasta encontrar su causa.",
-            "Me atraen las actividades relacionadas con ciencia o tecnología.",
-            "Prefiero entender el porqué antes de aplicar una solución.",
-            "Me gusta aprender temas complejos por mi cuenta."
+            "Descubrir cómo funciona algo",
+            "Resolver acertijos lógicos",
+            "Analizar información antes de decidir",
+            "Hacer experimentos",
+            "Comparar datos y hallar patrones",
+            "Preguntar hasta entender",
+            "Investigar la causa de un problema",
+            "Ciencia y tecnología",
+            "Entender el porqué de las cosas",
+            "Aprender temas complejos solo"
         ]),
         ("A", [
-            "Me gusta crear dibujos, diseños o composiciones.",
-            "Disfruto inventar ideas nuevas para un proyecto.",
-            "Me interesa combinar colores, formas o estilos.",
-            "Me gustaría crear contenido para redes o medios digitales.",
-            "Prefiero una actividad donde pueda expresar mi creatividad.",
-            "Me gusta escribir historias, textos o ideas originales.",
-            "Me interesa la fotografía, video, música o diseño.",
-            "Disfruto transformar una idea en una propuesta visual.",
-            "Me gusta buscar soluciones diferentes a las habituales.",
-            "Me gustaría trabajar en proyectos donde el estilo personal importe."
+            "Dibujar y diseñar",
+            "Inventar ideas nuevas",
+            "Combinar colores y formas",
+            "Crear contenido digital",
+            "Expresar creatividad libremente",
+            "Escribir historias o ideas",
+            "Fotografía, video o música",
+            "Convertir una idea en algo visual",
+            "Buscar soluciones distintas",
+            "Proyectos con estilo personal"
         ]),
         ("S", [
-            "Me gusta explicar algo cuando otra persona no lo entiende.",
-            "Disfruto escuchar los problemas de otras personas.",
-            "Me gustaría enseñar una habilidad a alguien.",
-            "Prefiero colaborar antes que trabajar completamente solo.",
-            "Me interesa participar en actividades de apoyo a la comunidad.",
-            "Me gusta motivar a compañeros cuando tienen dificultades.",
-            "Me gustaría orientar a alguien para que tome una buena decisión.",
-            "Me interesa trabajar directamente con personas.",
-            "Disfruto organizar actividades que beneficien a un grupo.",
-            "Me siento satisfecho cuando ayudo a alguien a mejorar."
+            "Explicar algo a alguien",
+            "Escuchar problemas ajenos",
+            "Enseñar una habilidad",
+            "Colaborar en equipo",
+            "Apoyar a la comunidad",
+            "Motivar a un compañero",
+            "Orientar una decisión difícil",
+            "Trabajar con personas",
+            "Organizar actividades grupales",
+            "Ayudar a alguien a mejorar"
         ]),
         ("E", [
-            "Me gusta tomar la iniciativa en un proyecto.",
-            "Me interesa dirigir o coordinar un equipo.",
-            "Disfruto presentar una idea frente a otras personas.",
-            "Me gustaría crear un negocio o emprendimiento.",
-            "Me atraen los retos donde hay que tomar decisiones.",
-            "Me gusta negociar para llegar a un acuerdo.",
-            "Me interesa planificar cómo alcanzar una meta.",
-            "Disfruto convencer a otros de una propuesta.",
-            "Me gustaría asumir responsabilidad por un proyecto.",
-            "Me motiva competir por alcanzar objetivos concretos."
+            "Tomar la iniciativa",
+            "Dirigir un equipo",
+            "Presentar una idea en público",
+            "Crear un negocio",
+            "Tomar decisiones bajo presión",
+            "Negociar un acuerdo",
+            "Planificar cómo lograr una meta",
+            "Convencer a otros",
+            "Asumir responsabilidad de un proyecto",
+            "Competir por un objetivo"
         ]),
         ("C", [
-            "Me gusta ordenar información para encontrarla fácilmente.",
-            "Prefiero trabajar con listas y pasos definidos.",
-            "Disfruto revisar que un documento no tenga errores.",
-            "Me gusta registrar datos de manera ordenada.",
-            "Prefiero planificar antes de comenzar una actividad.",
-            "Me siento cómodo trabajando con tablas o registros.",
-            "Me gusta mantener mis archivos y materiales organizados.",
-            "Disfruto comprobar que todos los datos estén completos.",
-            "Prefiero seguir normas claras para realizar una tarea.",
-            "Me gusta llevar control de fechas, tareas y pendientes."
+            "Ordenar información",
+            "Seguir listas y pasos",
+            "Revisar errores en un documento",
+            "Registrar datos con orden",
+            "Planificar antes de actuar",
+            "Trabajar con tablas y registros",
+            "Mantener archivos organizados",
+            "Comprobar que todo esté completo",
+            "Seguir normas claras",
+            "Llevar control de tareas y fechas"
         ])
     ];
 
     public static IReadOnlyList<Question> Create()
     {
-        var order = 1;
-        return Dimensions
-            .SelectMany(dimension => dimension.Texts.Select((text, index) => new Question
-            {
-                Id = QuestionId(dimension.Dimension, index + 1),
-                Code = $"{dimension.Dimension}{index + 1:00}",
-                Text = text,
-                Dimension = dimension.Dimension,
-                Order = order++,
-                IsActive = true
-            }))
+        // El orden se intercala entre dimensiones (R,I,A,S,E,C,R,I,A,S,E,C,...) en vez
+        // de agrupar las 10 preguntas de cada dimension seguidas. Si el estudiante ve
+        // 10 preguntas "parecidas" en fila reconoce el patron y empieza a responder
+        // "para ser consistente" en vez de genuino, lo que sesga el resultado.
+        var questionsByDimension = Dimensions
+            .Select(dimension => dimension.Texts
+                .Select((text, index) => new Question
+                {
+                    Id = QuestionId(dimension.Dimension, index + 1),
+                    Code = $"{dimension.Dimension}{index + 1:00}",
+                    Text = text,
+                    Dimension = dimension.Dimension,
+                    IsActive = true
+                })
+                .ToArray())
             .ToArray();
+
+        var order = 1;
+        var interleaved = new List<Question>(60);
+        for (var index = 0; index < 10; index++)
+        {
+            foreach (var dimension in questionsByDimension)
+            {
+                var question = dimension[index];
+                question.Order = order++;
+                interleaved.Add(question);
+            }
+        }
+
+        return interleaved;
     }
 
     public static Guid QuestionId(string dimension, int number)
