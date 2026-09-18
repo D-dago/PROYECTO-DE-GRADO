@@ -1,37 +1,45 @@
 import './App.css'
+import { Header } from './components/Header'
 import { TestPage } from './pages/TestPage'
 import { AccessPage } from './pages/AccessPage'
 import { RecommendationsPage } from './pages/RecommendationsPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { AdminPage } from './pages/AdminPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { getTokenRole } from './services/auth'
 
 function App() {
   const path = window.location.pathname
   const token = localStorage.getItem('accessToken')
   const protectedPath = ['/perfil', '/test', '/recomendaciones', '/historial', '/admin'].includes(path)
-  if (protectedPath && !token) return <main><h1>Inicia sesión para continuar</h1><a className="start-link" href="/login">Ir al login</a></main>
-  if (path === '/admin' && token && getTokenRole(token) !== 'ADMINISTRADOR') return <main><h1>Acceso restringido</h1><p>Esta sección requiere el rol ADMINISTRADOR.</p></main>
-  if (path === '/test') return <TestPage />
-  if (window.location.pathname === '/login') return <AccessPage />
-  if (window.location.pathname === '/registro') return <AccessPage register />
-  if (window.location.pathname === '/recomendaciones') return <RecommendationsPage />
-  if (window.location.pathname === '/historial') return <HistoryPage />
-  if (window.location.pathname === '/perfil') return <ProfilePage />
-  if (window.location.pathname === '/admin') return <AdminPage />
 
   return (
-    <main>
-      <h1>Orientacion vocacional</h1>
-      <p>Base inicial del sistema web hibrido.</p>
-      <a className="start-link" href="/test">Comenzar test RIASEC</a>
-      <nav className="app-nav"><a href="/registro">Registro</a><a href="/login">Login</a><a href="/perfil">Perfil</a><a href="/recomendaciones">Recomendaciones</a><a href="/historial">Historial</a><a href="/admin">Administración</a>{token && <button type="button" onClick={() => { localStorage.removeItem('accessToken'); window.location.href = '/' }}>Cerrar sesión</button>}</nav>
-    </main>
+    <>
+      <Header />
+      {renderPage()}
+    </>
   )
-}
 
-function getTokenRole(token: string) {
-  try { const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); return (payload.role ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']) as string } catch { return '' }
+  function renderPage() {
+    if (protectedPath && !token) return <main className="content-shell"><h1>Inicia sesión para continuar</h1><a className="start-link" href="/login">Ir al login</a></main>
+    if (path === '/admin' && token && getTokenRole(token) !== 'ADMINISTRADOR') return <main className="content-shell"><h1>Acceso restringido</h1><p>Esta sección requiere el rol ADMINISTRADOR.</p></main>
+    if (path === '/test') return <TestPage />
+    if (path === '/login') return <AccessPage />
+    if (path === '/registro') return <AccessPage register />
+    if (path === '/recomendaciones') return <RecommendationsPage />
+    if (path === '/historial') return <HistoryPage />
+    if (path === '/perfil') return <ProfilePage />
+    if (path === '/admin') return <AdminPage />
+
+    return (
+      <main className="hero-shell">
+        <span className="eyebrow">Sistema híbrido de orientación vocacional</span>
+        <h1>Descubre qué carrera se ajusta a ti.</h1>
+        <p className="hero-subtitle">Test vocacional RIASEC, recomendaciones por motor de reglas e interpretación con IA, pensado para bachilleres de Cochabamba.</p>
+        <a className="start-link" href={token ? '/test' : '/registro'}>{token ? 'Ir al test RIASEC' : 'Empezar ahora'}</a>
+      </main>
+    )
+  }
 }
 
 export default App

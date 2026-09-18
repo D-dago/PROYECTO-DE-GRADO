@@ -7,7 +7,8 @@ public sealed record TestAttemptResponse(
     int Answered,
     int Total,
     decimal Progress,
-    string Status);
+    string Status,
+    int Coins);
 
 public sealed class SubmitAnswerRequest
 {

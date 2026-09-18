@@ -32,7 +32,7 @@ public sealed class TestService(
 
         if (current is not null)
         {
-            return ToAttemptResponse(current);
+            return ToAttemptResponse(current, await GetCoinsAsync(userId, cancellationToken));
         }
 
         var attempt = new TestAttempt
@@ -43,7 +43,7 @@ public sealed class TestService(
         };
         dbContext.TestAttempts.Add(attempt);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return ToAttemptResponse(attempt);
+        return ToAttemptResponse(attempt, await GetCoinsAsync(userId, cancellationToken));
     }
 
     public async Task<TestAttemptResponse?> GetAttemptAsync(
@@ -56,7 +56,7 @@ public sealed class TestService(
             .SingleOrDefaultAsync(
                 candidate => candidate.Id == attemptId && candidate.UserId == userId,
                 cancellationToken);
-        return attempt is null ? null : ToAttemptResponse(attempt);
+        return attempt is null ? null : ToAttemptResponse(attempt, await GetCoinsAsync(userId, cancellationToken));
     }
 
     public async Task<(bool Success, string? Error, TestAttemptResponse? Attempt)> SubmitAnswerAsync(
@@ -102,8 +102,10 @@ public sealed class TestService(
             QuestionId = question.Id,
             Value = request.Value
         });
+        var user = await dbContext.Users.SingleAsync(candidate => candidate.Id == userId, cancellationToken);
+        user.Coins += RiasecTestConstants.CoinsPerAnswer;
         await dbContext.SaveChangesAsync(cancellationToken);
-        return (true, null, ToAttemptResponse(attempt));
+        return (true, null, ToAttemptResponse(attempt, user.Coins));
     }
 
     public async Task<(bool Success, string? Error, RiasecResultResponse? Result)> CompleteAsync(
@@ -149,9 +151,14 @@ public sealed class TestService(
         attempt.Status = TestAttemptStatus.Completed;
         attempt.CompletedAtUtc = DateTime.UtcNow;
         dbContext.RiasecProfiles.Add(profile);
+        var user = await dbContext.Users.SingleAsync(candidate => candidate.Id == userId, cancellationToken);
+        user.Coins += RiasecTestConstants.CompletionBonusCoins;
         await dbContext.SaveChangesAsync(cancellationToken);
         return (true, null, ToResultResponse(profile));
     }
+
+    private async Task<int> GetCoinsAsync(Guid userId, CancellationToken cancellationToken) =>
+        await dbContext.Users.Where(candidate => candidate.Id == userId).Select(candidate => candidate.Coins).SingleAsync(cancellationToken);
 
     public async Task<RiasecResultResponse?> GetResultAsync(
         Guid userId,
@@ -166,7 +173,7 @@ public sealed class TestService(
         return profile is null ? null : ToResultResponse(profile);
     }
 
-    private static TestAttemptResponse ToAttemptResponse(TestAttempt attempt)
+    private static TestAttemptResponse ToAttemptResponse(TestAttempt attempt, int coins)
     {
         var answered = attempt.Answers.Count;
         return new TestAttemptResponse(
@@ -174,7 +181,8 @@ public sealed class TestService(
             answered,
             RiasecTestConstants.TotalQuestions,
             Math.Round(answered * 100m / RiasecTestConstants.TotalQuestions, 2),
-            attempt.Status.ToString().ToUpperInvariant());
+            attempt.Status.ToString().ToUpperInvariant(),
+            coins);
     }
 
     private static RiasecResultResponse ToResultResponse(RiasecProfile profile) => new(

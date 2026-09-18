@@ -37,7 +37,8 @@ public sealed record UserProfileResponse(
     string? Phone,
     string? City,
     string? School,
-    int? GraduationYear);
+    int? GraduationYear,
+    int Coins);
 
 public sealed class UpdateStudentProfileRequest
 {

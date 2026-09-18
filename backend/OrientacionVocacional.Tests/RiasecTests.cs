@@ -53,7 +53,7 @@ public sealed class RiasecTests
     {
         await using var context = CreateContext();
         var service = CreateService(context);
-        var userId = Guid.NewGuid();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var question = await context.Questions.FirstAsync();
 
@@ -69,7 +69,7 @@ public sealed class RiasecTests
     {
         await using var context = CreateContext();
         var service = CreateService(context);
-        var userId = Guid.NewGuid();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var questions = await context.Questions.OrderBy(question => question.Order).Take(2).ToListAsync();
 
@@ -85,7 +85,7 @@ public sealed class RiasecTests
     {
         await using var context = CreateContext();
         var service = CreateService(context);
-        var userId = Guid.NewGuid();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var question = await context.Questions.FirstAsync();
         var request = new OrientacionVocacional.Application.Contracts.SubmitAnswerRequest { QuestionId = question.Id, Value = 1 };
@@ -102,7 +102,7 @@ public sealed class RiasecTests
     {
         await using var context = CreateContext();
         var service = CreateService(context);
-        var userId = Guid.NewGuid();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var questions = await context.Questions.OrderBy(question => question.Order).ToListAsync();
 
@@ -125,6 +125,15 @@ public sealed class RiasecTests
         Assert.Equal(30, complete.Result!.RScore);
         Assert.Equal("RI", complete.Result.PrimaryCode);
         Assert.Equal("A", complete.Result.SecondaryCode);
+        Assert.Equal(60, last.Attempt!.Coins);
+
+        var afterCompletion = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
+        Assert.Equal(110, afterCompletion!.Coins);
+
+        var completedAgain = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
+        var afterSecondComplete = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
+        Assert.True(completedAgain.Success);
+        Assert.Equal(110, afterSecondComplete!.Coins);
     }
 
     [Fact]
@@ -132,7 +141,7 @@ public sealed class RiasecTests
     {
         await using var context = CreateContext();
         var service = CreateService(context);
-        var firstUser = Guid.NewGuid();
+        var firstUser = await TestSupport.CreatePersistedStudentAsync(context);
         var secondUser = Guid.NewGuid();
         var attempt = await service.CreateAttemptAsync(firstUser, CancellationToken.None);
 

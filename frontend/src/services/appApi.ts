@@ -3,7 +3,7 @@ import { request } from './api'
 export type Institution = { id: string; name: string; type: string; location?: string; municipality?: string; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean }
 export type Career = { id: string; name: string; area?: string; level?: string; modality?: string; durationMonths?: number; cost?: number; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; institutionId: string; institutionName: string; compatibility: number; compatibilityReason: string }
 export type Recommendation = { items: Career[]; historyId: string; aiMessage?: string }
-export type StudentProfile = { userId: string; email: string; firstName: string; lastName: string; role: string; phone?: string; city?: string; school?: string; graduationYear?: number }
+export type StudentProfile = { userId: string; email: string; firstName: string; lastName: string; role: string; phone?: string; city?: string; school?: string; graduationYear?: number; coins: number }
 export type Compatibility = { id: string; careerId: string; careerName: string; dimension: string; compatibilityLevel: number; rule: string }
 export type Student = { id: string; email: string; firstName: string; lastName: string; isActive: boolean; createdAtUtc: string }
 

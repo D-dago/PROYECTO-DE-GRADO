@@ -64,7 +64,7 @@ export function TestPage() {
 
   return (
     <main className="test-shell">
-      <header className="test-header"><span className="eyebrow">Orientacion vocacional</span><span className="version-label">RIASEC · 60 preguntas</span></header>
+      <header className="test-header"><span className="eyebrow">Orientacion vocacional</span><span className="version-label">RIASEC · 60 preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
       <section className="quiz-panel" aria-live="polite">
         <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre que actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, 60)} <span>de 60</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>

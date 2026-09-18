@@ -12,6 +12,7 @@ export type Attempt = {
   total: number
   progress: number
   status: 'IN_PROGRESS' | 'COMPLETED'
+  coins: number
 }
 
 export type RiasecResult = {
