@@ -31,7 +31,7 @@ main { max-width: 64rem; margin: 0 auto; padding: 3rem 1.5rem; }
 .form-shell, .content-shell { max-width: 70rem; min-height: 100svh; padding: 3rem clamp(1rem, 5vw, 5rem); box-sizing: border-box; }
 .simple-form, .filter-form { display: grid; gap: 1rem; max-width: 36rem; }
 .simple-form label { display: grid; gap: .4rem; color: var(--muted); }
-.simple-form input, .filter-form input, .filter-form select { padding: .8rem; border: 1px solid var(--line); background: var(--panel); }
+.simple-form input, .simple-form select, .filter-form input, .filter-form select { padding: .8rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
 .simple-form button, .filter-form button, .career-card button { padding: .8rem 1rem; border: 0; background: var(--green); color: var(--panel); cursor: pointer; }
 .success-message { color: var(--green); }
 .filter-form { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); max-width: none; margin: 2rem 0; }
