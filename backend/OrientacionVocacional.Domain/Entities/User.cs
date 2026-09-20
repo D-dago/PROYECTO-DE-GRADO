@@ -9,6 +9,7 @@ public sealed class User
     public required string LastName { get; set; }
     public bool IsActive { get; set; } = true;
     public int Coins { get; set; }
+    public string EquippedSkin { get; set; } = "basic";
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public Guid RoleId { get; set; }
     public Role Role { get; set; } = null!;

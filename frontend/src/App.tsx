@@ -6,12 +6,13 @@ import { RecommendationsPage } from './pages/RecommendationsPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { AdminPage } from './pages/AdminPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { SkinsPage } from './pages/SkinsPage'
 import { getTokenRole } from './services/auth'
 
 function App() {
   const path = window.location.pathname
   const token = localStorage.getItem('accessToken')
-  const protectedPath = ['/perfil', '/test', '/recomendaciones', '/historial', '/admin'].includes(path)
+  const protectedPath = ['/perfil', '/test', '/recomendaciones', '/historial', '/skins', '/admin'].includes(path)
 
   return (
     <>
@@ -29,6 +30,7 @@ function App() {
     if (path === '/recomendaciones') return <RecommendationsPage />
     if (path === '/historial') return <HistoryPage />
     if (path === '/perfil') return <ProfilePage />
+    if (path === '/skins') return <SkinsPage />
     if (path === '/admin') return <AdminPage />
 
     return (

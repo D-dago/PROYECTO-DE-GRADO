@@ -16,6 +16,7 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
     public DbSet<TestAttempt> TestAttempts => Set<TestAttempt>();
     public DbSet<Answer> Answers => Set<Answer>();
     public DbSet<AssignedQuestion> AssignedQuestions => Set<AssignedQuestion>();
+    public DbSet<UserSkin> UserSkins => Set<UserSkin>();
     public DbSet<RiasecProfile> RiasecProfiles => Set<RiasecProfile>();
     public DbSet<Institution> Institutions => Set<Institution>();
     public DbSet<Career> Careers => Set<Career>();
@@ -44,6 +45,7 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
             entity.Property(user => user.FirstName).HasMaxLength(100).IsRequired();
             entity.Property(user => user.LastName).HasMaxLength(100).IsRequired();
             entity.HasIndex(user => user.Email).IsUnique();
+            entity.Property(user => user.EquippedSkin).HasMaxLength(40).HasDefaultValue("basic").IsRequired();
             entity.HasOne(user => user.Role)
                 .WithMany(role => role.Users)
                 .HasForeignKey(user => user.RoleId)
@@ -102,6 +104,15 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
                 .WithMany(question => question.Answers)
                 .HasForeignKey(answer => answer.QuestionId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<UserSkin>(entity =>
+        {
+            entity.ToTable("user_skins");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.SkinId).HasMaxLength(40).IsRequired();
+            entity.HasIndex(item => new { item.UserId, item.SkinId }).IsUnique();
+            entity.HasOne(item => item.User).WithMany().HasForeignKey(item => item.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<AssignedQuestion>(entity =>

@@ -34,6 +34,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IStudentProfileService, StudentProfileService>();
+        services.AddScoped<ISkinService, SkinService>();
         services.AddScoped<IRiasecScoringService, RiasecScoringService>();
         services.AddScoped<ITestService, TestService>();
         services.AddScoped<IAiExplanationService, AiExplanationService>();
