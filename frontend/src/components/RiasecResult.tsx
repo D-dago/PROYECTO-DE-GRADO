@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
 import type { Recommendation } from '../services/appApi'
 import type { RiasecResult } from '../types/riasec'
@@ -20,7 +20,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
     appApi.recommendations({}).then(setRecommendation).catch(() => setFailed(true))
   }, [])
 
-  const scores = [['R', result.rScore], ['I', result.iScore], ['A', result.aScore], ['S', result.sScore], ['E', result.eScore], ['C', result.cScore]]
+  const scores = [['C', result.cScore], ['H', result.hScore], ['A', result.aScore], ['S', result.sScore], ['I', result.iScore], ['D', result.dScore], ['E', result.eScore]]
   const interpretation = recommendation?.interpretation
 
   return (
@@ -28,7 +28,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
       <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">Resultado guardado</span></header>
       <section className="result-panel">
         <span className="eyebrow">Test terminado</span>
-        <h1>Tu perfil RIASEC</h1>
+        <h1>Tu perfil vocacional</h1>
         <p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p>
 
         <h2 className="result-heading">¿Qué significa tu perfil?</h2>

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { appApi } from '../services/appApi'
 import type { StudentProfile } from '../services/appApi'
+import { digitsOnly, inputRules, placeOnly } from '../services/inputFilters'
 
 export function ProfilePage() {
   const [profile, setProfile] = useState<Partial<StudentProfile>>({})
@@ -27,10 +28,10 @@ export function ProfilePage() {
       <span className="eyebrow">Perfil del estudiante</span>
       <h1>{profile.firstName ?? 'Mi perfil'}</h1>
       <form className="simple-form" onSubmit={save}>
-        <label>Teléfono<input name="phone" defaultValue={String(profile.phone ?? '')} /></label>
-        <label>Ciudad<input name="city" defaultValue={String(profile.city ?? '')} /></label>
-        <label>Colegio<input name="school" defaultValue={String(profile.school ?? '')} /></label>
-        <label>Año de graduación<input name="graduationYear" type="number" defaultValue={String(profile.graduationYear ?? '')} /></label>
+        <label>Teléfono<input name="phone" defaultValue={String(profile.phone ?? '')} onInput={digitsOnly} {...inputRules.phone} /></label>
+        <label>Ciudad<input name="city" defaultValue={String(profile.city ?? '')} onInput={placeOnly} {...inputRules.place} /></label>
+        <label>Colegio<input name="school" defaultValue={String(profile.school ?? '')} onInput={placeOnly} {...inputRules.place} /></label>
+        <label>Año de graduación<input name="graduationYear" type="number" min={2000} max={2050} step={1} onInput={(event) => { event.currentTarget.value = event.currentTarget.value.slice(0, 4) }} defaultValue={String(profile.graduationYear ?? '')} /></label>
         <button type="submit">Guardar cambios</button>
       </form>
       {success && <p className="success-message">{success}</p>}

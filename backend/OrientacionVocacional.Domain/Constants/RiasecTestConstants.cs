@@ -1,17 +1,17 @@
 namespace OrientacionVocacional.Domain.Constants;
 
+/// <summary>
+/// Parametros del test vocacional. El nombre "Riasec" es historico: desde la version
+/// CHASIDE el test mide 7 areas (C, H, A, S, I, D, E) tomadas del test "Chaside".
+/// </summary>
 public static class RiasecTestConstants
 {
-    // "V1" administraba las 60 preguntas del banco completo. "V2" sortea 12 por
-    // intento (2 por dimension, al azar dentro del banco de 10) para acortar el
-    // test sin perder representacion de las 6 dimensiones ni comparabilidad entre
-    // ellas (todas quedan siempre con la misma cantidad de items).
-    public const string Version = "RIASEC-12-V2";
-    public const int QuestionsPerDimension = 10; // tamano del banco por dimension
-    public const int QuestionsPerDimensionPerAttempt = 2; // cuantas de esas 10 se sortean por intento
-    public static readonly string[] DimensionOrder = ["R", "I", "A", "S", "E", "C"];
-    // Puntaje maximo posible por dimension (2 preguntas x valor 5). Las compatibilidades
-    // se calculan contra este maximo; antes era 50 (10 preguntas x 5) y dejaba todo en ~20%.
+    // V1/V2 eran RIASEC (60 y 12 items); "CHASIDE-14-V1" sortea 14 por intento
+    // (2 por cada una de las 7 areas, al azar dentro del banco de 60).
+    public const string Version = "CHASIDE-14-V1";
+    public const int QuestionsPerDimensionPerAttempt = 2; // cuantas preguntas de cada area se sortean por intento
+    public static readonly string[] DimensionOrder = ["C", "H", "A", "S", "I", "D", "E"];
+    // Puntaje maximo posible por area (2 preguntas x valor 5). Las compatibilidades se calculan contra este maximo.
     public static int MaxDimensionScore => QuestionsPerDimensionPerAttempt * 5;
     public static int TotalQuestions => DimensionOrder.Length * QuestionsPerDimensionPerAttempt;
     public const int CoinsPerAnswer = 1;

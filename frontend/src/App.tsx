@@ -1,4 +1,4 @@
-import './App.css'
+﻿import './App.css'
 import { Header } from './components/Header'
 import { TestPage } from './pages/TestPage'
 import { AccessPage } from './pages/AccessPage'
@@ -37,8 +37,8 @@ function App() {
       <main className="hero-shell">
         <span className="eyebrow">Sistema híbrido de orientación vocacional</span>
         <h1>Descubre qué carrera se ajusta a ti.</h1>
-        <p className="hero-subtitle">Test vocacional RIASEC, recomendaciones por motor de reglas e interpretación con IA, pensado para bachilleres de Cochabamba.</p>
-        <a className="start-link" href={token ? '/test' : '/registro'}>{token ? 'Ir al test RIASEC' : 'Empezar ahora'}</a>
+        <p className="hero-subtitle">Test vocacional CHASIDE, recomendaciones por motor de reglas e interpretación con IA, pensado para bachilleres de Cochabamba.</p>
+        <a className="start-link" href={token ? '/test' : '/registro'}>{token ? 'Ir al test vocacional' : 'Empezar ahora'}</a>
       </main>
     )
   }

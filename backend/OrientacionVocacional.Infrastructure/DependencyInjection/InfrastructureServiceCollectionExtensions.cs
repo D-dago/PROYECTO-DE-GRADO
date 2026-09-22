@@ -39,6 +39,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ITestService, TestService>();
         services.AddScoped<IAiExplanationService, AiExplanationService>();
         services.AddScoped<ICatalogService, CatalogService>();
+        services.AddScoped<IAdminService, AdminService>();
 
         return services;
     }

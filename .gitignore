@@ -11,9 +11,17 @@ frontend/.env
 *.user
 *.suo
 **/.env
+*.local.ps1
+*.local.cmd
+*.local.txt
+tools/
+backend/**/wwwroot/
 !**/.env.example
 # Imagenes de referencia sueltas en la raiz (no son assets de la app)
 /*.jpg
 /*.jpeg
 /*.png
 !frontend/**
+
+# PDF de referencia del test Chaside (material de terceros, no es codigo del proyecto)
+/*.pdf

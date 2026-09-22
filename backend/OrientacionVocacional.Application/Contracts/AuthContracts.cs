@@ -1,28 +1,28 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace OrientacionVocacional.Application.Contracts;
 
 public sealed class RegisterRequest
 {
-    [Required, EmailAddress, MaxLength(320)]
+    [Required, EmailAddress(ErrorMessage = "El correo no es válido."), MaxLength(254)]
     public required string Email { get; init; }
 
-    [Required, MinLength(8), MaxLength(100)]
+    [Required, RegularExpression(InputRules.Password, ErrorMessage = InputRules.PasswordMessage)]
     public required string Password { get; init; }
 
-    [Required, MaxLength(100)]
+    [Required, MinLength(2, ErrorMessage = "Mínimo 2 letras."), MaxLength(50, ErrorMessage = "Máximo 50 letras."), RegularExpression(InputRules.LettersOnly, ErrorMessage = InputRules.LettersOnlyMessage)]
     public required string FirstName { get; init; }
 
-    [Required, MaxLength(100)]
+    [Required, MinLength(2, ErrorMessage = "Mínimo 2 letras."), MaxLength(50, ErrorMessage = "Máximo 50 letras."), RegularExpression(InputRules.LettersOnly, ErrorMessage = InputRules.LettersOnlyMessage)]
     public required string LastName { get; init; }
 }
 
 public sealed class LoginRequest
 {
-    [Required, EmailAddress]
+    [Required, EmailAddress, MaxLength(254)]
     public required string Email { get; init; }
 
-    [Required]
+    [Required, MaxLength(64)]
     public required string Password { get; init; }
 }
 
@@ -43,15 +43,15 @@ public sealed record UserProfileResponse(
 
 public sealed class UpdateStudentProfileRequest
 {
-    [MaxLength(30)]
+    [RegularExpression(InputRules.DigitsOnly, ErrorMessage = InputRules.DigitsOnlyMessage)]
     public string? Phone { get; init; }
 
-    [MaxLength(100)]
+    [MaxLength(60), RegularExpression(InputRules.Place, ErrorMessage = InputRules.LettersOnlyMessage)]
     public string? City { get; init; }
 
-    [MaxLength(200)]
+    [MaxLength(100), RegularExpression(InputRules.Place, ErrorMessage = InputRules.LettersOnlyMessage)]
     public string? School { get; init; }
 
-    [Range(1900, 2200)]
+    [Range(2000, 2050, ErrorMessage = "El año debe estar entre 2000 y 2050.")]
     public int? GraduationYear { get; init; }
 }

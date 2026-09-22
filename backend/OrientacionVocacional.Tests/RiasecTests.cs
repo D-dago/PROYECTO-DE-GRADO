@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OrientacionVocacional.Domain.Entities;
 using OrientacionVocacional.Domain.Seed;
 using OrientacionVocacional.Application.Contracts;
@@ -15,41 +15,46 @@ public sealed class RiasecTests
         public Task<string> ExplainAsync(RiasecResultResponse profile, IReadOnlyList<CareerResponse> alternatives, CancellationToken cancellationToken) => Task.FromResult("Explicación mediante IA no disponible actualmente.");
     }
     [Fact]
-    public void Seed_has_exactly_sixty_questions_and_ten_per_dimension()
+    public void Seed_has_sixty_active_chaside_questions_and_keeps_legacy_ones_inactive()
     {
         var questions = RiasecQuestionSeed.Create();
+        var active = questions.Where(question => question.IsActive).ToList();
 
-        Assert.Equal(60, questions.Count);
-        Assert.Equal(60, questions.Select(question => question.Code).Distinct().Count());
-        foreach (var dimension in new[] { "R", "I", "A", "S", "E", "C" })
+        Assert.Equal(60, active.Count);
+        Assert.Equal(questions.Count, questions.Select(question => question.Code).Distinct().Count());
+        Assert.Equal(questions.Count, questions.Select(question => question.Id).Distinct().Count());
+        var expected = new Dictionary<string, int> { ["C"] = 9, ["H"] = 9, ["A"] = 9, ["S"] = 9, ["I"] = 8, ["D"] = 8, ["E"] = 8 };
+        foreach (var (dimension, count) in expected)
         {
-            Assert.Equal(10, questions.Count(question => question.Dimension == dimension));
+            Assert.Equal(count, active.Count(question => question.Dimension == dimension));
         }
+        // Las preguntas del test RIASEC anterior (incluida toda la dimension R) quedan inactivas.
+        Assert.DoesNotContain(active, question => question.Dimension == "R");
+        Assert.All(questions.Where(question => !question.IsActive), question => Assert.False(question.IsActive));
     }
 
     [Fact]
     public void Scoring_is_deterministic_and_uses_fixed_tie_order()
     {
-        var questions = RiasecQuestionSeed.Create();
-        var answers = questions.Select(question => new Answer
-        {
-            QuestionId = question.Id,
-            Question = question,
-            Value = 5
-        }).ToArray();
+        var answers = RiasecQuestionSeed.Create()
+            .Where(question => question.IsActive)
+            .Select(question => new Answer { QuestionId = question.Id, Question = question, Value = 5 })
+            .ToArray();
         var scoring = new RiasecScoringService();
 
         var first = scoring.Calculate(answers);
         var second = scoring.Calculate(answers);
 
         Assert.Equal(first, second);
-        Assert.Equal("RI", first.PrimaryCode);
+        // C, H, A, S empatan con 9 preguntas (45): gana el orden fijo C,H,A. I, D, E tienen 8 (40).
+        Assert.Equal("CH", first.PrimaryCode);
         Assert.Equal("A", first.SecondaryCode);
-        Assert.Equal(50, first.RScore);
+        Assert.Equal(45, first.CScore);
+        Assert.Equal(40, first.EScore);
     }
 
     [Fact]
-    public async Task Attempt_gets_twelve_questions_two_per_dimension()
+    public async Task Attempt_gets_fourteen_questions_two_per_area()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
@@ -59,18 +64,18 @@ public sealed class RiasecTests
         var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
         Assert.NotNull(assigned);
-        Assert.Equal(12, assigned!.Count);
-        Assert.Equal(12, assigned.Select(question => question.Id).Distinct().Count());
-        foreach (var dimension in new[] { "R", "I", "A", "S", "E", "C" })
+        Assert.Equal(14, assigned!.Count);
+        Assert.Equal(14, assigned.Select(question => question.Id).Distinct().Count());
+        foreach (var dimension in new[] { "C", "H", "A", "S", "I", "D", "E" })
         {
             Assert.Equal(2, assigned.Count(question => question.Dimension == dimension));
         }
-        // Nunca dos preguntas seguidas de la misma dimension.
+        // Nunca dos preguntas seguidas de la misma area.
         for (var index = 1; index < assigned.Count; index++)
         {
             Assert.NotEqual(assigned[index - 1].Dimension, assigned[index].Dimension);
         }
-        Assert.Equal(12, attempt.Total);
+        Assert.Equal(14, attempt.Total);
     }
 
     [Fact]
@@ -93,7 +98,7 @@ public sealed class RiasecTests
     public async Task Inactive_questions_are_never_assigned()
     {
         await using var context = CreateContext();
-        var inactiveQuestion = await context.Questions.FirstAsync(question => question.Dimension == "R");
+        var inactiveQuestion = await context.Questions.FirstAsync(question => question.Dimension == "C" && question.IsActive);
         inactiveQuestion.IsActive = false;
         await context.SaveChangesAsync();
         var service = CreateService(context);
@@ -102,7 +107,7 @@ public sealed class RiasecTests
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
-        Assert.Equal(2, assigned!.Count(question => question.Dimension == "R"));
+        Assert.Equal(2, assigned!.Count(question => question.Dimension == "C"));
         Assert.DoesNotContain(assigned!, question => question.Id == inactiveQuestion.Id);
     }
 
@@ -175,7 +180,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Cannot_complete_with_eleven_answers_but_can_with_twelve()
+    public async Task Cannot_complete_with_thirteen_answers_but_can_with_fourteen()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
@@ -183,7 +188,7 @@ public sealed class RiasecTests
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
-        foreach (var question in assigned!.Take(11))
+        foreach (var question in assigned!.Take(13))
         {
             var response = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 3 }, CancellationToken.None);
             Assert.True(response.Success);
@@ -191,26 +196,26 @@ public sealed class RiasecTests
 
         var incomplete = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
         Assert.False(incomplete.Success);
-        Assert.Equal("El test debe tener 12 respuestas antes de finalizar.", incomplete.Error);
+        Assert.Equal("El test debe tener 14 respuestas antes de finalizar.", incomplete.Error);
 
-        var last = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned![11].Id, Value = 3 }, CancellationToken.None);
+        var last = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned![13].Id, Value = 3 }, CancellationToken.None);
         var complete = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
 
         Assert.True(last.Success);
         Assert.True(complete.Success);
         Assert.NotNull(complete.Result);
-        Assert.Equal(6, complete.Result!.RScore); // 2 preguntas x valor 3
-        Assert.Equal("RI", complete.Result.PrimaryCode);
+        Assert.Equal(6, complete.Result!.CScore); // 2 preguntas x valor 3
+        Assert.Equal("CH", complete.Result.PrimaryCode); // empate total: orden fijo C,H,A,S,I,D,E
         Assert.Equal("A", complete.Result.SecondaryCode);
-        Assert.Equal(12, last.Attempt!.Coins);
+        Assert.Equal(14, last.Attempt!.Coins);
 
         var afterCompletion = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
-        Assert.Equal(62, afterCompletion!.Coins); // 12 respuestas + 50 de bono
+        Assert.Equal(64, afterCompletion!.Coins); // 14 respuestas + 50 de bono
 
         var completedAgain = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
         var afterSecondComplete = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
         Assert.True(completedAgain.Success);
-        Assert.Equal(62, afterSecondComplete!.Coins);
+        Assert.Equal(64, afterSecondComplete!.Coins);
     }
 
     [Fact]
@@ -241,9 +246,9 @@ public sealed class RiasecTests
         context.Institutions.Add(institution);
         var career = new Career { Id = Guid.NewGuid(), Name = "DATOS DE PRUEBA", Status = "ACTIVA", InstitutionId = institution.Id, Institution = institution, Area = "Tecnologia", Modality = "Presencial" };
         context.Careers.Add(career);
-        context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "R", CompatibilityLevel = 100, Rule = "Coincide con la dimension principal." });
-        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = "RIASEC-60-V1" };
-        var profile = new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 10, IScore = 6, AScore = 4, SScore = 4, EScore = 4, CScore = 4, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = "RIASEC-12-V2" };
+        context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "C", CompatibilityLevel = 100, Rule = "Coincide con la dimension principal." });
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version };
+        var profile = new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, CScore = 10, HScore = 6, AScore = 4, SScore = 4, IScore = 4, DScore = 4, EScore = 4, PrimaryCode = "CH", SecondaryCode = "A", AlgorithmVersion = OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version };
         context.TestAttempts.Add(attempt); context.RiasecProfiles.Add(profile);
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
@@ -289,11 +294,11 @@ public sealed class RiasecTests
         var career = new Career { Id = Guid.NewGuid(), Name = "Carrera de prueba", Status = "PRUEBA", InstitutionId = institution.Id, Institution = institution };
         context.Institutions.Add(institution);
         context.Careers.Add(career);
-        context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "I", CompatibilityLevel = 100, Rule = "Investigador." });
-        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = "RIASEC-12-V2" };
+        context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "H", CompatibilityLevel = 100, Rule = "Humanidades." });
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version };
         context.TestAttempts.Add(attempt);
-        // Puntaje maximo en I (2 preguntas x 5 = 10) y la mitad en R.
-        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 5, IScore = 10, AScore = 2, SScore = 2, EScore = 2, CScore = 2, PrimaryCode = "IR", SecondaryCode = "A", AlgorithmVersion = "RIASEC-12-V2" });
+        // Puntaje maximo en H (2 preguntas x 5 = 10) y la mitad en C.
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, CScore = 5, HScore = 10, AScore = 2, SScore = 2, IScore = 2, DScore = 2, EScore = 2, PrimaryCode = "HC", SecondaryCode = "A", AlgorithmVersion = OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version });
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
 
@@ -305,13 +310,13 @@ public sealed class RiasecTests
     [Fact]
     public void Interpretation_explains_each_letter_and_suggests_areas()
     {
-        var interpretation = RiasecInterpretationBuilder.Build("RI", "A");
+        var interpretation = RiasecInterpretationBuilder.Build("HS", "A");
 
-        Assert.Equal("RIA", interpretation.Code);
-        Assert.Equal(new[] { "Realista", "Investigador", "Artístico" }, interpretation.Dimensions.Select(item => item.Name));
+        Assert.Equal("HSA", interpretation.Code);
+        Assert.Equal(new[] { "Humanidades, Ciencias Sociales y Jurídicas", "Ciencias de la Salud", "Artística" }, interpretation.Dimensions.Select(item => item.Name));
         Assert.All(interpretation.Dimensions, item => Assert.StartsWith("Te atrae", item.Description));
         Assert.NotEmpty(interpretation.SuggestedAreas);
-        Assert.Contains("RIA", interpretation.Summary);
+        Assert.Contains("HSA", interpretation.Summary);
     }
 
     [Fact]
@@ -319,16 +324,16 @@ public sealed class RiasecTests
     {
         await using var context = CreateContext();
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
-        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = "RIASEC-12-V2" };
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version };
         context.TestAttempts.Add(attempt);
-        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 8, IScore = 6, AScore = 4, SScore = 2, EScore = 2, CScore = 2, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = "RIASEC-12-V2" });
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, CScore = 8, HScore = 6, AScore = 4, SScore = 2, IScore = 2, DScore = 2, EScore = 2, PrimaryCode = "CH", SecondaryCode = "A", AlgorithmVersion = OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version });
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
 
         var result = await service.GetRecommendationsAsync(userId, new RecommendationFilterRequest(), CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal("RIA", result!.Interpretation.Code);
+        Assert.Equal("CHA", result!.Interpretation.Code);
         Assert.False(result.AiGenerated);
         Assert.Empty(result.Items);
     }

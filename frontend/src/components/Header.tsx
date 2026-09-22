@@ -1,14 +1,21 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
 import { getTokenRole } from '../services/auth'
 import { Avatar } from './Avatar'
 
 const links = [
-  { path: '/test', label: 'Test RIASEC' },
+  { path: '/test', label: 'Test vocacional' },
   { path: '/recomendaciones', label: 'Recomendaciones' },
   { path: '/historial', label: 'Historial' },
   { path: '/skins', label: 'Skins' },
   { path: '/perfil', label: 'Perfil' },
+]
+
+const adminLinks = [
+  { href: '/admin#resultados', label: 'Resultados' },
+  { href: '/admin#preguntas', label: 'Preguntas' },
+  { href: '/admin#carreras', label: 'Carreras' },
+  { href: '/admin#estudiantes', label: 'Estudiantes' },
 ]
 
 export function Header() {
@@ -40,7 +47,7 @@ export function Header() {
       {token && (
         <nav className="app-header-nav">
           {isStudent && links.map((link) => <a key={link.path} href={link.path} className={path === link.path ? 'active' : ''}>{link.label}</a>)}
-          {role === 'ADMINISTRADOR' && <a href="/admin" className={path === '/admin' ? 'active' : ''}>Administración</a>}
+          {role === 'ADMINISTRADOR' && adminLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
         </nav>
       )}
       <div className="app-header-actions">

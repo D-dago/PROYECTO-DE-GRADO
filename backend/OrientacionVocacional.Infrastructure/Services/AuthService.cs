@@ -31,6 +31,11 @@ public sealed class AuthService(
             return null;
         }
 
+        if (await dbContext.Users.CountAsync(cancellationToken) >= RegistrationPolicy.MaxUsers)
+        {
+            throw new InvalidOperationException("El registro está cerrado temporalmente: se alcanzó el máximo de cuentas.");
+        }
+
         var studentRole = await dbContext.Roles
             .SingleAsync(role => role.Name == RoleNames.Student, cancellationToken);
 
@@ -92,14 +97,19 @@ public sealed class AuthService(
             return user.IsActive ? CreateToken(user) : null;
         }
 
+        if (await dbContext.Users.CountAsync(cancellationToken) >= RegistrationPolicy.MaxUsers)
+        {
+            throw new InvalidOperationException("El registro está cerrado temporalmente: se alcanzó el máximo de cuentas.");
+        }
+
         var studentRole = await dbContext.Roles
             .SingleAsync(role => role.Name == RoleNames.Student, cancellationToken);
         user = new User
         {
             Id = Guid.NewGuid(),
             Email = normalized,
-            FirstName = firstName.Trim(),
-            LastName = lastName.Trim(),
+            FirstName = Truncate(firstName.Trim(), 50),
+            LastName = Truncate(lastName.Trim(), 50),
             RoleId = studentRole.Id,
             Role = studentRole,
             PasswordHash = string.Empty
@@ -110,6 +120,8 @@ public sealed class AuthService(
         await dbContext.SaveChangesAsync(cancellationToken);
         return CreateToken(user);
     }
+
+    private static string Truncate(string value, int max) => value.Length <= max ? value : value[..max];
 
     private AuthResponse CreateToken(User user)
     {

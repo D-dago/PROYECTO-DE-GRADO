@@ -1,18 +1,24 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { appApi } from '../services/appApi'
-import type { Career, Compatibility, Institution, Student } from '../services/appApi'
+import type { AdminQuestion, AdminResult, Career, Compatibility, Institution, Student } from '../services/appApi'
+import { QuestionsSection, ResultsSection } from './AdminExtras'
 
-const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
+const dashboardLabels: [keyof NonNullable<DashboardData>, string][] = [['students', 'Estudiantes registrados'], ['institutions', 'Instituciones'], ['careers', 'Carreras'], ['compatibilityRules', 'Reglas de compatibilidad']]
+const dimensionOptions = ['C', 'H', 'A', 'S', 'I', 'D', 'E']
+
+type DashboardData = { students: number; institutions: number; careers: number; compatibilityRules: number } | null
 
 export function AdminPage() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
-  const [dashboard, setDashboard] = useState<{ students: number; institutions: number; careers: number; compatibilityRules: number } | null>(null)
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [careers, setCareers] = useState<Career[]>([])
   const [compatibilities, setCompatibilities] = useState<Compatibility[]>([])
   const [students, setStudents] = useState<Student[]>([])
+  const [questions, setQuestions] = useState<AdminQuestion[]>([])
+  const [results, setResults] = useState<AdminResult[]>([])
 
   function report(message: string, isError = false) {
     if (isError) { setError(message); setSuccess('') } else { setSuccess(message); setError('') }
@@ -20,9 +26,11 @@ export function AdminPage() {
 
   async function loadAll() {
     try {
-      const [dashboardData, institutionsData, careersData, compatibilitiesData, studentsData] = await Promise.all([
-        appApi.dashboard(), appApi.institutions(), appApi.adminCareers(), appApi.compatibilities(), appApi.students(),
+      const [dashboardData, institutionsData, careersData, compatibilitiesData, studentsData, questionsData, resultsData] = await Promise.all([
+        appApi.dashboard(), appApi.institutions(), appApi.adminCareers(), appApi.compatibilities(), appApi.students(), appApi.adminQuestions(), appApi.adminResults(),
       ])
+      setQuestions(questionsData)
+      setResults(resultsData)
       setDashboard(dashboardData)
       setInstitutions(institutionsData)
       setCareers(careersData)
@@ -39,7 +47,7 @@ export function AdminPage() {
     <main className="content-shell">
       <span className="eyebrow">Solo administrador</span>
       <h1>Panel de datos</h1>
-      {dashboard && <div className="dashboard-grid">{Object.entries(dashboard).map(([key, value]) => <strong key={key}>{value}<small> {key}</small></strong>)}</div>}
+      {dashboard && <div className="dashboard-grid">{dashboardLabels.map(([key, label]) => <strong key={key}>{dashboard[key]}<small> {label}</small></strong>)}</div>}
       <p className="empty-state">Carga únicamente información institucional verificada. La aplicación no incluye datos inventados.</p>
       {success && <p className="success-message">{success}</p>}
       {error && <p className="error-message">{error}</p>}
@@ -47,6 +55,8 @@ export function AdminPage() {
       <InstitutionsSection institutions={institutions} onChanged={loadAll} report={report} />
       <CareersSection careers={careers} institutions={institutions} onChanged={loadAll} report={report} />
       <CompatibilitiesSection compatibilities={compatibilities} careers={careers} onChanged={loadAll} report={report} />
+      <ResultsSection results={results} report={report} />
+      <QuestionsSection questions={questions} onChanged={loadAll} report={report} />
       <StudentsSection students={students} onChanged={loadAll} report={report} />
     </main>
   )
@@ -75,7 +85,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
   }
 
   return (
-    <section className="admin-section">
+    <section className="admin-section" id="instituciones">
       <h2>Instituciones</h2>
       <div className="admin-list">
         {institutions.map((institution) => (
@@ -95,7 +105,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
       </div>
       <form className="simple-form" onSubmit={submit} key={editing?.id ?? 'new-institution'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva institución'}</h3>
-        <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required />
+        <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
         <input name="type" placeholder="Tipo" defaultValue={editing?.type} required />
         <input name="municipality" placeholder="Municipio" defaultValue={editing?.municipality} />
         <input name="location" placeholder="Ubicación" defaultValue={editing?.location} />
@@ -134,7 +144,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
   }
 
   return (
-    <section className="admin-section">
+    <section className="admin-section" id="carreras">
       <h2>Carreras</h2>
       <div className="admin-list">
         {careers.map((career) => (
@@ -154,7 +164,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
       </div>
       <form className="simple-form" onSubmit={submit} key={editing?.id ?? 'new-career'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva carrera'}</h3>
-        <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required />
+        <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
         <label>Institución
           <select name="institutionId" defaultValue={editing?.institutionId ?? ''} required>
             <option value="" disabled>Selecciona una institución</option>
@@ -164,8 +174,8 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
         <input name="area" placeholder="Área" defaultValue={editing?.area} />
         <input name="level" placeholder="Nivel" defaultValue={editing?.level} />
         <input name="modality" placeholder="Modalidad" defaultValue={editing?.modality} />
-        <input name="durationMonths" type="number" placeholder="Duración en meses" defaultValue={editing?.durationMonths} />
-        <input name="cost" type="number" placeholder="Costo si existe" defaultValue={editing?.cost} />
+        <input name="durationMonths" type="number" min={1} max={240} placeholder="Duración en meses" defaultValue={editing?.durationMonths} />
+        <input name="cost" type="number" min={0} max={1000000} placeholder="Costo si existe" defaultValue={editing?.cost} />
         <input name="source" placeholder="Fuente verificable" defaultValue={editing?.source} />
         <input name="status" placeholder="Estado" defaultValue={editing?.status ?? 'PENDIENTE'} required />
         <div className="admin-row-actions">
@@ -202,7 +212,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
 
   return (
     <section className="admin-section">
-      <h2>Compatibilidades RIASEC</h2>
+      <h2>Compatibilidades por área (CHASIDE)</h2>
       <div className="admin-list">
         {compatibilities.map((compatibility) => (
           <div className="admin-row" key={compatibility.id}>
@@ -228,7 +238,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
         </label>
         {editing && <small>La carrera de una regla existente no se puede cambiar; elimina y crea una nueva si es necesario.</small>}
         <label>Dimensión
-          <select name="dimension" defaultValue={editing?.dimension ?? 'R'} required>
+          <select name="dimension" defaultValue={editing?.dimension ?? 'C'} required>
             {dimensionOptions.map((dimension) => <option key={dimension} value={dimension}>{dimension}</option>)}
           </select>
         </label>
@@ -250,7 +260,7 @@ function StudentsSection({ students, onChanged, report }: { students: Student[];
   }
 
   return (
-    <section className="admin-section">
+    <section className="admin-section" id="estudiantes">
       <h2>Estudiantes</h2>
       <div className="admin-list">
         {students.map((student) => (

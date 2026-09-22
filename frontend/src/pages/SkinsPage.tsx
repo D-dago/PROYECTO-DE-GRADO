@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
-import type { SkinShop } from '../services/appApi'
+import type { Skin, SkinShop } from '../services/appApi'
 import { Avatar } from '../components/Avatar'
 
 export function SkinsPage() {
@@ -26,6 +26,14 @@ export function SkinsPage() {
     } finally { setBusy(false) }
   }
 
+  function buy(skin: Skin) {
+    if (shop && shop.coins < skin.price) {
+      setMessage({ text: 'No tienes saldo suficiente. La única forma de conseguir monedas es haciendo el test.', isError: true })
+      return Promise.resolve()
+    }
+    return act('buy', skin.id)
+  }
+
   const equipped = shop?.skins.find((skin) => skin.equipped)
 
   return (
@@ -41,7 +49,7 @@ export function SkinsPage() {
           <aside className="skin-preview">
             <Avatar skin={shop.equippedSkin} size={170} />
             <strong>{equipped?.name}</strong>
-            <span className="coin-badge">🪙 {shop.coins} monedas</span>
+            <span className="badge badge-active">En uso</span>
           </aside>
           <div className="skin-grid">
             {shop.skins.map((skin) => (
@@ -50,9 +58,9 @@ export function SkinsPage() {
                 <h3>{skin.name}</h3>
                 <p>{skin.description}</p>
                 <div className="skin-actions">
-                  {skin.equipped ? <span className="badge badge-active">Equipada</span>
-                    : skin.owned ? <button type="button" disabled={busy} onClick={() => void act('equip', skin.id)}>Equipar</button>
-                    : <button type="button" disabled={busy || shop.coins < skin.price} onClick={() => void act('buy', skin.id)}>Comprar · 🪙 {skin.price}</button>}
+                  {skin.equipped ? <span className="badge badge-active">En uso</span>
+                    : skin.owned ? <button type="button" disabled={busy} onClick={() => void act('equip', skin.id)}>Seleccionar</button>
+                    : <button type="button" disabled={busy} onClick={() => void buy(skin)}>Comprar · 🪙 {skin.price}</button>}
                 </div>
               </article>
             ))}

@@ -1,4 +1,4 @@
-import { request } from './api'
+﻿import { downloadFile, request } from './api'
 
 export type Institution = { id: string; name: string; type: string; location?: string; municipality?: string; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean }
 export type Career = { id: string; name: string; area?: string; level?: string; modality?: string; durationMonths?: number; cost?: number; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; institutionId: string; institutionName: string; compatibility: number; compatibilityReason: string }
@@ -11,7 +11,18 @@ export type SkinShop = { coins: number; equippedSkin: string; skins: Skin[] }
 export type Compatibility = { id: string; careerId: string; careerName: string; dimension: string; compatibilityLevel: number; rule: string }
 export type Student = { id: string; email: string; firstName: string; lastName: string; isActive: boolean; createdAtUtc: string }
 
+export type AdminQuestion = { id: string; code: string; text: string; dimension: string; isActive: boolean; order: number }
+export type AdminUser = { id: string; email: string; fullName: string; role: string; isActive: boolean; createdAtUtc: string; coins: number; completedTests: number }
+export type AdminResult = { attemptId: string; studentName: string; email: string; completedAtUtc: string; primaryCode: string; secondaryCode: string; c: number; h: number; a: number; s: number; i: number; d: number; e: number }
+
 export const appApi = {
+  adminQuestions: () => request<AdminQuestion[]>('/admin/questions'),
+  createQuestion: (body: unknown) => request<AdminQuestion>('/admin/questions', { method: 'POST', body: JSON.stringify(body) }),
+  updateQuestion: (id: string, body: unknown) => request<AdminQuestion>(`/admin/questions/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  adminUsers: () => request<AdminUser[]>('/admin/users'),
+  adminResults: () => request<AdminResult[]>('/admin/results'),
+  downloadExcel: () => downloadFile('/admin/results/export/excel', 'resultados.xlsx'),
+  downloadPdf: () => downloadFile('/admin/results/export/pdf', 'resultados.pdf'),
   register: (body: unknown) => request<{ accessToken: string }>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: (body: unknown) => request<{ accessToken: string; role: string }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   skins: () => request<SkinShop>('/student/skins'),

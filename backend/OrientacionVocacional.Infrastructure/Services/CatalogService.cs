@@ -57,9 +57,11 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
 
     public async Task<RecommendationResponse?> GetRecommendationsAsync(Guid userId, RecommendationFilterRequest filter, CancellationToken cancellationToken)
     {
-        var profile = await db.RiasecProfiles.Include(item => item.TestAttempt).Where(item => item.TestAttempt.UserId == userId).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
+        var profile = await db.RiasecProfiles.Include(item => item.TestAttempt).Where(item => item.TestAttempt.UserId == userId && item.AlgorithmVersion == OrientacionVocacional.Domain.Constants.RiasecTestConstants.Version).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
+        // Solo cuenta un perfil del test vigente (CHASIDE): los perfiles del test anterior (RIASEC)
+        // usan otras letras y darian recomendaciones sin sentido; hay que repetir el test.
         if (profile is null) return null;
-        var scores = new Dictionary<string, int> { ["R"] = profile.RScore, ["I"] = profile.IScore, ["A"] = profile.AScore, ["S"] = profile.SScore, ["E"] = profile.EScore, ["C"] = profile.CScore };
+        var scores = new Dictionary<string, int> { ["C"] = profile.CScore, ["H"] = profile.HScore, ["A"] = profile.AScore, ["S"] = profile.SScore, ["I"] = profile.IScore, ["D"] = profile.DScore, ["E"] = profile.EScore };
         var query = db.Careers.AsNoTracking().Include(item => item.Institution).Include(item => item.Compatibilities).Where(item => item.IsActive && item.Institution.IsActive);
         if (filter.InstitutionId.HasValue) query = query.Where(item => item.InstitutionId == filter.InstitutionId);
         if (!string.IsNullOrWhiteSpace(filter.Municipality)) query = query.Where(item => item.Institution.Municipality == filter.Municipality);
@@ -73,7 +75,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         var history = new RecommendationHistory { Id = Guid.NewGuid(), UserId = userId, TestAttemptId = profile.TestAttemptId, FilterSummary = JsonSerializer.Serialize(filter) };
         db.RecommendationHistories.Add(history);
         await db.SaveChangesAsync(cancellationToken);
-        var result = new RiasecResultResponse(profile.Id, profile.TestAttemptId, profile.RScore, profile.IScore, profile.AScore, profile.SScore, profile.EScore, profile.CScore, profile.PrimaryCode, profile.SecondaryCode, profile.CreatedAtUtc, profile.AlgorithmVersion);
+        var result = new RiasecResultResponse(profile.Id, profile.TestAttemptId, profile.CScore, profile.HScore, profile.AScore, profile.SScore, profile.IScore, profile.DScore, profile.EScore, profile.PrimaryCode, profile.SecondaryCode, profile.CreatedAtUtc, profile.AlgorithmVersion);
         var aiMessage = await ai.ExplainAsync(result, recommendations, cancellationToken);
         return new RecommendationResponse(
             recommendations, history.Id, aiMessage,

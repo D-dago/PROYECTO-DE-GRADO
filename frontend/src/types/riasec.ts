@@ -1,4 +1,4 @@
-export type Question = {
+﻿export type Question = {
   id: string
   code: string
   text: string
@@ -18,12 +18,13 @@ export type Attempt = {
 export type RiasecResult = {
   id: string
   testAttemptId: string
-  rScore: number
-  iScore: number
+  cScore: number
+  hScore: number
   aScore: number
   sScore: number
+  iScore: number
+  dScore: number
   eScore: number
-  cScore: number
   primaryCode: string
   secondaryCode: string
   algorithmVersion: string

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using OrientacionVocacional.Domain.Constants;
 using OrientacionVocacional.Application.Contracts;
 using OrientacionVocacional.Application.Interfaces;
 
@@ -34,18 +36,30 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
 
     [HttpPost("register")]
     [AllowAnonymous]
+    [EnableRateLimiting("register")]
     public async Task<ActionResult<AuthResponse>> Register(
         RegisterRequest request,
         CancellationToken cancellationToken)
     {
-        var response = await authService.RegisterAsync(request, cancellationToken);
-        return response is null
-            ? Conflict(new { message = "El correo ya está registrado." })
-            : Created("api/auth/me", response);
+        var emailProblem = RegistrationPolicy.CheckEmail(request.Email.Trim());
+        if (emailProblem is not null) return BadRequest(new { message = emailProblem });
+
+        try
+        {
+            var response = await authService.RegisterAsync(request, cancellationToken);
+            return response is null
+                ? Conflict(new { message = "El correo ya está registrado." })
+                : Created("api/auth/me", response);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return StatusCode(503, new { message = exception.Message });
+        }
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("login")]
     public async Task<ActionResult<AuthResponse>> Login(
         LoginRequest request,
         CancellationToken cancellationToken)

@@ -17,10 +17,12 @@ public sealed class TestService(
         var current = await dbContext.TestAttempts
             .Include(attempt => attempt.Answers)
             .Include(attempt => attempt.AssignedQuestions)
-            .Where(attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress)
+            .Where(attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress && attempt.TestVersion == RiasecTestConstants.Version)
             .OrderByDescending(attempt => attempt.StartedAtUtc)
             .FirstOrDefaultAsync(cancellationToken);
 
+        // Un intento a medias de una version anterior del test (p. ej. RIASEC) no se reanuda:
+        // sus preguntas ya no estan activas. Se deja tal cual y se empieza uno nuevo.
         if (current is not null)
         {
             return ToAttemptResponse(current, await GetCoinsAsync(userId, cancellationToken));
@@ -156,12 +158,13 @@ public sealed class TestService(
         {
             Id = Guid.NewGuid(),
             TestAttemptId = attempt.Id,
-            RScore = score.RScore,
-            IScore = score.IScore,
+            CScore = score.CScore,
+            HScore = score.HScore,
             AScore = score.AScore,
             SScore = score.SScore,
+            IScore = score.IScore,
+            DScore = score.DScore,
             EScore = score.EScore,
-            CScore = score.CScore,
             PrimaryCode = score.PrimaryCode,
             SecondaryCode = score.SecondaryCode,
             AlgorithmVersion = RiasecTestConstants.Version
@@ -241,12 +244,13 @@ public sealed class TestService(
     private static RiasecResultResponse ToResultResponse(RiasecProfile profile) => new(
         profile.Id,
         profile.TestAttemptId,
-        profile.RScore,
-        profile.IScore,
+        profile.CScore,
+        profile.HScore,
         profile.AScore,
         profile.SScore,
+        profile.IScore,
+        profile.DScore,
         profile.EScore,
-        profile.CScore,
         profile.PrimaryCode,
         profile.SecondaryCode,
         profile.CreatedAtUtc,
