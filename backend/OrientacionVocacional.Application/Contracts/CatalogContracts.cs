@@ -5,7 +5,11 @@ public sealed record CareerResponse(Guid Id, string Name, string? Area, string? 
 public sealed record DimensionInfoResponse(string Code, string Name, string Description, IReadOnlyList<string> CareerAreas);
 public sealed record ProfileInterpretationResponse(string Code, IReadOnlyList<DimensionInfoResponse> Dimensions, string Summary, IReadOnlyList<string> SuggestedAreas);
 public sealed record RecommendationResponse(IReadOnlyList<CareerResponse> Items, Guid HistoryId, string? AiMessage, ProfileInterpretationResponse Interpretation, bool AiGenerated);
-public sealed record HistoryResponse(Guid Id, Guid TestAttemptId, DateTime CreatedAtUtc, string? FilterSummary);
+public sealed record HistoryResponse(
+    Guid Id, Guid TestAttemptId, DateTime CreatedAtUtc, string? FilterSummary,
+    string? PrimaryCode, string? SecondaryCode,
+    int? RScore, int? IScore, int? AScore, int? SScore, int? EScore, int? CScore,
+    ProfileInterpretationResponse? Interpretation);
 public sealed record AdminDashboardResponse(int Students, int Institutions, int Careers, int CompatibilityRules);
 public sealed record CompatibilityResponse(Guid Id, Guid CareerId, string CareerName, string Dimension, int CompatibilityLevel, string Rule);
 public sealed record StudentAdminResponse(Guid Id, string Email, string FirstName, string LastName, bool IsActive, DateTime CreatedAtUtc);
@@ -38,7 +42,7 @@ public sealed class CareerRequest
 public sealed class CompatibilityRequest
 {
     public Guid CareerId { get; init; }
-    [System.ComponentModel.DataAnnotations.RegularExpression("^[CHASIDE]$")] public required string Dimension { get; init; }
+    [System.ComponentModel.DataAnnotations.RegularExpression("^[RIASEC]$")] public required string Dimension { get; init; }
     [System.ComponentModel.DataAnnotations.Range(0, 100)] public int CompatibilityLevel { get; init; }
     [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.MaxLength(300)] public required string Rule { get; init; }
 }

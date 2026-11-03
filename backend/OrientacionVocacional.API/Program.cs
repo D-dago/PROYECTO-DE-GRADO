@@ -3,13 +3,40 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OrientacionVocacional.Application.Configuration;
 using OrientacionVocacional.Domain.Constants;
 using OrientacionVocacional.Infrastructure.DependencyInjection;
+using OrientacionVocacional.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+// Documentacion interactiva de la API (solo en desarrollo: no tiene sentido exponer esto
+// si algun dia se publica en un hosting real de verdad).
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Orientación Vocacional API", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Pega el token asi: Bearer {token}"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() }
+    });
+});
+
+// Endpoint de salud: confirma que la API responde y que puede llegar a la base de datos.
+// Util para monitoreo y para verificar rapido si "el sistema esta encendido".
+builder.Services.AddHealthChecks().AddDbContextCheck<OrientacionVocacionalDbContext>();
 
 // Ninguna peticion legitima de esta app necesita mas de 100 KB: corta cuerpos gigantes.
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 100 * 1024);
@@ -80,6 +107,29 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Red de seguridad: una excepcion no manejada (un bug real, una falla de la base de datos...)
+// nunca debe devolver un stack trace ni una pagina HTML al cliente. Se registra el detalle en
+// el log del servidor y se responde siempre el mismo JSON generico.
+app.UseExceptionHandler(exceptionApp => exceptionApp.Run(async context =>
+{
+    var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+    if (error is not null)
+    {
+        context.RequestServices.GetRequiredService<ILogger<Program>>().LogError(error, "Error no controlado en {Path}", context.Request.Path);
+    }
+    context.Response.ContentType = "application/json";
+    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    await context.Response.WriteAsync("{\"message\":\"Ocurrió un error inesperado. Intenta de nuevo en un momento.\"}");
+}));
+
+app.MapHealthChecks("/health");
 
 app.UseForwardedHeaders();
 

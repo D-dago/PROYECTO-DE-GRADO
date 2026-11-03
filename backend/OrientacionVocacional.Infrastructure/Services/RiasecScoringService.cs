@@ -15,7 +15,6 @@ public sealed class RiasecScoringService : IRiasecScoringService
             dimension => answers
                 .Where(answer => answer.Question.Dimension == dimension)
                 .Sum(answer => answer.Value));
-        // Empates: gana la letra que va primero en DimensionOrder (C,H,A,S,I,D,E).
         var ordered = DimensionOrder
             .Select((dimension, index) => (dimension, score: scores[dimension], index))
             .OrderByDescending(item => item.score)
@@ -23,7 +22,7 @@ public sealed class RiasecScoringService : IRiasecScoringService
             .ToArray();
 
         return new RiasecScoreResult(
-            scores["C"], scores["H"], scores["A"], scores["S"], scores["I"], scores["D"], scores["E"],
+            scores["R"], scores["I"], scores["A"], scores["S"], scores["E"], scores["C"],
             ordered[0].dimension + ordered[1].dimension,
             ordered[2].dimension);
     }

@@ -119,7 +119,7 @@ public sealed class AuthAndAdminTests
         var created = await service.CreateInstitutionAsync(new InstitutionRequest { Name = "Universidad X", Type = "Publica", Status = "PENDIENTE" }, CancellationToken.None);
         var updated = await service.UpdateInstitutionAsync(created.Id, new InstitutionRequest { Name = "Universidad X Actualizada", Type = "Publica", Status = "ACTIVA" }, CancellationToken.None);
         var deactivated = await service.SetInstitutionActiveAsync(created.Id, false, CancellationToken.None);
-        var list = await service.GetInstitutionsAsync(CancellationToken.None);
+        var list = await service.GetAllInstitutionsForAdminAsync(CancellationToken.None);
 
         Assert.Equal("Universidad X Actualizada", updated!.Name);
         Assert.True(deactivated);

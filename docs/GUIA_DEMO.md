@@ -8,17 +8,20 @@
 4. En otra terminal, inicia `npm run dev` desde `frontend`.
 5. Abre `http://localhost:5173`.
 
+Para comprobar antes de empezar que todo está encendido: `GET /health` debe responder `Healthy`.
+
 ## Flujo estudiante
 
-1. Abre `/registro` y crea una cuenta.
+1. Abre `/registro` y crea una cuenta (o entra con Google).
 2. Entra a `/login`.
 3. Abre `/perfil` y guarda datos académicos.
-4. Abre `/test` y responde las 60 preguntas.
-5. Muestra el resultado RIASEC y el aviso de orientación no diagnóstica.
+4. Abre `/test` y responde las 12 preguntas (2 por cada una de las 6 dimensiones RIASEC, sorteadas del banco de 60).
+5. Muestra el resultado: código del perfil, tarjetas por dimensión, puntajes, explicación y el aviso de orientación no diagnóstica.
 6. Abre `/recomendaciones`; inicialmente puede mostrar que no existen alternativas si el catálogo está vacío.
 7. Explica los filtros y la comparación.
-8. Abre `/historial` para mostrar el registro de la consulta.
-9. Cierra sesión eliminando el token del navegador.
+8. Abre `/historial`: hay una entrada por test terminado y se despliega con el detalle completo del perfil.
+9. Abre `/skins` para mostrar las monedas ganadas y el cambio de avatar.
+10. Cierra sesión con el botón "Salir".
 
 ## Flujo administrador
 
@@ -26,9 +29,11 @@
 2. Abre `/admin` y muestra el dashboard.
 3. Carga una institución con nombre, tipo, fuente y estado verificados.
 4. Carga una carrera asociada a la institución.
-5. Crea una compatibilidad mediante `POST /api/admin/catalog/compatibilities`.
+5. Crea una regla de compatibilidad desde el formulario de la sección "Compatibilidades por dimensión (RIASEC)".
 6. Repite `/recomendaciones` como estudiante para mostrar la regla aplicada.
-7. Prueba activación/desactivación y edición mediante los endpoints protegidos.
+7. En "Resultados", despliega un estudiante para ver la interpretación de su perfil y descarga el Excel y el PDF.
+8. En "Preguntas", edita o desactiva una pregunta y muestra que el sistema impide dejar una dimensión con menos de 2 activas.
+9. Prueba activación/desactivación de instituciones, carreras y estudiantes.
 
 No uses registros inventados como información real. Si la base de datos está vacía, demuestra el estado vacío y explica que el administrador debe cargar fuentes verificables.
 
@@ -40,3 +45,5 @@ No uses registros inventados como información real. Si la base de datos está v
 - Solicitud sin JWT a `/api/test/questions`: `401`.
 - Solicitud sin JWT a `/api/admin/catalog/dashboard`: `401`.
 - Estudiante contra `/api/admin/*`: debe recibir `403`.
+- `GET /health`: `Healthy`.
+- Cada push ejecuta el flujo de CI de GitHub Actions (`.github/workflows/ci.yml`), que compila el backend, corre las pruebas y compila el frontend.

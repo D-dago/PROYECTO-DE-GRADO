@@ -9,9 +9,8 @@ const options = [
 ]
 
 const dimensions = new Map([
-  ['C', 'Administrativa'], ['H', 'Humanidades y Sociales'], ['A', 'Artística'],
-  ['S', 'Ciencias de la Salud'], ['I', 'Técnica'], ['D', 'Defensa y Seguridad'],
-  ['E', 'Ciencias Experimentales'],
+  ['R', 'Realista'], ['I', 'Investigador'], ['A', 'Artístico'],
+  ['S', 'Social'], ['E', 'Emprendedor'], ['C', 'Convencional'],
 ])
 
 const QUESTION_SECONDS = 30
@@ -31,7 +30,7 @@ export function TestPage() {
     try {
       // Las preguntas se sortean por intento (2 por dimension, al azar), asi que
       // primero hay que crear/reanudar el intento y recien despues pedir cuales
-      // 14 preguntas especificas le tocaron - ya no se puede pedir en paralelo.
+      // 12 preguntas especificas le tocaron - ya no se puede pedir en paralelo.
       const loadedAttempt = await riasecApi.createAttempt()
       const loadedQuestions = await riasecApi.getAssignedQuestions(loadedAttempt.attemptId)
       setQuestions(loadedQuestions)
@@ -101,7 +100,7 @@ export function TestPage() {
 
   return (
     <main className="test-shell">
-      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">CHASIDE · {attempt.total} preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
+      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">RIASEC · {attempt.total} preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
       <section className="quiz-panel" aria-live="polite">
         <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, attempt.total)} <span>de {attempt.total}</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>

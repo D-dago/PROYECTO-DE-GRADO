@@ -32,13 +32,25 @@ body {
   min-height: 100vh;
 }
 
-main { max-width: 64rem; margin: 0 auto; padding: 3rem 1.5rem; }
+/* Petalos de sakura cayendo sobre el fondo, en toda la app */
+.petalos-capa { position: fixed; inset: 0; overflow: hidden; z-index: 1; pointer-events: none; }
+.petalo { position: absolute; top: -8vh; color: #f6b9d6; animation-name: caer-petalo; animation-timing-function: linear; animation-iteration-count: infinite; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .25)); }
+@keyframes caer-petalo {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(var(--deriva), 118vh) rotate(var(--giro)); }
+}
+/* Quien desactivo las animaciones en su sistema (mareos, preferencia, bateria) no las ve. */
+@media (prefers-reduced-motion: reduce) { .petalos-capa { display: none; } }
+
+main { max-width: 64rem; margin: 0 auto; padding: 3rem 1.5rem; position: relative; z-index: 2; }
 h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98; max-width: 14ch; margin: .7rem 0 2rem; letter-spacing: -.04em; }
 .start-link { display: inline-block; margin-top: 2rem; color: #fff; background: var(--accent); padding: .9rem 1.6rem; border-radius: 999px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 24px -8px rgba(236, 47, 143, .55); transition: background .15s, transform .15s; }
 .start-link:hover { background: var(--accent-dark); transform: translateY(-1px); }
 
 /* Cabecera persistente */
-.app-header { display: flex; align-items: center; gap: 1.5rem; padding: 1rem clamp(1rem, 4vw, 3rem); background: rgba(15, 4, 10, .55); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+/* Antes era casi transparente (.55 de opacidad): al hacer scroll, el titulo de la pagina se veia
+   "fantasma" detras de los enlaces. Ahora es casi solida, con blur mas fuerte por si algo se cuela. */
+.app-header { display: flex; align-items: center; gap: 1.5rem; padding: 1rem clamp(1rem, 4vw, 3rem); background: rgba(12, 3, 9, .94); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255, 255, 255, .1); }
 .app-logo { display: flex; align-items: center; gap: .6rem; color: var(--cream); text-decoration: none; font-weight: 700; letter-spacing: -.01em; margin-right: auto; font-size: .95rem; }
 .app-logo-mark { display: grid; place-content: center; width: 2rem; height: 2rem; border-radius: 8px; background: var(--accent); color: #fff; font-size: .72rem; font-weight: 800; }
 .app-header-nav { display: flex; gap: 1.4rem; flex-wrap: wrap; }
@@ -83,6 +95,17 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .admin-row-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .admin-row-actions button { padding: .4rem .8rem; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; }
 .admin-row-actions button:hover { border-color: var(--accent-dark); color: var(--accent-dark); }
+
+/* Resultados del admin: la fila es desplegable (<details>), asi que va en columna en vez de fila,
+   y el detalle interior usa fondo oscuro porque sus textos (dimension-card, area-chip...) estan
+   pensados para el tema oscuro de la pantalla de resultado, no para la tarjeta clara del admin. */
+.admin-row-result { display: block; }
+.admin-row-result summary { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .8rem; cursor: pointer; list-style: none; }
+.admin-row-result summary::-webkit-details-marker { display: none; }
+.admin-row-result summary::after { content: 'Ver detalle ▾'; margin-left: auto; color: var(--muted); font-size: .8rem; }
+.admin-row-result[open] summary::after { content: 'Ocultar ▴'; color: var(--accent-dark); }
+.admin-result-detail { margin-top: 1rem; padding: 1.2rem; border-radius: 10px; background: #1f0a19; }
+.admin-result-detail h3 { color: var(--cream); margin: 0 0 .8rem; }
 .badge { padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
 .badge-active { background: var(--soft-accent); color: var(--green); }
 .badge-inactive { background: #f0f0ec; color: var(--muted); }
@@ -97,6 +120,10 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .form-shell, .content-shell { max-width: 70rem; margin: 2rem auto 3rem; padding: 2.5rem clamp(1.2rem, 4vw, 3.2rem); box-sizing: border-box; border-radius: 28px; }
 .form-shell { max-width: 44rem; width: min(calc(100% - 2rem), 44rem); }
 .simple-form, .filter-form { display: grid; gap: 1rem; max-width: 36rem; }
+/* Al apretar "Editar" la pagina baja hasta el formulario: el margen evita que la cabecera fija lo
+   tape, y el borde deja claro que se esta editando un registro existente. */
+.simple-form { scroll-margin-top: 6rem; }
+.simple-form.editando { padding: 1.2rem; border: 2px solid var(--accent); border-radius: 14px; background: rgba(236, 47, 143, .08); }
 .simple-form h2, .simple-form h3 { color: var(--cream); }
 .simple-form label { display: grid; gap: .4rem; color: var(--cream-muted); }
 .filter-form label { display: grid; gap: .4rem; color: var(--cream-muted); align-self: end; }
@@ -129,7 +156,26 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .cost-tier-high { background: #fbdde2; color: #b3123f; }
 .empty-state { padding: 1.5rem; background: var(--soft-accent); color: var(--accent-dark); border-radius: 10px; }
 .comparison { margin-top: 2rem; border-top: 1px solid rgba(255, 255, 255, .15); padding-top: 1rem; }
-.comparison div, .history-row { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, .15); color: var(--cream); }
+.comparison div { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, .15); color: var(--cream); }
+
+/* Historial: una tarjeta desplegable por intento. Cerrada muestra fecha, codigo y puntajes;
+   al abrirla aparece el mismo detalle que la pantalla de resultado (tarjetas por area,
+   explicacion y areas afines) - no solo lo basico. */
+.history-list { display: grid; gap: .9rem; margin-top: 1.5rem; }
+.history-card { padding: 1.1rem 1.3rem; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .1); }
+.history-card-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; color: var(--cream); flex-wrap: wrap; cursor: pointer; list-style: none; }
+.history-card-top::-webkit-details-marker { display: none; }
+.history-toggle-hint { color: var(--cream-muted); font-size: .8rem; margin-left: auto; }
+.history-card[open] .history-toggle-hint { color: var(--accent); }
+.result-code-mini { color: var(--accent); font-weight: 800; font-size: 1.3rem; letter-spacing: -.02em; }
+.result-code-mini small { color: #2ecc82; font-size: .7em; margin-left: .2em; }
+.history-scores { display: flex; gap: .9rem; flex-wrap: wrap; margin-top: .7rem; color: var(--cream-muted); font-size: .85rem; }
+.history-scores b { color: var(--cream); margin-right: .3rem; }
+.history-filter { display: block; margin-top: .6rem; color: var(--cream-muted); font-size: .82rem; }
+.history-detail { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, .12); }
+.history-detail .dimension-cards { margin-bottom: 1.2rem; }
+.history-detail .score-list { margin-bottom: 1.2rem; }
+.history-detail .area-chips { margin-top: .6rem; }
 
 /* Test RIASEC */
 .test-shell { max-width: 70rem; min-height: 100svh; padding: 2rem clamp(1rem, 5vw, 5rem); box-sizing: border-box; }
@@ -241,7 +287,8 @@ img, svg { max-width: 100%; }
   .skin-grid { grid-template-columns: repeat(auto-fill, minmax(8.6rem, 1fr)); gap: .7rem; }
   .skin-card { padding: .8rem .5rem; }
   .career-grid { grid-template-columns: 1fr; }
-  .history-row, .comparison div { flex-direction: column; gap: .3rem; }
+  .comparison div { flex-direction: column; gap: .3rem; }
+  .history-card-top { flex-direction: column; align-items: flex-start; gap: .3rem; }
   .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-section { margin: 2rem 0; }
   .admin-row { flex-direction: column; align-items: stretch; }

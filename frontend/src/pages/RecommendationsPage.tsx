@@ -5,9 +5,9 @@ import type { Career, Institution } from '../services/appApi'
 
 const budgetRanges = [
   { value: '', label: 'No estoy seguro / sin límite' },
-  { value: '500', label: 'Menos de Bs. 500 al mes' },
-  { value: '1000', label: 'Bs. 500 – 1.000' },
-  { value: '1500', label: 'Bs. 1.000 – 1.500' },
+  { value: '500', label: 'Hasta Bs. 500 al mes' },
+  { value: '1000', label: 'Hasta Bs. 1.000 al mes' },
+  { value: '1500', label: 'Hasta Bs. 1.500 al mes' },
 ]
 
 function costTier(cost?: number): { label: string; className: string } | null {
@@ -19,11 +19,34 @@ function costTier(cost?: number): { label: string; className: string } | null {
 
 export function RecommendationsPage() {
   const [institutions, setInstitutions] = useState<Institution[]>([])
+  const [catalog, setCatalog] = useState<Career[]>([])
+  const [institutionId, setInstitutionId] = useState('')
+  const [municipality, setMunicipality] = useState('')
   const [items, setItems] = useState<Career[]>([])
   const [selected, setSelected] = useState<Career[]>([])
   const [message, setMessage] = useState<string | null>(null)
 
-  useEffect(() => { void appApi.institutions().then(setInstitutions).catch(() => setMessage('Inicia sesión para consultar recomendaciones.')) }, [])
+  useEffect(() => {
+    void appApi.institutions().then(setInstitutions).catch(() => setMessage('Inicia sesión para consultar recomendaciones.'))
+    void appApi.careers().then(setCatalog).catch(() => setCatalog([]))
+  }, [])
+
+  // Todas las listas salen de los datos ya cargados, para elegir en vez de escribir a mano y
+  // arriesgarse a una falta de tilde o mayuscula que deja la busqueda vacia.
+  const municipios = [...new Set(institutions.map((item) => item.municipality).filter((item): item is string => !!item))].sort()
+  // Las carreras y modalidades ofrecidas se limitan a la institucion y al municipio elegidos:
+  // asi nunca se ofrece una combinacion que no existe.
+  const municipioDe = new Map(institutions.map((item) => [item.id, item.municipality]))
+  const disponibles = catalog.filter((career) =>
+    (!institutionId || career.institutionId === institutionId) &&
+    (!municipality || municipioDe.get(career.institutionId) === municipality))
+  const porArea = new Map<string, Set<string>>()
+  for (const career of disponibles) {
+    const area = career.area?.trim() || 'Otras'
+    porArea.set(area, (porArea.get(area) ?? new Set()).add(career.name))
+  }
+  const areas = [...porArea.keys()].sort()
+  const modalidades = [...new Set(disponibles.map((career) => career.modality).filter((item): item is string => !!item))].sort()
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -43,13 +66,28 @@ export function RecommendationsPage() {
       <span className="eyebrow">Motor de reglas</span>
       <h1>Alternativas compatibles</h1>
       <form className="filter-form" onSubmit={submit}>
-        <select name="institutionId" defaultValue="">
+        <select name="institutionId" value={institutionId} onChange={(event) => setInstitutionId(event.target.value)}>
           <option value="">Todas las instituciones</option>
           {institutions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
         </select>
-        <input name="municipality" placeholder="Municipio" />
-        <input name="area" placeholder="Área" />
-        <input name="modality" placeholder="Modalidad" />
+        <select name="municipality" value={municipality} onChange={(event) => setMunicipality(event.target.value)}>
+          <option value="">Todos los municipios</option>
+          {municipios.map((municipio) => <option key={municipio} value={municipio}>{municipio}</option>)}
+        </select>
+        {/* key: al cambiar institucion o municipio se reinicia la eleccion, porque la carrera o
+            modalidad elegida antes puede no existir en la nueva seleccion. */}
+        <select name="area" defaultValue="" key={`carrera-${institutionId}-${municipality}`}>
+          <option value="">Todas las carreras</option>
+          {areas.map((area) => (
+            <optgroup key={area} label={area}>
+              {[...porArea.get(area)!].sort().map((nombre) => <option key={nombre} value={nombre}>{nombre}</option>)}
+            </optgroup>
+          ))}
+        </select>
+        <select name="modality" defaultValue="" key={`modalidad-${institutionId}-${municipality}`}>
+          <option value="">Todas las modalidades</option>
+          {modalidades.map((modalidad) => <option key={modalidad} value={modalidad}>{modalidad}</option>)}
+        </select>
         <label>Presupuesto
           <select name="maximumCost" defaultValue="">
             {budgetRanges.map((range) => <option key={range.value} value={range.value}>{range.label}</option>)}

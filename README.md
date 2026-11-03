@@ -1,6 +1,6 @@
 # Sistema web hibrido de orientacion vocacional
 
-Base inicial para un sistema de orientacion vocacional dirigido a estudiantes bachilleres de Cochabamba, Bolivia.
+Sistema de orientacion vocacional para estudiantes bachilleres de Cochabamba, Bolivia: test vocacional RIASEC (Holland), motor de reglas con el catalogo educativo cargado por el administrador, explicacion opcional con IA y panel administrativo.
 
 ## Estructura
 
@@ -56,6 +56,7 @@ Endpoints principales:
 
 - `POST /api/auth/register`: crea un estudiante y su perfil vacio.
 - `POST /api/auth/login`: devuelve el JWT.
+- `POST /api/auth/google`: inicio de sesion con Google; valida el idToken y emite el mismo JWT propio.
 - `POST /api/auth/logout`: cierre stateless; el cliente debe descartar el token.
 - `GET /api/student/profile`: requiere rol `ESTUDIANTE`.
 - `PUT /api/student/profile`: actualiza telefono, ciudad, colegio y ano de graduacion.
@@ -63,26 +64,28 @@ Endpoints principales:
 
 La migracion inicial crea `roles`, `users` y `student_profiles`, y siembra solo los roles `ESTUDIANTE` y `ADMINISTRADOR`. No crea usuarios, universidades, carreras ni datos institucionales.
 
-## Test RIASEC
+## Test vocacional RIASEC
 
-La migracion `RiasecTest` agrega exactamente 60 preguntas activas, diez por dimension (`R`, `I`, `A`, `S`, `E`, `C`), junto con `test_attempts`, `answers` y `riasec_profiles`.
+El banco tiene 60 preguntas activas, diez por cada una de las seis dimensiones: `R` (Realista), `I` (Investigador), `A` (Artistico), `S` (Social), `E` (Emprendedor) y `C` (Convencional), segun la teoria de Holland. El sistema llego a aplicar por un tiempo una version CHASIDE del test; la migracion `VuelveATestRiasec` restauro el banco RIASEC y dejo inactivas las preguntas propias de CHASIDE (areas H y D), porque hay respuestas guardadas que las referencian.
+
+Cada intento sortea 12 preguntas (2 por dimension) y las intercala para que no salgan dos seguidas de la misma dimension. El algoritmo `RIASEC-12-V2` suma cada dimension y resuelve empates con el orden fijo `R, I, A, S, E, C`; el puntaje maximo por dimension es 10 (2 preguntas x 5). Los resultados del periodo CHASIDE se conservan, pero no se interpretan ni generan recomendaciones.
 
 Todos los endpoints requieren un JWT de estudiante:
 
-- `GET /api/test/questions`
-- `POST /api/test/attempts`
+- `POST /api/test/attempts`: crea el intento y sortea sus 12 preguntas (o devuelve el intento en progreso).
 - `GET /api/test/attempts/{attemptId}`
+- `GET /api/test/attempts/{attemptId}/questions`: las preguntas sorteadas para ese intento.
 - `POST /api/test/attempts/{attemptId}/answers` con `{ "questionId": "...", "value": 1 }`
 - `POST /api/test/attempts/{attemptId}/complete`
 - `GET /api/test/attempts/{attemptId}/result`
 
-El frontend del quiz esta disponible en `/test`. Cada respuesta se guarda de inmediato y un intento en progreso se reutiliza al volver a entrar. El algoritmo `RIASEC-60-V1` suma cada dimension y resuelve empates con el orden fijo `R, I, A, S, E, C`.
+El quiz esta en `/test`. Cada respuesta se guarda de inmediato y un intento en progreso se reutiliza al volver a entrar. Responder da monedas (1 por respuesta, 50 al terminar) que se gastan en el catalogo de skins de `/skins`.
 
 Las pruebas se ejecutan con:
 
 ```powershell
 cd backend
-dotnet test OrientacionVocacional.Tests\OrientacionVocacional.Tests.csproj
+dotnet test
 ```
 
 ## Comprobaciones
@@ -91,18 +94,31 @@ dotnet test OrientacionVocacional.Tests\OrientacionVocacional.Tests.csproj
 cd frontend
 npm run build
 
-cd ..\backend
+cd ../backend
 dotnet build
+dotnet test
 ```
 
-El test RIASEC, el motor de reglas, recomendaciones e IA opcional están implementados en esta etapa. La información educativa real queda pendiente de carga administrativa.
+Cada push y cada pull request ejecutan lo mismo en GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Catálogo y recomendaciones
 
 El catálogo no contiene universidades, carreras ni datos institucionales inventados. Se añadieron las tablas `institutions`, `careers`, `career_compatibilities` y `recommendation_history`; empiezan vacías y el administrador debe cargar información verificable con fuente y fecha.
 
-El motor de reglas utiliza el perfil RIASEC guardado, compatibilidades por dimensión y filtros de institución, municipio, modalidad, nivel, área, costo máximo y duración máxima. La IA está detrás de `IAiExplanationService`; si no hay proveedor configurado, devuelve un mensaje de indisponibilidad y las recomendaciones estructuradas continúan funcionando.
+El motor de reglas utiliza el perfil vocacional guardado, compatibilidades por dimensión RIASEC y filtros de institución, municipio, modalidad, nivel, área, costo máximo y duración máxima. Los filtros de texto ignoran mayúsculas y tildes. La IA está detrás de `IAiExplanationService`; si no hay proveedor configurado, devuelve un mensaje de indisponibilidad y las recomendaciones estructuradas continúan funcionando.
 
-Rutas frontend disponibles: `/registro`, `/login`, `/perfil`, `/test`, `/recomendaciones`, `/historial` y `/admin`.
+Rutas frontend disponibles: `/registro`, `/login`, `/perfil`, `/test`, `/recomendaciones`, `/historial`, `/skins` y `/admin`.
+
+El historial guarda una entrada por test terminado (no una por búsqueda) con el perfil, los puntajes y la interpretación de esa vez.
+
+## Panel de administrador
+
+Desde `/admin`, una cuenta con rol `ADMINISTRADOR` gestiona instituciones, carreras, reglas de compatibilidad, el banco de preguntas y los estudiantes, y consulta los resultados con su interpretación, exportables a Excel (con el detalle de respuestas) y a PDF. Una pregunta no se puede desactivar si deja a su dimensión con menos de 2 activas.
+
+## Operación
+
+- `GET /health` comprueba que la API responde y alcanza la base de datos.
+- En desarrollo, la documentación interactiva de la API queda en `/swagger`.
+- Hay límites de tamaño (100 KB por petición) y de frecuencia por IP para registro, login y uso general.
 
 Las operaciones `/api/admin/*` exigen el rol `ADMINISTRADOR`; las operaciones de estudiante usan el `UserId` del JWT y no aceptan identificadores de usuario enviados por el cliente.

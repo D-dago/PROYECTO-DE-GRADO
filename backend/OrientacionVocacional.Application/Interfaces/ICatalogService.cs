@@ -5,6 +5,7 @@ namespace OrientacionVocacional.Application.Interfaces;
 public interface ICatalogService
 {
     Task<IReadOnlyList<InstitutionResponse>> GetInstitutionsAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<InstitutionResponse>> GetAllInstitutionsForAdminAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<CareerResponse>> GetCareersAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<CareerResponse>> GetAllCareersForAdminAsync(CancellationToken cancellationToken);
     Task<InstitutionResponse> CreateInstitutionAsync(InstitutionRequest request, CancellationToken cancellationToken);

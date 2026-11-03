@@ -22,7 +22,7 @@ public sealed class CatalogController(ICatalogService service) : ControllerBase
     public async Task<ActionResult<RecommendationResponse>> Recommendations(RecommendationFilterRequest request, CancellationToken cancellationToken)
     {
         var result = await service.GetRecommendationsAsync(GetUserId(), request, cancellationToken);
-        return result is null ? NotFound(new { message = "Completa el test RIASEC antes de solicitar recomendaciones." }) : Ok(result);
+        return result is null ? NotFound(new { message = "Completa el test vocacional antes de solicitar recomendaciones." }) : Ok(result);
     }
 
     [HttpGet("history")]

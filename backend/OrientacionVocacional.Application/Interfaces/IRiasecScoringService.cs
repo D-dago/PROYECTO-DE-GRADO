@@ -3,13 +3,12 @@ using OrientacionVocacional.Domain.Entities;
 namespace OrientacionVocacional.Application.Interfaces;
 
 public sealed record RiasecScoreResult(
-    int CScore,
-    int HScore,
+    int RScore,
+    int IScore,
     int AScore,
     int SScore,
-    int IScore,
-    int DScore,
     int EScore,
+    int CScore,
     string PrimaryCode,
     string SecondaryCode);
 

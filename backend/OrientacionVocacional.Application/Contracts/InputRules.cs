@@ -4,11 +4,13 @@
 public static class InputRules
 {
     // Letras (con tildes y ñ), separadas por un espacio, apostrofe o guion. Sin digitos ni simbolos.
-    public const string LettersOnly = @"^\p{L}+([ '\-]\p{L}+)*$";
+    // Se tolera un espacio sobrante al principio o al final (\s* a los costados): el teclado del
+    // celular y el autocompletado lo agregan solos y no es motivo real para rechazar el nombre.
+    public const string LettersOnly = @"^\s*\p{L}+([ '\-]\p{L}+)*\s*$";
     public const string LettersOnlyMessage = "Solo se permiten letras (sin números ni símbolos).";
 
     // Ciudad / colegio: igual que arriba pero se admite el punto (p. ej. "Sta. Cruz").
-    public const string Place = @"^\p{L}[\p{L} '\-.]*$";
+    public const string Place = @"^\s*\p{L}[\p{L} '\-.]*\s*$";
 
     public const string DigitsOnly = @"^\d{7,15}$";
     public const string DigitsOnlyMessage = "El teléfono debe tener solo dígitos (7 a 15).";

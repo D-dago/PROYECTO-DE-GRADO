@@ -18,8 +18,10 @@ export function digitsOnly(event: FormEvent<HTMLInputElement>) {
   event.currentTarget.value = event.currentTarget.value.replace(/\D/g, '')
 }
 
+// \s* a los costados: tolera un espacio sobrante al principio o al final (lo agrega solo el
+// autocompletado o el teclado del celular), igual que el mismo patron del lado del servidor.
 export const inputRules = {
-  name: { maxLength: 50, minLength: 2, pattern: "\\p{L}+([ '\\-]\\p{L}+)*", title: 'Solo letras (sin números ni símbolos).', autoComplete: 'off' },
-  place: { maxLength: 60, pattern: "\\p{L}+([ '\\-.]\\p{L}+)*\\.?", title: 'Solo letras (sin números ni símbolos).' },
+  name: { maxLength: 50, minLength: 2, pattern: "\\s*\\p{L}+([ '\\-]\\p{L}+)*\\s*", title: 'Solo letras (sin números ni símbolos).', autoComplete: 'off' },
+  place: { maxLength: 60, pattern: "\\s*\\p{L}+([ '\\-.]\\p{L}+)*\\.?\\s*", title: 'Solo letras (sin números ni símbolos).' },
   phone: { maxLength: 15, minLength: 7, pattern: '\\d{7,15}', title: 'Solo dígitos, de 7 a 15.', inputMode: 'numeric' as const },
 }

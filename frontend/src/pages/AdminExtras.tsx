@@ -2,8 +2,10 @@
 import type { FormEvent } from 'react'
 import { appApi } from '../services/appApi'
 import type { AdminQuestion, AdminResult } from '../services/appApi'
+import { InterpretationDetail } from '../components/InterpretationDetail'
+import { useFormularioDeEdicion } from '../components/useFormularioDeEdicion'
 
-const dimensionOptions = ['C', 'H', 'A', 'S', 'I', 'D', 'E']
+const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
 
 type Report = (message: string, isError?: boolean) => void
 
@@ -22,12 +24,19 @@ export function ResultsSection({ results, report }: { results: AdminResult[]; re
       </div>
       <div className="admin-list">
         {results.map((result) => (
-          <div className="admin-row" key={result.attemptId}>
-            <div className="admin-row-main">
+          <details className="admin-row admin-row-result" key={result.attemptId}>
+            <summary className="admin-row-main">
               <strong>{result.studentName} · {result.primaryCode}{result.secondaryCode}</strong>
-              <small>{result.email} · {new Date(result.completedAtUtc).toLocaleString()} · C{result.c} H{result.h} A{result.a} S{result.s} I{result.i} D{result.d} E{result.e}</small>
+              <small>{result.email} · {new Date(result.completedAtUtc).toLocaleString()} · R{result.r} I{result.i} A{result.a} S{result.s} E{result.e} C{result.c}</small>
+            </summary>
+            <div className="admin-result-detail">
+              <h3>¿Qué significa este perfil?</h3>
+              <InterpretationDetail
+                interpretation={result.interpretation}
+                scores={[['R', result.r], ['I', result.i], ['A', result.a], ['S', result.s], ['E', result.e], ['C', result.c]]}
+              />
             </div>
-          </div>
+          </details>
         ))}
         {results.length === 0 && <p className="empty-state">Todavía ningún estudiante terminó el test.</p>}
       </div>
@@ -37,6 +46,7 @@ export function ResultsSection({ results, report }: { results: AdminResult[]; re
 
 export function QuestionsSection({ questions, onChanged, report }: { questions: AdminQuestion[]; onChanged: () => void; report: Report }) {
   const [editing, setEditing] = useState<AdminQuestion | null>(null)
+  const formulario = useFormularioDeEdicion(editing)
   const [filter, setFilter] = useState('')
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -64,8 +74,8 @@ export function QuestionsSection({ questions, onChanged, report }: { questions: 
   return (
     <section className="admin-section" id="preguntas">
       <h2>Preguntas del test</h2>
-      <p className="empty-state">Cada intento sortea 2 preguntas activas por área. Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
-      <label>Filtrar por área
+      <p className="empty-state">Cada intento sortea 2 preguntas activas por dimensión. Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
+      <label>Filtrar por dimensión
         <select value={filter} onChange={(event) => setFilter(event.target.value)}>
           <option value="">Todas ({questions.length})</option>
           {dimensionOptions.map((dimension) => <option key={dimension} value={dimension}>{dimension}</option>)}
@@ -76,7 +86,7 @@ export function QuestionsSection({ questions, onChanged, report }: { questions: 
           <div className="admin-row" key={question.id}>
             <div className="admin-row-main">
               <strong>{question.text}</strong>
-              <small>{question.code} · área {question.dimension}</small>
+              <small>{question.code} · dimensión {question.dimension}</small>
             </div>
             <div className="admin-row-actions">
               <span className={`badge ${question.isActive ? 'badge-active' : 'badge-inactive'}`}>{question.isActive ? 'Activa' : 'Inactiva'}</span>
@@ -86,10 +96,10 @@ export function QuestionsSection({ questions, onChanged, report }: { questions: 
           </div>
         ))}
       </div>
-      <form className="simple-form" onSubmit={submit} key={editing?.id ?? 'new-question'}>
+      <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-question'}>
         <h3>{editing ? `Editar ${editing.code}` : 'Nueva pregunta'}</h3>
         <input name="text" placeholder="Texto de la pregunta" defaultValue={editing?.text} required minLength={5} maxLength={300} />
-        <label>Área
+        <label>Dimensión
           <select name="dimension" defaultValue={editing?.dimension ?? 'C'} required>
             {dimensionOptions.map((dimension) => <option key={dimension} value={dimension}>{dimension}</option>)}
           </select>

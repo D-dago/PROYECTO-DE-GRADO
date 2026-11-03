@@ -9,11 +9,16 @@ export type StudentProfile = { userId: string; email: string; firstName: string;
 export type Skin = { id: string; name: string; description: string; price: number; owned: boolean; equipped: boolean }
 export type SkinShop = { coins: number; equippedSkin: string; skins: Skin[] }
 export type Compatibility = { id: string; careerId: string; careerName: string; dimension: string; compatibilityLevel: number; rule: string }
-export type Student = { id: string; email: string; firstName: string; lastName: string; isActive: boolean; createdAtUtc: string }
+export type HistoryEntry = {
+  id: string; testAttemptId: string; createdAtUtc: string; filterSummary?: string
+  primaryCode?: string; secondaryCode?: string
+  rScore?: number; iScore?: number; aScore?: number; sScore?: number; eScore?: number; cScore?: number
+  interpretation?: ProfileInterpretation
+}
 
 export type AdminQuestion = { id: string; code: string; text: string; dimension: string; isActive: boolean; order: number }
 export type AdminUser = { id: string; email: string; fullName: string; role: string; isActive: boolean; createdAtUtc: string; coins: number; completedTests: number }
-export type AdminResult = { attemptId: string; studentName: string; email: string; completedAtUtc: string; primaryCode: string; secondaryCode: string; c: number; h: number; a: number; s: number; i: number; d: number; e: number }
+export type AdminResult = { attemptId: string; studentName: string; email: string; completedAtUtc: string; primaryCode: string; secondaryCode: string; r: number; i: number; a: number; s: number; e: number; c: number; interpretation: ProfileInterpretation }
 
 export const appApi = {
   adminQuestions: () => request<AdminQuestion[]>('/admin/questions'),
@@ -34,10 +39,13 @@ export const appApi = {
   institutions: () => request<Institution[]>('/catalog/institutions'),
   careers: () => request<Career[]>('/catalog/careers'),
   recommendations: (body: unknown) => request<Recommendation>('/catalog/recommendations', { method: 'POST', body: JSON.stringify(body) }),
-  history: () => request<{ id: string; testAttemptId: string; createdAtUtc: string; filterSummary?: string }[]>('/catalog/history'),
+  history: () => request<HistoryEntry[]>('/catalog/history'),
 
   dashboard: () => request<{ students: number; institutions: number; careers: number; compatibilityRules: number }>('/admin/catalog/dashboard'),
 
+  // El listado publico solo trae las instituciones activas; el administrador necesita ver tambien
+  // las inactivas, que son justamente las que puede volver a activar.
+  adminInstitutions: () => request<Institution[]>('/admin/catalog/institutions'),
   createInstitution: (body: unknown) => request<Institution>('/admin/catalog/institutions', { method: 'POST', body: JSON.stringify(body) }),
   updateInstitution: (id: string, body: unknown) => request<Institution>(`/admin/catalog/institutions/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   setInstitutionActive: (id: string, active: boolean) => request<void>(`/admin/catalog/institutions/${id}/active?active=${active}`, { method: 'PATCH' }),
@@ -52,6 +60,5 @@ export const appApi = {
   updateCompatibility: (id: string, body: unknown) => request<void>(`/admin/catalog/compatibilities/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteCompatibility: (id: string) => request<void>(`/admin/catalog/compatibilities/${id}`, { method: 'DELETE' }),
 
-  students: () => request<Student[]>('/admin/catalog/students'),
   setStudentActive: (id: string, active: boolean) => request<void>(`/admin/catalog/students/${id}/active?active=${active}`, { method: 'PATCH' }),
 }

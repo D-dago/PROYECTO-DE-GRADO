@@ -52,21 +52,25 @@ Abre `http://localhost:5173`.
 
 Entra a `/registro`, escribe nombre, apellido, correo y contraseña. Luego entra a `/login`. Después abre `/perfil` para revisar y guardar teléfono, ciudad, colegio y año de graduación.
 
-## 8. REALIZAR EL TEST RIASEC
+## 8. REALIZAR EL TEST VOCACIONAL (RIASEC)
 
-Abre `/test`, responde las 60 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
+Abre `/test` y responde las 12 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada intento sortea 2 preguntas por cada una de las 6 dimensiones desde un banco de 60, así que dos intentos no traen las mismas preguntas. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
+
+Cada respuesta da 1 moneda y terminar el test da 50; las monedas se gastan en `/skins`.
 
 ## 9. INTERPRETAR EL RESULTADO
 
-R es Realista, I Investigador, A Artístico, S Social, E Emprendedor y C Convencional. El código principal usa las dos dimensiones con mayor puntuación y el secundario la tercera. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.
+Las seis dimensiones RIASEC (teoría de Holland) son: `R` Realista, `I` Investigador, `A` Artístico, `S` Social, `E` Emprendedor y `C` Convencional. El código principal usa las dos dimensiones con mayor puntuación y el secundario la tercera; los empates se resuelven en el orden fijo `R, I, A, S, E, C`. El puntaje máximo por dimensión es 10.
+
+La pantalla de resultado explica qué significa cada letra del perfil, muestra los puntajes, las áreas profesionales afines y las carreras del catálogo ordenadas por compatibilidad. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.
 
 ## 10. OBTENER RECOMENDACIONES
 
-El flujo es: resultado RIASEC, reglas deterministas, compatibilidad, filtros y recomendaciones. Abre `/recomendaciones` después de completar el test.
+El flujo es: resultado del test, reglas deterministas, compatibilidad, filtros y recomendaciones. Abre `/recomendaciones` después de completar el test.
 
 ## 11. USAR LOS FILTROS
 
-Puedes filtrar por institución, municipio, área, modalidad y costo máximo. También existe soporte backend para nivel y duración máxima. Solo se muestran registros activos y almacenados.
+Puedes filtrar por institución, municipio, área o carrera, modalidad y costo máximo. También existe soporte backend para nivel y duración máxima. Los filtros de texto ignoran mayúsculas y tildes, así que "sacaba" encuentra "Sacaba". Solo se muestran registros activos y almacenados.
 
 ## 12. COMPARAR CARRERAS
 
@@ -74,15 +78,23 @@ Selecciona `Comparar` en dos o más alternativas. La vista compara compatibilida
 
 ## 13. USAR LA IA
 
-La IA recibirá únicamente el perfil RIASEC y alternativas estructuradas producidas por reglas. No calcula puntuaciones, no modifica reglas y no inventa carreras o instituciones. Si no existe configuración de proveedor, se muestra: `Explicación con IA no disponible actualmente. Las recomendaciones estructuradas continúan disponibles.`
+La IA recibirá únicamente el perfil vocacional y alternativas estructuradas producidas por reglas. No calcula puntuaciones, no modifica reglas y no inventa carreras o instituciones. Si no existe configuración de proveedor, se muestra: `Explicación con IA no disponible actualmente. Las recomendaciones estructuradas continúan disponibles.`
 
 ## 14. HISTORIAL
 
-Abre `/historial` para consultar las solicitudes de recomendaciones propias. El backend filtra siempre por el usuario incluido en el JWT.
+Abre `/historial` para consultar tus resultados. Hay una entrada por test terminado —no una por búsqueda— y cada una se despliega con el perfil, los puntajes y la interpretación completa de esa vez, aunque más tarde repitas el test y te salga un perfil distinto. El backend filtra siempre por el usuario incluido en el JWT.
 
 ## 15. ADMINISTRADOR
 
-El administrador debe iniciar sesión con una cuenta que tenga el rol `ADMINISTRADOR`. La ruta `/admin` permite cargar instituciones y carreras con fuente y estado. El backend protege las operaciones con autorización por rol. Las reglas de compatibilidad se cargan mediante `POST /api/admin/catalog/compatibilities`. No se crean datos institucionales ficticios.
+El administrador debe iniciar sesión con una cuenta que tenga el rol `ADMINISTRADOR`. La ruta `/admin` permite:
+
+- Cargar y editar instituciones y carreras con fuente y estado, y activarlas o desactivarlas.
+- Crear, editar y eliminar reglas de compatibilidad por dimensión RIASEC.
+- Ver los resultados de cada estudiante con su interpretación, y descargarlos en Excel (incluye el detalle de respuestas) o PDF.
+- Editar el banco de preguntas. No se puede dejar una dimensión con menos de 2 preguntas activas, porque el test no se podría armar.
+- Ver los estudiantes registrados con sus monedas y tests terminados, y activarlos o desactivarlos.
+
+El backend protege todas estas operaciones con autorización por rol. No se crean datos institucionales ficticios.
 
 ## 16. INSTALACION
 
@@ -106,7 +118,7 @@ Inicia el backend con `dotnet run --project OrientacionVocacional.API` y el fron
 
 ## 21. RESULTADOS Y RECOMENDACIONES
 
-El resultado RIASEC conserva las seis puntuaciones, código principal, secundario y versión del algoritmo. Las recomendaciones solo aparecen cuando existen carreras y reglas cargadas.
+El resultado conserva las seis puntuaciones, código principal, secundario y versión del algoritmo (`RIASEC-12-V2`). Un resultado de otra versión del test (por ejemplo, del período en que se aplicó CHASIDE) se conserva pero ya no se interpreta ni genera recomendaciones: sus letras significan otra cosa y habría que repetir el test. Las recomendaciones solo aparecen cuando existen carreras y reglas cargadas.
 
 ## 22. FUENTES Y FECHAS
 
@@ -118,9 +130,11 @@ Las operaciones administrativas requieren `ADMINISTRADOR`. Los endpoints de estu
 
 ## 24. PRUEBAS
 
-Ejecuta `dotnet build`, `dotnet test` y `npm run build`. Las pruebas cubren el banco RIASEC, escala, duplicados, finalización, determinismo e aislamiento.
+Ejecuta `dotnet build`, `dotnet test` y `npm run build`. Las pruebas cubren el banco de preguntas, la escala, los duplicados, la finalización, el determinismo del algoritmo, el aislamiento entre estudiantes, el panel de administrador y las exportaciones. Además, cada push ejecuta el flujo de CI en `.github/workflows/ci.yml`.
 
 ## 25. SOLUCION DE PROBLEMAS
+
+Para comprobar de un vistazo que la API responde y alcanza la base de datos, abre `GET /health`: debe decir `Healthy`. En desarrollo también está Swagger en `/swagger`.
 
 Si aparece un error de contraseña, configura la contraseña real de PostgreSQL. Si la IA no está configurada, el mensaje de indisponibilidad es esperado y las recomendaciones estructuradas continúan funcionando. Si el catálogo está vacío, carga datos verificables desde el panel administrativo.
 

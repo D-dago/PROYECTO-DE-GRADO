@@ -9,7 +9,7 @@ public sealed class AdminQuestionRequest
     [Required, MinLength(5), MaxLength(300)]
     public required string Text { get; init; }
 
-    [Required, RegularExpression("^[CHASIDE]$", ErrorMessage = "La dimensión debe ser C, H, A, S, I, D o E.")]
+    [Required, RegularExpression("^[RIASEC]$", ErrorMessage = "La dimensión debe ser R, I, A, S, E o C.")]
     public required string Dimension { get; init; }
 
     public bool IsActive { get; init; } = true;
@@ -18,7 +18,8 @@ public sealed class AdminQuestionRequest
 public sealed record AdminResultRow(
     Guid AttemptId, string StudentName, string Email, DateTime CompletedAtUtc,
     string PrimaryCode, string SecondaryCode,
-    int C, int H, int A, int S, int I, int D, int E);
+    int R, int I, int A, int S, int E, int C,
+    ProfileInterpretationResponse Interpretation);
 
 public sealed record AdminAnswerRow(Guid AttemptId, string StudentName, string Email, string QuestionCode, string Dimension, string QuestionText, int Value);
 

@@ -30,8 +30,15 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
             return Unauthorized(new { message = "No se pudo validar tu cuenta de Google." });
         }
 
-        var response = await authService.LoginExternalAsync(identity.Email, identity.FirstName, identity.LastName, cancellationToken);
-        return response is null ? Unauthorized(new { message = "Tu cuenta está desactivada." }) : Ok(response);
+        try
+        {
+            var response = await authService.LoginExternalAsync(identity.Email, identity.FirstName, identity.LastName, cancellationToken);
+            return response is null ? Unauthorized(new { message = "Tu cuenta está desactivada." }) : Ok(response);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return StatusCode(503, new { message = exception.Message });
+        }
     }
 
     [HttpPost("register")]

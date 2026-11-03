@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using OrientacionVocacional.Application.Contracts;
 using OrientacionVocacional.Application.Interfaces;
@@ -14,7 +14,7 @@ namespace OrientacionVocacional.Infrastructure.Services;
 
 public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminService
 {
-    // Las preguntas del test RIASEC anterior (Order >= 1000) se conservan inactivas y no se muestran.
+    // Las preguntas de versiones anteriores del test (Order >= 1000) se conservan inactivas y no se muestran.
     private const int LegacyOrderStart = 1000;
 
     public async Task<IReadOnlyList<AdminQuestionResponse>> GetQuestionsAsync(CancellationToken cancellationToken) =>
@@ -74,11 +74,12 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
             {
                 profile.TestAttemptId, profile.TestAttempt.User.FirstName, profile.TestAttempt.User.LastName, profile.TestAttempt.User.Email,
                 profile.CreatedAtUtc, profile.PrimaryCode, profile.SecondaryCode,
-                profile.CScore, profile.HScore, profile.AScore, profile.SScore, profile.IScore, profile.DScore, profile.EScore
+                profile.RScore, profile.IScore, profile.AScore, profile.SScore, profile.EScore, profile.CScore
             })
             .ToListAsync(cancellationToken);
         return rows.Select(row => new AdminResultRow(row.TestAttemptId, $"{row.FirstName} {row.LastName}", row.Email, row.CreatedAtUtc, row.PrimaryCode, row.SecondaryCode,
-            row.CScore, row.HScore, row.AScore, row.SScore, row.IScore, row.DScore, row.EScore)).ToList();
+            row.RScore, row.IScore, row.AScore, row.SScore, row.EScore, row.CScore,
+            RiasecInterpretationBuilder.Build(row.PrimaryCode, row.SecondaryCode))).ToList();
     }
 
     public async Task<IReadOnlyList<AdminAnswerRow>> GetAnswersAsync(CancellationToken cancellationToken)
@@ -99,12 +100,12 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
     {
         using var workbook = new XLWorkbook();
         var sheet = workbook.Worksheets.Add("Resultados");
-        string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "C", "H", "A", "S", "I", "D", "E"];
+        string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "R", "I", "A", "S", "E", "C"];
         for (var column = 0; column < header.Length; column++) sheet.Cell(1, column + 1).Value = header[column];
         for (var index = 0; index < results.Count; index++)
         {
             var row = results[index];
-            object[] values = [row.StudentName, row.Email, row.CompletedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"), row.PrimaryCode + row.SecondaryCode, row.C, row.H, row.A, row.S, row.I, row.D, row.E];
+            object[] values = [row.StudentName, row.Email, row.CompletedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"), row.PrimaryCode + row.SecondaryCode, row.R, row.I, row.A, row.S, row.E, row.C];
             for (var column = 0; column < values.Length; column++) sheet.Cell(index + 2, column + 1).Value = XLCellValue.FromObject(values[column]);
         }
         sheet.Row(1).Style.Font.Bold = true;
@@ -137,7 +138,7 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
             page.DefaultTextStyle(style => style.FontSize(9));
             page.Header().Column(column =>
             {
-                column.Item().Text("Resultados del test vocacional CHASIDE").FontSize(16).Bold();
+                column.Item().Text("Resultados del test vocacional RIASEC").FontSize(16).Bold();
                 column.Item().Text($"Generado el {DateTime.Now:dd/MM/yyyy HH:mm} · {results.Count} resultado(s)").FontColor(Colors.Grey.Darken1);
             });
             page.Content().PaddingTop(10).Table(table =>
@@ -145,14 +146,14 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
                 table.ColumnsDefinition(columns =>
                 {
                     columns.RelativeColumn(3); columns.RelativeColumn(4); columns.RelativeColumn(2.2f); columns.RelativeColumn(1.5f);
-                    for (var index = 0; index < 7; index++) columns.RelativeColumn(0.8f);
+                    for (var index = 0; index < 6; index++) columns.RelativeColumn(0.8f);
                 });
-                string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "C", "H", "A", "S", "I", "D", "E"];
+                string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "R", "I", "A", "S", "E", "C"];
                 table.Header(row => { foreach (var title in header) row.Cell().Background(Colors.Grey.Lighten2).Padding(4).Text(title).Bold(); });
                 foreach (var item in results)
                 {
                     string[] cells = [item.StudentName, item.Email, item.CompletedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm"), item.PrimaryCode + item.SecondaryCode,
-                        item.C.ToString(), item.H.ToString(), item.A.ToString(), item.S.ToString(), item.I.ToString(), item.D.ToString(), item.E.ToString()];
+                        item.R.ToString(), item.I.ToString(), item.A.ToString(), item.S.ToString(), item.E.ToString(), item.C.ToString()];
                     foreach (var cell in cells) table.Cell().BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Padding(4).Text(cell);
                 }
             });

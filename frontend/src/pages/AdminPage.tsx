@@ -1,11 +1,12 @@
 ﻿import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { appApi } from '../services/appApi'
-import type { AdminQuestion, AdminResult, Career, Compatibility, Institution, Student } from '../services/appApi'
+import type { AdminQuestion, AdminResult, AdminUser, Career, Compatibility, Institution } from '../services/appApi'
 import { QuestionsSection, ResultsSection } from './AdminExtras'
+import { useFormularioDeEdicion } from '../components/useFormularioDeEdicion'
 
 const dashboardLabels: [keyof NonNullable<DashboardData>, string][] = [['students', 'Estudiantes registrados'], ['institutions', 'Instituciones'], ['careers', 'Carreras'], ['compatibilityRules', 'Reglas de compatibilidad']]
-const dimensionOptions = ['C', 'H', 'A', 'S', 'I', 'D', 'E']
+const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
 
 type DashboardData = { students: number; institutions: number; careers: number; compatibilityRules: number } | null
 
@@ -16,7 +17,7 @@ export function AdminPage() {
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [careers, setCareers] = useState<Career[]>([])
   const [compatibilities, setCompatibilities] = useState<Compatibility[]>([])
-  const [students, setStudents] = useState<Student[]>([])
+  const [students, setStudents] = useState<AdminUser[]>([])
   const [questions, setQuestions] = useState<AdminQuestion[]>([])
   const [results, setResults] = useState<AdminResult[]>([])
 
@@ -26,8 +27,8 @@ export function AdminPage() {
 
   async function loadAll() {
     try {
-      const [dashboardData, institutionsData, careersData, compatibilitiesData, studentsData, questionsData, resultsData] = await Promise.all([
-        appApi.dashboard(), appApi.institutions(), appApi.adminCareers(), appApi.compatibilities(), appApi.students(), appApi.adminQuestions(), appApi.adminResults(),
+      const [dashboardData, institutionsData, careersData, compatibilitiesData, usersData, questionsData, resultsData] = await Promise.all([
+        appApi.dashboard(), appApi.adminInstitutions(), appApi.adminCareers(), appApi.compatibilities(), appApi.adminUsers(), appApi.adminQuestions(), appApi.adminResults(),
       ])
       setQuestions(questionsData)
       setResults(resultsData)
@@ -35,7 +36,7 @@ export function AdminPage() {
       setInstitutions(institutionsData)
       setCareers(careersData)
       setCompatibilities(compatibilitiesData)
-      setStudents(studentsData)
+      setStudents(usersData.filter((user) => user.role === 'ESTUDIANTE'))
     } catch (loadError) {
       report(loadError instanceof Error ? loadError.message : 'Se requiere una sesión de administrador.', true)
     }
@@ -64,6 +65,7 @@ export function AdminPage() {
 
 function InstitutionsSection({ institutions, onChanged, report }: { institutions: Institution[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Institution | null>(null)
+  const formulario = useFormularioDeEdicion(editing)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -103,7 +105,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
         ))}
         {institutions.length === 0 && <p className="empty-state">Todavía no hay instituciones cargadas.</p>}
       </div>
-      <form className="simple-form" onSubmit={submit} key={editing?.id ?? 'new-institution'}>
+      <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-institution'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva institución'}</h3>
         <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
         <input name="type" placeholder="Tipo" defaultValue={editing?.type} required />
@@ -122,6 +124,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
 
 function CareersSection({ careers, institutions, onChanged, report }: { careers: Career[]; institutions: Institution[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Career | null>(null)
+  const formulario = useFormularioDeEdicion(editing)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -162,7 +165,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
         ))}
         {careers.length === 0 && <p className="empty-state">Todavía no hay carreras cargadas.</p>}
       </div>
-      <form className="simple-form" onSubmit={submit} key={editing?.id ?? 'new-career'}>
+      <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-career'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva carrera'}</h3>
         <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
         <label>Institución
@@ -189,6 +192,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
 
 function CompatibilitiesSection({ compatibilities, careers, onChanged, report }: { compatibilities: Compatibility[]; careers: Career[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Compatibility | null>(null)
+  const formulario = useFormularioDeEdicion(editing)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -212,7 +216,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
 
   return (
     <section className="admin-section">
-      <h2>Compatibilidades por área (CHASIDE)</h2>
+      <h2>Compatibilidades por dimensión (RIASEC)</h2>
       <div className="admin-list">
         {compatibilities.map((compatibility) => (
           <div className="admin-row" key={compatibility.id}>
@@ -228,7 +232,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
         ))}
         {compatibilities.length === 0 && <p className="empty-state">Todavía no hay reglas de compatibilidad.</p>}
       </div>
-      <form className="simple-form" onSubmit={submit} key={editing?.id ?? 'new-compatibility'}>
+      <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-compatibility'}>
         <h3>{editing ? 'Editar regla' : 'Nueva regla'}</h3>
         <label>Carrera
           <select name="careerId" defaultValue={editing?.careerId ?? ''} required disabled={Boolean(editing)}>
@@ -253,8 +257,8 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
   )
 }
 
-function StudentsSection({ students, onChanged, report }: { students: Student[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
-  async function toggleActive(student: Student) {
+function StudentsSection({ students, onChanged, report }: { students: AdminUser[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
+  async function toggleActive(student: AdminUser) {
     try { await appApi.setStudentActive(student.id, !student.isActive); onChanged() }
     catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
   }
@@ -266,8 +270,8 @@ function StudentsSection({ students, onChanged, report }: { students: Student[];
         {students.map((student) => (
           <div className="admin-row" key={student.id}>
             <div className="admin-row-main">
-              <strong>{student.firstName} {student.lastName}</strong>
-              <small>{student.email} · registrado el {new Date(student.createdAtUtc).toLocaleDateString()}</small>
+              <strong>{student.fullName}</strong>
+              <small>{student.email} · registrado el {new Date(student.createdAtUtc).toLocaleDateString()} · {student.completedTests} test(s) terminado(s) · 🪙 {student.coins}</small>
             </div>
             <div className="admin-row-actions">
               <span className={`badge ${student.isActive ? 'badge-active' : 'badge-inactive'}`}>{student.isActive ? 'Activo' : 'Inactivo'}</span>
