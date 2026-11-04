@@ -55,9 +55,9 @@ Este script no se sube a git porque contiene la contraseña local de la base de 
 
 ## 2026-11-03: Solo universidades de Cochabamba
 
-**Decisión:** a pedido del usuario, el estudiante solo ve UMSS, Univalle, UPB y USIP.
+**Decisión:** a pedido del usuario, el estudiante solo ve opciones de Cochabamba: UMSS, Univalle, UPB, USIP y TECBA. TECBA se ocultó primero por ser instituto y se reactivó el 2026-11-04 porque el usuario indicó, y su sitio confirma, que tiene sede en Cochabamba. Sus 2 carreras quedan en `CONFIRMAR SEDE` porque también tiene sede en Sucre.
 
-UPEA e ITPM están en El Alto. TECBA, INCOS y Álvarez Plata son institutos, no universidades. Los cinco quedan inactivos, no borrados: el administrador puede reactivarlos en Instituciones. Es un cambio de datos, por lo que no hay código que excluya a nadie.
+UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial confirmado. Los cuatro quedan inactivos, no borrados: el administrador puede reactivarlos en Instituciones. Es un cambio de datos, por lo que no hay código que excluya a nadie.
 
 ## 2026-11-03: Enlaces oficiales en lugar de municipio, costo y lugar
 

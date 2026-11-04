@@ -20,14 +20,14 @@ export function RecommendationsPage() {
   return (
     <main className="content-shell">
       <span className="eyebrow">Según tu último test</span>
-      <h1>Universidades de Cochabamba</h1>
+      <h1>Dónde estudiar en Cochabamba</h1>
       {error && (
         <>
           <p className="empty-state">{error}</p>
           <a className="start-link" href="/test">Ir al test vocacional</a>
         </>
       )}
-      {!error && !recommendation && <p className="status-message">Buscando universidades compatibles...</p>}
+      {!error && !recommendation && <p className="status-message">Buscando opciones compatibles...</p>}
       {recommendation && <UniversityLinks careers={recommendation.items} />}
     </main>
   )
