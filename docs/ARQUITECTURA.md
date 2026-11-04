@@ -43,6 +43,8 @@ Instituciones y carreras se almacenan con estado, fuente y fecha de actualizaci�
 
 ## Filtros y recomendaciones
 
+La interfaz del estudiante ya no usa estos filtros: muestra las instituciones compatibles con su enlace oficial (ver `docs/decisiones.md`). El backend los conserva porque están probados y no estorban.
+
 El backend aplica primero los filtros traducibles a SQL (institución, costo y duración máximos) y luego los de texto libre (municipio, modalidad, nivel y área) en memoria, ignorando mayúsculas y tildes: así "sacaba" encuentra "Sacaba" e "informatico" encuentra "Informático". El filtro de área busca además en el nombre de la carrera.
 
 Cada consulta se registra en `recommendation_history`. El historial que ve el estudiante muestra **una entrada por test terminado** —no una por búsqueda—, con su perfil, puntajes, interpretación y los filtros de la última búsqueda hecha con ese resultado.

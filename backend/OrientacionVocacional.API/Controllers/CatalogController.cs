@@ -9,10 +9,16 @@ namespace OrientacionVocacional.API.Controllers;
 
 [ApiController]
 [Route("api/catalog")]
-public sealed class CatalogController(ICatalogService service) : ControllerBase
+public sealed class CatalogController(ICatalogService service, ISiteFramingService siteFraming) : ControllerBase
 {
     [HttpGet("institutions")]
     public async Task<ActionResult<IReadOnlyList<InstitutionResponse>>> Institutions(CancellationToken cancellationToken) => Ok(await service.GetInstitutionsAsync(cancellationToken));
+
+    // Indica si la pagina oficial se puede mostrar dentro de una ventana interna o hay que abrirla aparte.
+    [HttpGet("institutions/{id:guid}/site-check")]
+    [Authorize]
+    public async Task<ActionResult<SiteCheckResponse>> SiteCheck(Guid id, CancellationToken cancellationToken) =>
+        await siteFraming.CheckInstitutionAsync(id, cancellationToken) is { } result ? Ok(result) : NotFound(new { message = "Esta institución no tiene una página oficial registrada." });
 
     [HttpGet("careers")]
     public async Task<ActionResult<IReadOnlyList<CareerResponse>>> Careers(CancellationToken cancellationToken) => Ok(await service.GetCareersAsync(cancellationToken));

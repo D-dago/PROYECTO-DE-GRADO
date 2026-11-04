@@ -154,6 +154,7 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
             entity.Property(item => item.Municipality).HasMaxLength(100);
             entity.Property(item => item.Status).HasMaxLength(40).IsRequired();
             entity.Property(item => item.Source).HasMaxLength(500);
+            entity.Property(item => item.Website).HasMaxLength(300);
         });
 
         modelBuilder.Entity<Career>(entity =>

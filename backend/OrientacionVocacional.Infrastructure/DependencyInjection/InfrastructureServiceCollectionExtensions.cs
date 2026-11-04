@@ -30,6 +30,9 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.SectionName));
         services.AddHttpClient("ai");
         services.AddHttpClient("google");
+        services.AddHttpClient(SiteFramingService.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(6));
+        services.AddMemoryCache();
+        services.AddScoped<ISiteFramingService, SiteFramingService>();
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();

@@ -13,11 +13,11 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
     // Listado publico: solo activas. Una institucion desactivada no aporta ninguna carrera a las
     // recomendaciones, asi que ofrecerla en el filtro del estudiante solo da "sin resultados".
     public async Task<IReadOnlyList<InstitutionResponse>> GetInstitutionsAsync(CancellationToken cancellationToken) =>
-        await db.Institutions.AsNoTracking().Where(item => item.IsActive).OrderBy(item => item.Name).Select(item => new InstitutionResponse(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive)).ToListAsync(cancellationToken);
+        await db.Institutions.AsNoTracking().Where(item => item.IsActive).OrderBy(item => item.Name).Select(item => new InstitutionResponse(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.Website)).ToListAsync(cancellationToken);
 
     // El administrador si necesita ver las inactivas: son las que puede volver a activar.
     public async Task<IReadOnlyList<InstitutionResponse>> GetAllInstitutionsForAdminAsync(CancellationToken cancellationToken) =>
-        await db.Institutions.AsNoTracking().OrderBy(item => item.Name).Select(item => new InstitutionResponse(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive)).ToListAsync(cancellationToken);
+        await db.Institutions.AsNoTracking().OrderBy(item => item.Name).Select(item => new InstitutionResponse(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.Website)).ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<CareerResponse>> GetCareersAsync(CancellationToken cancellationToken)
     {
@@ -34,7 +34,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
 
     public async Task<InstitutionResponse> CreateInstitutionAsync(InstitutionRequest request, CancellationToken cancellationToken)
     {
-        var item = new Institution { Id = Guid.NewGuid(), Name = request.Name.Trim(), Type = request.Type.Trim(), Location = request.Location?.Trim(), Municipality = request.Municipality?.Trim(), Status = request.Status.Trim(), Source = request.Source?.Trim(), IsActive = request.IsActive, LastUpdatedUtc = DateTime.UtcNow };
+        var item = new Institution { Id = Guid.NewGuid(), Name = request.Name.Trim(), Type = request.Type.Trim(), Location = request.Location?.Trim(), Municipality = request.Municipality?.Trim(), Status = request.Status.Trim(), Source = request.Source?.Trim(), Website = LimpiarWeb(request.Website), IsActive = request.IsActive, LastUpdatedUtc = DateTime.UtcNow };
         db.Institutions.Add(item);
         await db.SaveChangesAsync(cancellationToken);
         return ToInstitution(item);
@@ -149,7 +149,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
     {
         var item = await db.Institutions.FindAsync([id], cancellationToken);
         if (item is null) return null;
-        item.Name = request.Name.Trim(); item.Type = request.Type.Trim(); item.Location = request.Location?.Trim(); item.Municipality = request.Municipality?.Trim(); item.Status = request.Status.Trim(); item.Source = request.Source?.Trim(); item.IsActive = request.IsActive; item.LastUpdatedUtc = DateTime.UtcNow;
+        item.Name = request.Name.Trim(); item.Type = request.Type.Trim(); item.Location = request.Location?.Trim(); item.Municipality = request.Municipality?.Trim(); item.Status = request.Status.Trim(); item.Source = request.Source?.Trim(); item.Website = LimpiarWeb(request.Website); item.IsActive = request.IsActive; item.LastUpdatedUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken); return ToInstitution(item);
     }
 
@@ -180,8 +180,10 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         return true;
     }
 
-    private static InstitutionResponse ToInstitution(Institution item) => new(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive);
-    private static CareerResponse ToCareer(Career item, int compatibility, string reason) => new(item.Id, item.Name, item.Area, item.Level, item.Modality, item.DurationMonths, item.Cost, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.InstitutionId, item.Institution?.Name ?? "Información pendiente de actualización", compatibility, reason);
+    private static InstitutionResponse ToInstitution(Institution item) => new(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.Website);
+    private static CareerResponse ToCareer(Career item, int compatibility, string reason) => new(item.Id, item.Name, item.Area, item.Level, item.Modality, item.DurationMonths, item.Cost, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.InstitutionId, item.Institution?.Name ?? "Información pendiente de actualización", compatibility, reason, item.Institution?.Website);
+
+    private static string? LimpiarWeb(string? web) => string.IsNullOrWhiteSpace(web) ? null : web.Trim();
 
     // Coincidencia de texto libre "de verdad": ignora mayusculas/minusculas y tildes (muy comun
     // escribir "informatico" sin la tilde de "informático"), y es un "contiene", no exacta.

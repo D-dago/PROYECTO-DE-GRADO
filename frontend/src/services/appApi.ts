@@ -1,7 +1,7 @@
-﻿import { downloadFile, request } from './api'
+import { downloadFile, request } from './api'
 
-export type Institution = { id: string; name: string; type: string; location?: string; municipality?: string; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean }
-export type Career = { id: string; name: string; area?: string; level?: string; modality?: string; durationMonths?: number; cost?: number; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; institutionId: string; institutionName: string; compatibility: number; compatibilityReason: string }
+export type Institution = { id: string; name: string; type: string; location?: string; municipality?: string; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; website?: string | null }
+export type Career = { id: string; name: string; area?: string; level?: string; modality?: string; durationMonths?: number; cost?: number; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; institutionId: string; institutionName: string; compatibility: number; compatibilityReason: string; institutionWebsite?: string | null }
 export type DimensionInfo = { code: string; name: string; description: string; careerAreas: string[] }
 export type ProfileInterpretation = { code: string; dimensions: DimensionInfo[]; summary: string; suggestedAreas: string[] }
 export type Recommendation = { items: Career[]; historyId: string; aiMessage?: string; interpretation: ProfileInterpretation; aiGenerated: boolean }
@@ -36,8 +36,7 @@ export const appApi = {
   googleLogin: (idToken: string) => request<{ accessToken: string; role: string }>('/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
   getProfile: () => request<StudentProfile>('/student/profile'),
   updateProfile: (body: unknown) => request<StudentProfile>('/student/profile', { method: 'PUT', body: JSON.stringify(body) }),
-  institutions: () => request<Institution[]>('/catalog/institutions'),
-  careers: () => request<Career[]>('/catalog/careers'),
+  siteCheck: (institutionId: string) => request<{ embeddable: boolean }>(`/catalog/institutions/${institutionId}/site-check`),
   recommendations: (body: unknown) => request<Recommendation>('/catalog/recommendations', { method: 'POST', body: JSON.stringify(body) }),
   history: () => request<HistoryEntry[]>('/catalog/history'),
 

@@ -66,11 +66,11 @@ La pantalla de resultado explica qué significa cada letra del perfil, muestra l
 
 ## 10. OBTENER RECOMENDACIONES
 
-El flujo es: resultado del test, reglas deterministas, compatibilidad, filtros y recomendaciones. Abre `/recomendaciones` después de completar el test.
+El flujo es: resultado del test, reglas deterministas, compatibilidad y universidades recomendadas. Aparecen al terminar el test y también en `/recomendaciones`.
 
 ## 11. USAR LOS FILTROS
 
-Puedes filtrar por institución, municipio, área o carrera, modalidad y costo máximo. También existe soporte backend para nivel y duración máxima. Los filtros de texto ignoran mayúsculas y tildes, así que "sacaba" encuentra "Sacaba". Solo se muestran registros activos y almacenados.
+Cada institución muestra sus carreras más compatibles y el botón **Ver sitio oficial**, que abre su página en una ventana dentro del sistema. Si la institución no permite mostrarse dentro de otra página, se ofrece abrirla en otra pestaña. Costos, ubicación y requisitos se consultan en ese sitio oficial. Solo se muestran registros activos; una institución sin página confirmada aparece sin enlace.
 
 ## 12. COMPARAR CARRERAS
 

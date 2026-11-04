@@ -119,18 +119,17 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .form-shell, .content-shell, .hero-shell { width: min(calc(100% - 2rem), 70rem); }
 .form-shell, .content-shell { max-width: 70rem; margin: 2rem auto 3rem; padding: 2.5rem clamp(1.2rem, 4vw, 3.2rem); box-sizing: border-box; border-radius: 28px; }
 .form-shell { max-width: 44rem; width: min(calc(100% - 2rem), 44rem); }
-.simple-form, .filter-form { display: grid; gap: 1rem; max-width: 36rem; }
+.simple-form { display: grid; gap: 1rem; max-width: 36rem; }
 /* Al apretar "Editar" la pagina baja hasta el formulario: el margen evita que la cabecera fija lo
    tape, y el borde deja claro que se esta editando un registro existente. */
 .simple-form { scroll-margin-top: 6rem; }
 .simple-form.editando { padding: 1.2rem; border: 2px solid var(--accent); border-radius: 14px; background: rgba(236, 47, 143, .08); }
 .simple-form h2, .simple-form h3 { color: var(--cream); }
 .simple-form label { display: grid; gap: .4rem; color: var(--cream-muted); }
-.filter-form label { display: grid; gap: .4rem; color: var(--cream-muted); align-self: end; }
 .simple-form small { color: var(--cream-muted); }
-.simple-form input, .simple-form select, .filter-form input, .filter-form select { padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
-.simple-form button, .filter-form button, .career-card button { padding: .8rem 1.2rem; border: 0; border-radius: 999px; background: var(--green); color: #fff; cursor: pointer; font-weight: 600; transition: filter .15s; }
-.simple-form button:hover, .filter-form button:hover, .career-card button:hover { filter: brightness(.92); }
+.simple-form input, .simple-form select { padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.simple-form button { padding: .8rem 1.2rem; border: 0; border-radius: 999px; background: var(--green); color: #fff; cursor: pointer; font-weight: 600; transition: filter .15s; }
+.simple-form button:hover { filter: brightness(.92); }
 .password-field { position: relative; display: block; }
 .password-field input { width: 100%; box-sizing: border-box; padding-right: 3rem; }
 .simple-form .password-toggle { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); width: auto; padding: .4rem; background: transparent; color: var(--muted); border-radius: 8px; line-height: 0; }
@@ -143,20 +142,9 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .success-message { color: #4fe0a4; }
 .error-message { color: #ff7597; margin-top: 1rem; }
 .status-message { color: var(--cream-muted); }
-.filter-form { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); max-width: none; margin: 2rem 0; }
 
 /* Recomendaciones */
-.career-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
-.career-card { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 1.2rem; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5); color: var(--ink); }
-.career-card h2 { margin: .6rem 0; color: var(--ink); }
-.career-card span { color: var(--accent-dark); font-weight: 700; }
-.cost-tier { display: inline-block; margin-left: .5rem; padding: .1rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; }
-.cost-tier-low { background: #dcf6e8; color: #17915c; }
-.cost-tier-medium { background: #fdf0d2; color: #a86a0a; }
-.cost-tier-high { background: #fbdde2; color: #b3123f; }
 .empty-state { padding: 1.5rem; background: var(--soft-accent); color: var(--accent-dark); border-radius: 10px; }
-.comparison { margin-top: 2rem; border-top: 1px solid rgba(255, 255, 255, .15); padding-top: 1rem; }
-.comparison div { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, .15); color: var(--cream); }
 
 /* Historial: una tarjeta desplegable por intento. Cerrada muestra fecha, codigo y puntajes;
    al abrirla aparece el mismo detalle que la pantalla de resultado (tarjetas por area,
@@ -171,7 +159,6 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .result-code-mini small { color: #2ecc82; font-size: .7em; margin-left: .2em; }
 .history-scores { display: flex; gap: .9rem; flex-wrap: wrap; margin-top: .7rem; color: var(--cream-muted); font-size: .85rem; }
 .history-scores b { color: var(--cream); margin-right: .3rem; }
-.history-filter { display: block; margin-top: .6rem; color: var(--cream-muted); font-size: .82rem; }
 .history-detail { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, .12); }
 .history-detail .dimension-cards { margin-bottom: 1.2rem; }
 .history-detail .score-list { margin-bottom: 1.2rem; }
@@ -219,13 +206,30 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .result-explanation { color: var(--cream); line-height: 1.6; max-width: 60ch; white-space: pre-line; }
 .area-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
 .area-chip { padding: .4rem .9rem; border-radius: 999px; background: rgba(33, 184, 118, .16); color: #6fe5b0; font-size: .9rem; }
-.result-careers { display: grid; gap: .8rem; }
-.result-career { padding: 1rem 1.2rem; border-radius: 14px; background: var(--panel); color: var(--ink); }
-.result-career h3 { margin: .3rem 0; color: var(--ink); font-size: 1.1rem; }
-.result-career p { margin: .2rem 0; color: var(--muted); }
-.result-career .result-career-institution { color: var(--ink); font-weight: 600; }
-.result-career-match { color: var(--accent-dark); font-weight: 700; font-size: .85rem; }
-.result-career .cost-tier { margin-left: 0; margin-top: .4rem; }
+.university-note { margin-top: 0; }
+.university-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; margin-top: 1rem; }
+.university-card { display: flex; flex-direction: column; gap: .8rem; padding: 1.2rem; border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5); }
+.university-card h3 { margin: 0; color: var(--ink); font-size: 1.05rem; line-height: 1.25; }
+.university-card ul { display: grid; gap: .45rem; margin: 0 0 auto; padding: 0; list-style: none; }
+.university-card li { display: flex; justify-content: space-between; gap: .8rem; color: var(--muted); font-size: .93rem; }
+.university-card li strong { color: var(--accent-dark); }
+.university-card button { padding: .75rem 1rem; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+.university-card button:hover { background: var(--accent-dark); }
+.university-card small { color: var(--muted); }
+
+/* Ventana interna con el sitio oficial. Fondo blanco: es el que esperan las paginas externas. */
+html:has(.site-window[open]) { overflow: hidden; }
+.site-window { width: min(72rem, calc(100vw - 2rem)); height: calc(100dvh - 2rem); max-width: none; max-height: none; margin: auto; padding: 0; border: 0; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); }
+.site-window[open] { display: flex; flex-direction: column; }
+.site-window::backdrop { background: rgba(12, 3, 9, .78); }
+.site-window-bar { display: flex; align-items: center; gap: 1rem; padding: .7rem 1rem; background: var(--bg-2); color: var(--cream); }
+.site-window-bar strong { margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-window-bar a { flex: none; color: var(--cream); font-size: .9rem; }
+.site-window-bar button { flex: none; width: 2.4rem; height: 2.4rem; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .14); color: #fff; font-size: 1rem; cursor: pointer; }
+.site-window-bar button:hover { background: var(--accent); }
+.site-window-body { position: relative; flex: 1; min-height: 0; }
+.site-window-body iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+.site-window-message { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .5rem; margin: 0; padding: 1.5rem; color: var(--ink); text-align: center; }
 
 /* Celular. Ningun contenido debe salirse del ancho de la pantalla. */
 html, body { overflow-x: clip; }
@@ -254,9 +258,8 @@ img, svg { max-width: 100%; }
   .header-logout, .header-link, .header-cta { padding: .45rem .8rem; }
 
   /* Formularios: 16 px evita que el celular haga zoom al tocar un campo; botones comodos de tocar */
-  .simple-form input, .simple-form select, .filter-form input, .filter-form select { font-size: 16px; }
-  .simple-form button, .filter-form button, .career-card button, .start-link { min-height: 2.9rem; }
-  .filter-form { grid-template-columns: 1fr; }
+  .simple-form input, .simple-form select { font-size: 16px; }
+  .simple-form button, .university-card button, .start-link { min-height: 2.9rem; }
   .google-fallback, .google-slot, .form-divider { max-width: none; }
 
   /* Test */
@@ -286,8 +289,9 @@ img, svg { max-width: 100%; }
   /* Skins, recomendaciones, historial, administrador */
   .skin-grid { grid-template-columns: repeat(auto-fill, minmax(8.6rem, 1fr)); gap: .7rem; }
   .skin-card { padding: .8rem .5rem; }
-  .career-grid { grid-template-columns: 1fr; }
-  .comparison div { flex-direction: column; gap: .3rem; }
+  .university-grid { grid-template-columns: 1fr; }
+  .site-window { width: 100vw; height: 100dvh; border-radius: 0; }
+  .site-window-bar a { font-size: .8rem; }
   .history-card-top { flex-direction: column; align-items: flex-start; gap: .3rem; }
   .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-section { margin: 2rem 0; }

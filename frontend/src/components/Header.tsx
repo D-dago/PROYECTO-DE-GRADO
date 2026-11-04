@@ -1,11 +1,11 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
 import { getTokenRole } from '../services/auth'
 import { Avatar } from './Avatar'
 
 const links = [
   { path: '/test', label: 'Test vocacional' },
-  { path: '/recomendaciones', label: 'Recomendaciones' },
+  { path: '/recomendaciones', label: 'Universidades' },
   { path: '/historial', label: 'Historial' },
   { path: '/skins', label: 'Skins' },
   { path: '/perfil', label: 'Perfil' },

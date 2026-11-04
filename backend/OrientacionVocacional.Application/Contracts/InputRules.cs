@@ -1,4 +1,4 @@
-﻿namespace OrientacionVocacional.Application.Contracts;
+namespace OrientacionVocacional.Application.Contracts;
 
 /// <summary>Reglas de entrada compartidas: solo letras en nombres, solo digitos en telefono, etc.</summary>
 public static class InputRules
@@ -14,6 +14,11 @@ public static class InputRules
 
     public const string DigitsOnly = @"^\d{7,15}$";
     public const string DigitsOnlyMessage = "El teléfono debe tener solo dígitos (7 a 15).";
+
+    // Pagina web: solo http/https. Bloquea direcciones como "javascript:", que dentro de un enlace o
+    // de una ventana interna ejecutarian codigo en la sesion de quien la abre.
+    public const string WebUrl = @"^(?i)https?://[^\s<>""']+$";
+    public const string WebUrlMessage = "La página web debe empezar con http:// o https://.";
 
     // Contrasena: al menos una letra y un numero.
     public const string Password = @"^(?=.*\p{L})(?=.*\d).{8,64}$";

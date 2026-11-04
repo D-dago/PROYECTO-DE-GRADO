@@ -1,16 +1,10 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
 import type { Recommendation } from '../services/appApi'
 import type { RiasecResult } from '../types/riasec'
+import { UniversityLinks } from './UniversityLinks'
 
 const MAX_DIMENSION_SCORE = 10 // 2 preguntas por dimension x valor maximo 5
-
-function costTier(cost?: number) {
-  if (cost == null) return null
-  if (cost <= 500) return { label: '🟢 Accesible', className: 'cost-tier-low' }
-  if (cost <= 1000) return { label: '🟡 Costo medio', className: 'cost-tier-medium' }
-  return { label: '🔴 Costo alto', className: 'cost-tier-high' }
-}
 
 export function RiasecResult({ result }: { result: RiasecResult }) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
@@ -59,30 +53,12 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
             <h2 className="result-heading">Áreas profesionales afines</h2>
             <div className="area-chips">{interpretation.suggestedAreas.map((area) => <span key={area} className="area-chip">{area}</span>)}</div>
 
-            <h2 className="result-heading">Carreras y universidades compatibles</h2>
-            {recommendation.items.length === 0 ? (
-              <p className="result-note">Todavía no hay carreras cargadas en el catálogo, por eso aquí no aparecen universidades. Cuando el administrador cargue instituciones y carreras verificadas, se mostrarán automáticamente ordenadas por compatibilidad con tu perfil.</p>
-            ) : (
-              <div className="result-careers">
-                {recommendation.items.slice(0, 6).map((career) => {
-                  const tier = costTier(career.cost)
-                  return (
-                    <article className="result-career" key={career.id}>
-                      <span className="result-career-match">{career.compatibility}% compatible</span>
-                      <h3>{career.name}</h3>
-                      <p className="result-career-institution">🏛 {career.institutionName}</p>
-                      <p>{career.compatibilityReason}</p>
-                      {tier && <span className={`cost-tier ${tier.className}`}>{tier.label}</span>}
-                    </article>
-                  )
-                })}
-              </div>
-            )}
+            <h2 className="result-heading">Universidades e institutos para ti</h2>
+            <UniversityLinks careers={recommendation.items} />
           </>
         )}
 
         <p className="result-note">Este resultado resume tus respuestas. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.</p>
-        <a className="start-link" href="/recomendaciones">Filtrar por presupuesto, municipio y más</a>
       </section>
     </main>
   )

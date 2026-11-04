@@ -8,31 +8,6 @@ const dimensionLabels: [ScoreKey, string][] = [
   ['rScore', 'R'], ['iScore', 'I'], ['aScore', 'A'], ['sScore', 'S'], ['eScore', 'E'], ['cScore', 'C'],
 ]
 
-const filterLabels: Record<string, string> = {
-  Municipality: 'Municipio',
-  Modality: 'Modalidad',
-  Level: 'Nivel',
-  Area: 'Área',
-  MaximumCost: 'Costo máximo',
-  MaximumDurationMonths: 'Duración máxima (meses)',
-}
-
-/** El backend guarda el filtro como JSON crudo (FilterSummary = JsonSerializer.Serialize(filter));
- * esto lo convierte en un resumen legible en vez de mostrar el JSON tal cual al estudiante.
- * Devuelve '' cuando la busqueda fue sin filtros, para no ensuciar la tarjeta con "Sin filtros". */
-function summarizeFilters(raw?: string): string {
-  if (!raw) return ''
-  try {
-    const filters = JSON.parse(raw) as Record<string, unknown>
-    return Object.entries(filters)
-      .filter(([key, value]) => key in filterLabels && value !== null && value !== '')
-      .map(([key, value]) => `${filterLabels[key]}: ${value}`)
-      .join(' · ')
-  } catch {
-    return ''
-  }
-}
-
 export function HistoryPage() {
   const [items, setItems] = useState<HistoryEntry[]>([])
 
@@ -47,9 +22,7 @@ export function HistoryPage() {
         <p className="empty-state">Todavía no hay resultados guardados.</p>
       ) : (
         <div className="history-list">
-          {items.map((item) => {
-            const filtros = summarizeFilters(item.filterSummary)
-            return (
+          {items.map((item) => (
             <details className="history-card" key={item.id}>
               <summary className="history-card-top">
                 <strong>{new Date(item.createdAtUtc).toLocaleString()}</strong>
@@ -65,7 +38,6 @@ export function HistoryPage() {
               ) : (
                 <p className="result-note">Este intento es de una versión anterior del test; ya no se puede mostrar el detalle.</p>
               )}
-              {filtros && <span className="history-filter">Última búsqueda · {filtros}</span>}
               {item.interpretation && (
                 <div className="history-detail">
                   <h2 className="result-heading">¿Qué significa este perfil?</h2>
@@ -76,8 +48,7 @@ export function HistoryPage() {
                 </div>
               )}
             </details>
-            )
-          })}
+          ))}
         </div>
       )}
     </main>

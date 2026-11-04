@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { appApi } from '../services/appApi'
 import type { AdminQuestion, AdminResult, AdminUser, Career, Compatibility, Institution } from '../services/appApi'
@@ -94,7 +94,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
           <div className="admin-row" key={institution.id}>
             <div className="admin-row-main">
               <strong>{institution.name}</strong>
-              <small>{institution.type} · {institution.municipality ?? 'Sin municipio'} · {institution.status}</small>
+              <small>{institution.type} · {institution.municipality ?? 'Sin municipio'} · {institution.status} · {institution.website ?? 'Sin página oficial'}</small>
             </div>
             <div className="admin-row-actions">
               <span className={`badge ${institution.isActive ? 'badge-active' : 'badge-inactive'}`}>{institution.isActive ? 'Activa' : 'Inactiva'}</span>
@@ -111,6 +111,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
         <input name="type" placeholder="Tipo" defaultValue={editing?.type} required />
         <input name="municipality" placeholder="Municipio" defaultValue={editing?.municipality} />
         <input name="location" placeholder="Ubicación" defaultValue={editing?.location} />
+        <input name="website" type="url" placeholder="Página oficial (https://...)" pattern="https?://.+" title="Debe empezar con http:// o https://" maxLength={300} defaultValue={editing?.website ?? ''} />
         <input name="source" placeholder="Fuente verificable" defaultValue={editing?.source} />
         <input name="status" placeholder="Estado" defaultValue={editing?.status ?? 'PENDIENTE'} required />
         <div className="admin-row-actions">
