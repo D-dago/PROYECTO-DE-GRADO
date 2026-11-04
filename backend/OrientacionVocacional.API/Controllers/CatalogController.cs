@@ -31,6 +31,12 @@ public sealed class CatalogController(ICatalogService service, ISiteFramingServi
         return result is null ? NotFound(new { message = "Completa el test vocacional antes de solicitar recomendaciones." }) : Ok(result);
     }
 
+    // Solo las carreras, para refrescar una pantalla abierta: no escribe en el historial ni llama a la IA.
+    [HttpGet("my-careers")]
+    [Authorize(Roles = RoleNames.Student)]
+    public async Task<ActionResult<IReadOnlyList<CareerResponse>>> MyCareers(CancellationToken cancellationToken) =>
+        await service.GetCareerMatchesAsync(GetUserId(), cancellationToken) is { } result ? Ok(result) : NotFound(new { message = "Completa el test vocacional antes de solicitar recomendaciones." });
+
     [HttpGet("history")]
     [Authorize(Roles = RoleNames.Student)]
     public async Task<ActionResult<IReadOnlyList<HistoryResponse>>> History(CancellationToken cancellationToken) => Ok(await service.GetHistoryAsync(GetUserId(), cancellationToken));

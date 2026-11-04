@@ -46,6 +46,7 @@ public sealed class TestController(ITestService testService) : ControllerBase
     }
 
     [HttpPost("attempts/{attemptId:guid}/complete")]
+    [OrientacionVocacional.API.Live.NotifyDataChange(OrientacionVocacional.API.Live.DataArea.Activity)]
     public async Task<ActionResult<RiasecResultResponse>> Complete(
         Guid attemptId,
         CancellationToken cancellationToken)

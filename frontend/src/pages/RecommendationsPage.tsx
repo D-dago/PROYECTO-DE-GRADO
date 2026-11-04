@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
 import type { Recommendation } from '../services/appApi'
 import { UniversityLinks } from '../components/UniversityLinks'
+import { useLiveCareers } from '../services/liveData'
 
 // Antes esta pagina pedia municipio, costo y lugar, pero esos datos eran estimaciones sin confirmar.
 // Ahora muestra lo que si se puede sostener: la compatibilidad con el perfil y el sitio oficial.
 export function RecommendationsPage() {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
   const [error, setError] = useState<string | null>(null)
+  useLiveCareers(setRecommendation)
 
   useEffect(() => {
     appApi.recommendations({})

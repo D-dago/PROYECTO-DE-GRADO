@@ -3,12 +3,14 @@ import { appApi } from '../services/appApi'
 import type { Recommendation } from '../services/appApi'
 import type { RiasecResult } from '../types/riasec'
 import { UniversityLinks } from './UniversityLinks'
+import { useLiveCareers } from '../services/liveData'
 
 const MAX_DIMENSION_SCORE = 10 // 2 preguntas por dimension x valor maximo 5
 
 export function RiasecResult({ result }: { result: RiasecResult }) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
   const [failed, setFailed] = useState(false)
+  useLiveCareers(setRecommendation)
 
   useEffect(() => {
     appApi.recommendations({}).then(setRecommendation).catch(() => setFailed(true))

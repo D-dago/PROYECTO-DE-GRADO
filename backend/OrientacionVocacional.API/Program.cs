@@ -12,6 +12,7 @@ using OrientacionVocacional.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<OrientacionVocacional.API.Live.DataVersion>();
 
 // Documentacion interactiva de la API (solo en desarrollo: no tiene sentido exponer esto
 // si algun dia se publica en un hosting real de verdad).

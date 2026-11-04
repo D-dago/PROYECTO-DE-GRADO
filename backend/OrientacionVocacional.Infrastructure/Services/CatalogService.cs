@@ -67,11 +67,36 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
 
     public async Task<RecommendationResponse?> GetRecommendationsAsync(Guid userId, RecommendationFilterRequest filter, CancellationToken cancellationToken)
     {
-        var profile = await db.RiasecProfiles.AsNoTracking().Where(item => item.TestAttempt.UserId == userId && item.AlgorithmVersion == RiasecTestConstants.Version).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
-        // Solo cuenta un perfil del test vigente (RIASEC-12-V2): los perfiles de otras versiones
-        // (el CHASIDE que se aplico un tiempo) usan letras con otro significado y darian
-        // recomendaciones sin sentido; hay que repetir el test.
+        var profile = await GetCurrentProfileAsync(userId, cancellationToken);
         if (profile is null) return null;
+        var recommendations = await MatchCareersAsync(profile, filter, cancellationToken);
+        var history = new RecommendationHistory { Id = Guid.NewGuid(), UserId = userId, TestAttemptId = profile.TestAttemptId, FilterSummary = JsonSerializer.Serialize(filter) };
+        db.RecommendationHistories.Add(history);
+        await db.SaveChangesAsync(cancellationToken);
+        var result = new RiasecResultResponse(profile.Id, profile.TestAttemptId, profile.RScore, profile.IScore, profile.AScore, profile.SScore, profile.EScore, profile.CScore, profile.PrimaryCode, profile.SecondaryCode, profile.CreatedAtUtc, profile.AlgorithmVersion);
+        var aiMessage = await ai.ExplainAsync(result, recommendations, cancellationToken);
+        return new RecommendationResponse(
+            recommendations, history.Id, aiMessage,
+            RiasecInterpretationBuilder.Build(profile.PrimaryCode, profile.SecondaryCode),
+            aiMessage != AiExplanationService.UnavailableMessage);
+    }
+
+    // Lo que usa una pantalla abierta para ponerse al dia. Sin historial ni IA: se repite cada vez que el
+    // administrador cambia algo, y cada llamada a la IA tarda y cuesta dinero.
+    public async Task<IReadOnlyList<CareerResponse>?> GetCareerMatchesAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var profile = await GetCurrentProfileAsync(userId, cancellationToken);
+        return profile is null ? null : await MatchCareersAsync(profile, new RecommendationFilterRequest(), cancellationToken);
+    }
+
+    // Solo cuenta un perfil del test vigente (RIASEC-12-V2): los perfiles de otras versiones
+    // (el CHASIDE que se aplico un tiempo) usan letras con otro significado y darian
+    // recomendaciones sin sentido; hay que repetir el test.
+    private Task<RiasecProfile?> GetCurrentProfileAsync(Guid userId, CancellationToken cancellationToken) =>
+        db.RiasecProfiles.AsNoTracking().Where(item => item.TestAttempt.UserId == userId && item.AlgorithmVersion == RiasecTestConstants.Version).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
+
+    private async Task<List<CareerResponse>> MatchCareersAsync(RiasecProfile profile, RecommendationFilterRequest filter, CancellationToken cancellationToken)
+    {
         var scores = new Dictionary<string, int> { ["R"] = profile.RScore, ["I"] = profile.IScore, ["A"] = profile.AScore, ["S"] = profile.SScore, ["E"] = profile.EScore, ["C"] = profile.CScore };
         // Solo lo traducible de forma segura a SQL (igualdad de Id, comparacion numerica) se
         // filtra en la base. El resto (texto libre) se compara despues, en memoria, para poder
@@ -94,16 +119,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         // que busca ("sistemas informatico") en vez de la categoria.
         if (!string.IsNullOrWhiteSpace(filter.Area)) careers = careers.Where(item => Coincide(item.Area, filter.Area) || Coincide(item.Name, filter.Area)).ToList();
 
-        var recommendations = careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / RiasecTestConstants.MaxDimensionScore, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
-        var history = new RecommendationHistory { Id = Guid.NewGuid(), UserId = userId, TestAttemptId = profile.TestAttemptId, FilterSummary = JsonSerializer.Serialize(filter) };
-        db.RecommendationHistories.Add(history);
-        await db.SaveChangesAsync(cancellationToken);
-        var result = new RiasecResultResponse(profile.Id, profile.TestAttemptId, profile.RScore, profile.IScore, profile.AScore, profile.SScore, profile.EScore, profile.CScore, profile.PrimaryCode, profile.SecondaryCode, profile.CreatedAtUtc, profile.AlgorithmVersion);
-        var aiMessage = await ai.ExplainAsync(result, recommendations, cancellationToken);
-        return new RecommendationResponse(
-            recommendations, history.Id, aiMessage,
-            RiasecInterpretationBuilder.Build(profile.PrimaryCode, profile.SecondaryCode),
-            aiMessage != AiExplanationService.UnavailableMessage);
+        return careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / RiasecTestConstants.MaxDimensionScore, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
     }
 
     // Una entrada por test terminado, no por busqueda. RecommendationHistories guarda una fila

@@ -4,6 +4,7 @@ import { appApi } from '../services/appApi'
 import type { AdminQuestion, AdminResult, AdminUser, Career, Compatibility, Institution } from '../services/appApi'
 import { QuestionsSection, ResultsSection } from './AdminExtras'
 import { useFormularioDeEdicion } from '../components/useFormularioDeEdicion'
+import { useLiveData } from '../services/liveData'
 
 const dashboardLabels: [keyof NonNullable<DashboardData>, string][] = [['students', 'Estudiantes registrados'], ['institutions', 'Instituciones'], ['careers', 'Carreras'], ['compatibilityRules', 'Reglas de compatibilidad']]
 const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
@@ -25,7 +26,7 @@ export function AdminPage() {
     if (isError) { setError(message); setSuccess('') } else { setSuccess(message); setError('') }
   }
 
-  async function loadAll() {
+  async function loadAll(silent = false) {
     try {
       const [dashboardData, institutionsData, careersData, compatibilitiesData, usersData, questionsData, resultsData] = await Promise.all([
         appApi.dashboard(), appApi.adminInstitutions(), appApi.adminCareers(), appApi.compatibilities(), appApi.adminUsers(), appApi.adminQuestions(), appApi.adminResults(),
@@ -38,27 +39,29 @@ export function AdminPage() {
       setCompatibilities(compatibilitiesData)
       setStudents(usersData.filter((user) => user.role === 'ESTUDIANTE'))
     } catch (loadError) {
-      report(loadError instanceof Error ? loadError.message : 'Se requiere una sesión de administrador.', true)
+      // Una actualizacion automatica que falla no debe tapar lo que el administrador esta haciendo.
+      if (!silent) report(loadError instanceof Error ? loadError.message : 'Se requiere una sesión de administrador.', true)
     }
   }
 
   useEffect(() => { void loadAll() }, [])
+  useLiveData(['catalog', 'activity'], () => { void loadAll(true) })
 
   return (
     <main className="content-shell">
       <span className="eyebrow">Solo administrador</span>
       <h1>Panel de datos</h1>
       {dashboard && <div className="dashboard-grid">{dashboardLabels.map(([key, label]) => <strong key={key}>{dashboard[key]}<small> {label}</small></strong>)}</div>}
-      <p className="empty-state">Carga únicamente información institucional verificada. La aplicación no incluye datos inventados.</p>
+      <p className="empty-state">Carga únicamente información institucional verificada. Este panel y las pantallas abiertas de los estudiantes se actualizan solos en unos segundos.</p>
       {success && <p className="success-message">{success}</p>}
       {error && <p className="error-message">{error}</p>}
 
-      <InstitutionsSection institutions={institutions} onChanged={loadAll} report={report} />
-      <CareersSection careers={careers} institutions={institutions} onChanged={loadAll} report={report} />
-      <CompatibilitiesSection compatibilities={compatibilities} careers={careers} onChanged={loadAll} report={report} />
+      <InstitutionsSection institutions={institutions} onChanged={() => void loadAll()} report={report} />
+      <CareersSection careers={careers} institutions={institutions} onChanged={() => void loadAll()} report={report} />
+      <CompatibilitiesSection compatibilities={compatibilities} careers={careers} onChanged={() => void loadAll()} report={report} />
       <ResultsSection results={results} report={report} />
-      <QuestionsSection questions={questions} onChanged={loadAll} report={report} />
-      <StudentsSection students={students} onChanged={loadAll} report={report} />
+      <QuestionsSection questions={questions} onChanged={() => void loadAll()} report={report} />
+      <StudentsSection students={students} onChanged={() => void loadAll()} report={report} />
     </main>
   )
 }
@@ -72,7 +75,8 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
     const form = event.currentTarget
     const data = Object.fromEntries(new FormData(form))
     try {
-      if (editing) await appApi.updateInstitution(editing.id, { ...data, isActive: editing.isActive })
+      // El estado se toma de la lista, que se mantiene al dia: el de "editing" pudo cambiar mientras se editaba.
+      if (editing) await appApi.updateInstitution(editing.id, { ...data, isActive: institutions.find((item) => item.id === editing.id)?.isActive ?? editing.isActive })
       else await appApi.createInstitution(data)
       report(editing ? 'Institución actualizada.' : 'Institución guardada.')
       setEditing(null)
@@ -90,14 +94,14 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
     <section className="admin-section" id="instituciones">
       <h2>Instituciones</h2>
       <div className="admin-list">
-        {institutions.map((institution) => (
+        {[...institutions].sort((a, b) => Number(b.isActive) - Number(a.isActive)).map((institution) => (
           <div className="admin-row" key={institution.id}>
             <div className="admin-row-main">
               <strong>{institution.name}</strong>
               <small>{institution.type} · {institution.municipality ?? 'Sin municipio'} · {institution.status} · {institution.website ?? 'Sin página oficial'}</small>
             </div>
             <div className="admin-row-actions">
-              <span className={`badge ${institution.isActive ? 'badge-active' : 'badge-inactive'}`}>{institution.isActive ? 'Activa' : 'Inactiva'}</span>
+              <span className={`badge ${institution.isActive ? 'badge-active' : 'badge-inactive'}`}>{institution.isActive ? 'La ve el estudiante' : 'Oculta'}</span>
               <button type="button" onClick={() => setEditing(institution)}>Editar</button>
               <button type="button" onClick={() => void toggleActive(institution)}>{institution.isActive ? 'Desactivar' : 'Activar'}</button>
             </div>
@@ -107,6 +111,7 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
       </div>
       <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-institution'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva institución'}</h3>
+        <small>El estudiante solo ve el nombre y la página oficial. Municipio, ubicación, fuente y estado son de uso interno.</small>
         <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
         <input name="type" placeholder="Tipo" defaultValue={editing?.type} required />
         <input name="municipality" placeholder="Municipio" defaultValue={editing?.municipality} />
@@ -126,12 +131,15 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
 function CareersSection({ careers, institutions, onChanged, report }: { careers: Career[]; institutions: Institution[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Career | null>(null)
   const formulario = useFormularioDeEdicion(editing)
+  // Una carrera activa de una institucion inactiva no la ve nadie: marcarla "activa" hacia creer lo contrario.
+  const institutionActive = new Map(institutions.map((item) => [item.id, item.isActive]))
+  const isVisible = (career: Career) => career.isActive && institutionActive.get(career.institutionId) !== false
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
     const data = Object.fromEntries(new FormData(form))
-    const body = { ...data, durationMonths: data.durationMonths ? Number(data.durationMonths) : null, cost: data.cost ? Number(data.cost) : null, isActive: editing ? editing.isActive : true }
+    const body = { ...data, durationMonths: data.durationMonths ? Number(data.durationMonths) : null, cost: data.cost ? Number(data.cost) : null, isActive: editing ? careers.find((item) => item.id === editing.id)?.isActive ?? editing.isActive : true }
     try {
       if (editing) await appApi.updateCareer(editing.id, body)
       else await appApi.createCareer(body)
@@ -151,14 +159,14 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
     <section className="admin-section" id="carreras">
       <h2>Carreras</h2>
       <div className="admin-list">
-        {careers.map((career) => (
+        {[...careers].sort((a, b) => Number(isVisible(b)) - Number(isVisible(a))).map((career) => (
           <div className="admin-row" key={career.id}>
             <div className="admin-row-main">
               <strong>{career.name}</strong>
               <small>{career.institutionName} · {career.area ?? 'Sin área'} · {career.status}</small>
             </div>
             <div className="admin-row-actions">
-              <span className={`badge ${career.isActive ? 'badge-active' : 'badge-inactive'}`}>{career.isActive ? 'Activa' : 'Inactiva'}</span>
+              <span className={`badge ${isVisible(career) ? 'badge-active' : 'badge-inactive'}`}>{isVisible(career) ? 'La ve el estudiante' : career.isActive ? 'Oculta: institución inactiva' : 'Oculta'}</span>
               <button type="button" onClick={() => setEditing(career)}>Editar</button>
               <button type="button" onClick={() => void toggleActive(career)}>{career.isActive ? 'Desactivar' : 'Activar'}</button>
             </div>
@@ -168,6 +176,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
       </div>
       <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-career'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva carrera'}</h3>
+        <small>El estudiante solo ve el nombre de la carrera y su compatibilidad. Área, modalidad, duración, costo y fuente son de uso interno.</small>
         <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
         <label>Institución
           <select name="institutionId" defaultValue={editing?.institutionId ?? ''} required>

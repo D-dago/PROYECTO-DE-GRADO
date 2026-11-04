@@ -14,6 +14,7 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
     public sealed record GoogleLoginRequest(string IdToken);
 
     [HttpPost("google")]
+    [OrientacionVocacional.API.Live.NotifyDataChange(OrientacionVocacional.API.Live.DataArea.Activity)]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> GoogleLogin(
         GoogleLoginRequest request,
@@ -42,6 +43,7 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
     }
 
     [HttpPost("register")]
+    [OrientacionVocacional.API.Live.NotifyDataChange(OrientacionVocacional.API.Live.DataArea.Activity)]
     [AllowAnonymous]
     [EnableRateLimiting("register")]
     public async Task<ActionResult<AuthResponse>> Register(

@@ -23,6 +23,16 @@ Este script no se sube a git porque contiene la contraseña local de la base de 
 - Un fallo de compilación o una API que no responde detienen el script con un mensaje.
 - Si el túnel falla, el script recuerda que la página sigue disponible en la PC y en la misma red Wi-Fi.
 
+## 2026-11-03: Actualización en vivo con consultas cada 5 segundos
+
+**Decisión:** las pantallas preguntan cada 5 segundos si algo cambió, en vez de recibir un aviso del servidor.
+
+**Motivo:** la técnica más simple para recibir avisos (SSE) no funciona en los túneles rápidos de Cloudflare, que son los que usa el enlace público. SignalR sí funcionaría, pero agrega una librería y una conexión abierta por estudiante, sin una ventaja que se note en esta aplicación.
+
+**Consecuencias:** un cambio tarda hasta 5 segundos en llegar. Las pestañas en segundo plano no consultan. Refrescar no llama a la IA ni escribe en el historial, así que la explicación de la IA no cambia hasta volver a abrir la pantalla.
+
+**Limitación:** el contador está en memoria y solo ve lo que pasa por la API. Un cambio hecho directamente en la base de datos no se detecta hasta recargar.
+
 ## 2026-11-03: Solo universidades de Cochabamba
 
 **Decisión:** a pedido del usuario, el estudiante solo ve UMSS, Univalle, UPB y USIP.

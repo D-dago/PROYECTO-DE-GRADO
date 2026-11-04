@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OrientacionVocacional.API.Live;
 using OrientacionVocacional.Application.Contracts;
 using OrientacionVocacional.Application.Interfaces;
 using OrientacionVocacional.Domain.Constants;
@@ -9,6 +10,7 @@ namespace OrientacionVocacional.API.Controllers;
 [ApiController]
 [Route("api/admin/catalog")]
 [Authorize(Roles = RoleNames.Administrator)]
+[NotifyDataChange(DataArea.Catalog)]
 public sealed class AdminCatalogController(ICatalogService service) : ControllerBase
 {
     [HttpGet("dashboard")]

@@ -14,6 +14,7 @@ public interface ICatalogService
     Task<bool> SetCareerActiveAsync(Guid id, bool active, CancellationToken cancellationToken);
     Task<bool> AddCompatibilityAsync(CompatibilityRequest request, CancellationToken cancellationToken);
     Task<RecommendationResponse?> GetRecommendationsAsync(Guid userId, RecommendationFilterRequest filter, CancellationToken cancellationToken);
+    Task<IReadOnlyList<CareerResponse>?> GetCareerMatchesAsync(Guid userId, CancellationToken cancellationToken);
     Task<IReadOnlyList<HistoryResponse>> GetHistoryAsync(Guid userId, CancellationToken cancellationToken);
     Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken);
     Task<InstitutionResponse?> UpdateInstitutionAsync(Guid id, InstitutionRequest request, CancellationToken cancellationToken);

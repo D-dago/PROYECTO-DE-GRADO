@@ -41,6 +41,10 @@ Las compatibilidades se almacenan por carrera y dimensión RIASEC. Las reglas qu
 
 Instituciones y carreras se almacenan con estado, fuente y fecha de actualización. No se siembran instituciones ni carreras ficticias. El listado público muestra solo las activas; el administrador tiene su propio listado que incluye las inactivas para poder reactivarlas.
 
+## Datos en vivo
+
+Cada pantalla abierta consulta `GET /api/live/version` cada 5 segundos y recarga sus datos solo si la versión cambió. El contador vive en memoria (`DataVersion`), no consulta la base y queda fuera del límite anti-abuso. Las peticiones que modifican datos lo avanzan con `[NotifyDataChange]`. Si se agrega otra acción que cambie datos del catálogo fuera de esos controladores, debe llevar ese atributo.
+
 ## Filtros y recomendaciones
 
 La interfaz del estudiante ya no usa estos filtros: muestra las instituciones compatibles con su enlace oficial (ver `docs/decisiones.md`). El backend los conserva porque están probados y no estorban.

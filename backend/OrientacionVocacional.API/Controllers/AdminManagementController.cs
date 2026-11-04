@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OrientacionVocacional.API.Live;
 using OrientacionVocacional.Application.Contracts;
 using OrientacionVocacional.Application.Interfaces;
 using OrientacionVocacional.Domain.Constants;
@@ -10,6 +11,7 @@ namespace OrientacionVocacional.API.Controllers;
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = RoleNames.Administrator)]
+[NotifyDataChange(DataArea.Activity)]
 public sealed class AdminManagementController(IAdminService service) : ControllerBase
 {
     private const string ExcelType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

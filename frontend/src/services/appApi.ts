@@ -38,6 +38,8 @@ export const appApi = {
   updateProfile: (body: unknown) => request<StudentProfile>('/student/profile', { method: 'PUT', body: JSON.stringify(body) }),
   siteCheck: (institutionId: string) => request<{ embeddable: boolean }>(`/catalog/institutions/${institutionId}/site-check`),
   recommendations: (body: unknown) => request<Recommendation>('/catalog/recommendations', { method: 'POST', body: JSON.stringify(body) }),
+  myCareers: () => request<Career[]>('/catalog/my-careers'),
+  liveVersion: () => request<{ catalog: number; activity: number }>('/live/version'),
   history: () => request<HistoryEntry[]>('/catalog/history'),
 
   dashboard: () => request<{ students: number; institutions: number; careers: number; compatibilityRules: number }>('/admin/catalog/dashboard'),
