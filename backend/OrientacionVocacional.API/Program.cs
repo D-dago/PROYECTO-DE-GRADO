@@ -38,6 +38,10 @@ builder.Services.AddSwaggerGen(options =>
 // Util para monitoreo y para verificar rapido si "el sistema esta encendido".
 builder.Services.AddHealthChecks().AddDbContextCheck<OrientacionVocacionalDbContext>();
 
+// Reduce a cerca de un tercio el JS, el CSS y el JSON para quien entra por el Wi-Fi. Por el tunel no se aplica
+// (la conexion cuenta como https y por seguridad no se comprime aqui), y ahi ya comprime Cloudflare.
+builder.Services.AddResponseCompression();
+
 // Ninguna peticion legitima de esta app necesita mas de 100 KB: corta cuerpos gigantes.
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 100 * 1024);
 
@@ -142,12 +146,17 @@ app.Use(async (context, next) =>
 });
 
 // La API tambien sirve la web ya compilada (carpeta wwwroot): un solo puerto y un solo enlace.
+app.UseResponseCompression();
 app.UseDefaultFiles();
-// Los archivos con hash (assets/) pueden cachearse; el index.html no, para ver siempre la ultima version.
+// index.html nunca se conserva, para ver siempre la ultima version. Lo de assets/ lleva un hash en el nombre que
+// cambia con su contenido, asi que se guarda un ano sin volver a preguntar. El resto (fondo, icono) se guarda un dia.
 static StaticFileOptions WebFiles() => new()
 {
     OnPrepareResponse = context =>
-        context.Context.Response.Headers.CacheControl = context.File.Name == "index.html" ? "no-cache" : "public,max-age=86400"
+        context.Context.Response.Headers.CacheControl =
+            context.File.Name == "index.html" ? "no-cache"
+            : context.Context.Request.Path.StartsWithSegments("/assets") ? "public,max-age=31536000,immutable"
+            : "public,max-age=86400"
 };
 app.UseStaticFiles(WebFiles());
 

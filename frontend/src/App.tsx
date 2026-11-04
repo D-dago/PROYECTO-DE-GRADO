@@ -1,14 +1,17 @@
-﻿import './App.css'
+import { lazy, Suspense } from 'react'
+import './App.css'
 import { Header } from './components/Header'
 import { FallingPetals } from './components/FallingPetals'
-import { TestPage } from './pages/TestPage'
-import { AccessPage } from './pages/AccessPage'
-import { RecommendationsPage } from './pages/RecommendationsPage'
-import { HistoryPage } from './pages/HistoryPage'
-import { AdminPage } from './pages/AdminPage'
-import { ProfilePage } from './pages/ProfilePage'
-import { SkinsPage } from './pages/SkinsPage'
 import { getTokenRole } from './services/auth'
+
+// Cada pagina se descarga solo cuando se visita: un estudiante en el celular no paga por el panel de administrador.
+const TestPage = lazy(() => import('./pages/TestPage').then((module) => ({ default: module.TestPage })))
+const AccessPage = lazy(() => import('./pages/AccessPage').then((module) => ({ default: module.AccessPage })))
+const RecommendationsPage = lazy(() => import('./pages/RecommendationsPage').then((module) => ({ default: module.RecommendationsPage })))
+const HistoryPage = lazy(() => import('./pages/HistoryPage').then((module) => ({ default: module.HistoryPage })))
+const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const SkinsPage = lazy(() => import('./pages/SkinsPage').then((module) => ({ default: module.SkinsPage })))
 
 function App() {
   const path = window.location.pathname
@@ -19,7 +22,9 @@ function App() {
     <>
       <FallingPetals />
       <Header />
-      {renderPage()}
+      <Suspense fallback={<main className="content-shell"><p className="status-message">Cargando...</p></main>}>
+        {renderPage()}
+      </Suspense>
     </>
   )
 

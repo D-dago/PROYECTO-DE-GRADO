@@ -25,16 +25,18 @@ html {
 }
 
 body {
-  /* La imagen se ve casi completa; solo un velo suave arriba y abajo. La legibilidad
-     la dan los paneles de cristal (.glass), no oscureciendo la imagen. */
-  background: linear-gradient(180deg, rgba(15, 4, 12, .22), rgba(15, 4, 12, 0) 35%, rgba(15, 4, 12, .38)) fixed, url('/fondo.jpg') 22% center / cover no-repeat fixed, var(--bg-2);
   color: var(--cream);
   min-height: 100vh;
 }
 
+/* La imagen se ve casi completa; solo un velo suave arriba y abajo. La legibilidad la dan los paneles
+   de cristal. Va en una capa fija propia y no con "background-attachment: fixed": eso obliga a redibujar
+   toda la imagen en cada desplazamiento y en celulares la agranda o la hace saltar. */
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(15, 4, 12, .22), rgba(15, 4, 12, 0) 35%, rgba(15, 4, 12, .38)), url('/fondo.jpg') 22% center / cover no-repeat; }
+
 /* Petalos de sakura cayendo sobre el fondo, en toda la app */
 .petalos-capa { position: fixed; inset: 0; overflow: hidden; z-index: 1; pointer-events: none; }
-.petalo { position: absolute; top: -8vh; color: #f6b9d6; animation-name: caer-petalo; animation-timing-function: linear; animation-iteration-count: infinite; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .25)); }
+.petalo { position: absolute; top: -8vh; color: #f6b9d6; animation-name: caer-petalo; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
 @keyframes caer-petalo {
   0% { transform: translate(0, 0) rotate(0deg); }
   100% { transform: translate(var(--deriva), 118vh) rotate(var(--giro)); }
@@ -236,10 +238,14 @@ html, body { overflow-x: clip; }
 img, svg { max-width: 100%; }
 
 @media (max-width: 640px) {
-  /* "background-attachment: fixed" falla en celulares (la imagen se agranda o salta):
-     el fondo va en una capa fija propia. */
-  body { background: none; }
-  body::before { content: ''; position: fixed; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(15, 4, 12, .22), rgba(15, 4, 12, 0) 35%, rgba(15, 4, 12, .38)), url('/fondo.jpg') 30% center / cover no-repeat; }
+  body::before { background-position: 0 0, 30% center; }
+
+  /* El desenfoque de los paneles es de lo mas costoso para un celular: se cambia por un fondo mas opaco
+     que conserva la legibilidad. Y con la mitad de los petalos basta en una pantalla tan pequena. */
+  .form-shell, .content-shell, .hero-shell, .test-header { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(22, 6, 20, .88); }
+  .quiz-panel, .result-panel { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(20, 6, 18, .92); }
+  .app-header { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .petalo:nth-child(even) { display: none; }
 
   main { padding: 1.5rem 1rem; }
   h1 { max-width: none; font-size: clamp(1.8rem, 9vw, 2.6rem); margin-bottom: 1.2rem; }

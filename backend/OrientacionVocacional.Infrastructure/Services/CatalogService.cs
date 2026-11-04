@@ -21,7 +21,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
 
     public async Task<IReadOnlyList<CareerResponse>> GetCareersAsync(CancellationToken cancellationToken)
     {
-        var careers = await db.Careers.AsNoTracking().Include(item => item.Institution).Include(item => item.Compatibilities)
+        var careers = await db.Careers.AsNoTracking().Include(item => item.Institution)
             .Where(item => item.IsActive && item.Institution.IsActive).OrderBy(item => item.Name).ToListAsync(cancellationToken);
         return careers.Select(item => ToCareer(item, 0, "Compatibilidad pendiente de regla.")).ToList();
     }
@@ -67,7 +67,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
 
     public async Task<RecommendationResponse?> GetRecommendationsAsync(Guid userId, RecommendationFilterRequest filter, CancellationToken cancellationToken)
     {
-        var profile = await db.RiasecProfiles.Include(item => item.TestAttempt).Where(item => item.TestAttempt.UserId == userId && item.AlgorithmVersion == RiasecTestConstants.Version).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
+        var profile = await db.RiasecProfiles.AsNoTracking().Where(item => item.TestAttempt.UserId == userId && item.AlgorithmVersion == RiasecTestConstants.Version).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
         // Solo cuenta un perfil del test vigente (RIASEC-12-V2): los perfiles de otras versiones
         // (el CHASIDE que se aplico un tiempo) usan letras con otro significado y darian
         // recomendaciones sin sentido; hay que repetir el test.

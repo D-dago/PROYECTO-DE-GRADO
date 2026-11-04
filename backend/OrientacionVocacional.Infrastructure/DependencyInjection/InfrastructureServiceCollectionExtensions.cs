@@ -28,7 +28,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
         services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.SectionName));
-        services.AddHttpClient("ai");
+        // Sin este tope, un proveedor de IA lento dejaba al estudiante hasta 100 s esperando su resultado.
+        services.AddHttpClient("ai", client => client.Timeout = TimeSpan.FromSeconds(15));
         services.AddHttpClient("google");
         services.AddHttpClient(SiteFramingService.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(6));
         services.AddMemoryCache();
