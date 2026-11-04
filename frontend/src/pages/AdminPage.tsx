@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { appApi } from '../services/appApi'
 import type { AdminQuestion, AdminResult, AdminUser, Career, Compatibility, Institution } from '../services/appApi'
 import { QuestionsSection, ResultsSection } from './AdminExtras'
@@ -26,6 +27,12 @@ export function AdminPage() {
     if (isError) { setError(message); setSuccess('') } else { setSuccess(message); setError('') }
   }
 
+  useEffect(() => {
+    if (!success && !error) return
+    const timer = setTimeout(() => { setSuccess(''); setError('') }, 6000)
+    return () => clearTimeout(timer)
+  }, [success, error])
+
   async function loadAll(silent = false) {
     try {
       const [dashboardData, institutionsData, careersData, compatibilitiesData, usersData, questionsData, resultsData] = await Promise.all([
@@ -39,22 +46,30 @@ export function AdminPage() {
       setCompatibilities(compatibilitiesData)
       setStudents(usersData.filter((user) => user.role === 'ESTUDIANTE'))
     } catch (loadError) {
-      // Una actualizacion automatica que falla no debe tapar lo que el administrador esta haciendo.
-      if (!silent) report(loadError instanceof Error ? loadError.message : 'Se requiere una sesión de administrador.', true)
+      // Una actualizacion automatica que falla no debe tapar lo que el administrador esta haciendo: se reintenta sola.
+      if (silent) throw loadError
+      report(loadError instanceof Error ? loadError.message : 'Se requiere una sesión de administrador.', true)
     }
   }
 
   useEffect(() => { void loadAll() }, [])
-  useLiveData(['catalog', 'activity'], () => { void loadAll(true) })
+  useLiveData(['catalog', 'activity'], () => loadAll(true))
+
+  const activeInstitutions = new Set(institutions.filter((item) => item.isActive).map((item) => item.id))
+  const visibleCounts: Partial<Record<keyof NonNullable<DashboardData>, number>> = {
+    institutions: activeInstitutions.size,
+    careers: careers.filter((career) => career.isActive && activeInstitutions.has(career.institutionId)).length,
+  }
 
   return (
     <main className="content-shell">
       <span className="eyebrow">Solo administrador</span>
       <h1>Panel de datos</h1>
-      {dashboard && <div className="dashboard-grid">{dashboardLabels.map(([key, label]) => <strong key={key}>{dashboard[key]}<small> {label}</small></strong>)}</div>}
+      {dashboard && <div className="dashboard-grid">{dashboardLabels.map(([key, label]) => <strong key={key}>{dashboard[key]}<small> {label}{visibleCounts[key] !== undefined ? ` (${visibleCounts[key]} las ve el estudiante)` : ''}</small></strong>)}</div>}
       <p className="empty-state">Carga únicamente información institucional verificada. Este panel y las pantallas abiertas de los estudiantes se actualizan solos en unos segundos.</p>
-      {success && <p className="success-message">{success}</p>}
-      {error && <p className="error-message">{error}</p>}
+      {/* Fijo abajo: el panel es largo y un aviso arriba de todo quedaba fuera de la vista al hacer clic. Va fuera
+          del panel porque su efecto de cristal haria que "fixed" se mida desde el panel y no desde la pantalla. */}
+      {(success || error) && createPortal(<p className={`admin-toast ${error ? 'admin-toast-error' : ''}`} role="status">{error || success}</p>, document.body)}
 
       <InstitutionsSection institutions={institutions} onChanged={() => void loadAll()} report={report} />
       <CareersSection careers={careers} institutions={institutions} onChanged={() => void loadAll()} report={report} />
@@ -86,15 +101,19 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
   }
 
   async function toggleActive(institution: Institution) {
-    try { await appApi.setInstitutionActive(institution.id, !institution.isActive); onChanged() }
-    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
+    try {
+      await appApi.setInstitutionActive(institution.id, !institution.isActive)
+      report(institution.isActive ? `${institution.name}: oculta. El estudiante ya no la ve.` : `${institution.name}: activa. El estudiante ya la ve.`)
+      onChanged()
+    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
   }
 
   return (
     <section className="admin-section" id="instituciones">
-      <h2>Instituciones</h2>
+      <h2>Instituciones <small className="admin-count">{institutions.filter((item) => item.isActive).length} de {institutions.length} las ve el estudiante</small></h2>
       <div className="admin-list">
-        {[...institutions].sort((a, b) => Number(b.isActive) - Number(a.isActive)).map((institution) => (
+        {/* Orden fijo: si la fila cambiara de lugar al hacer clic, parece que el boton no hizo nada. */}
+        {institutions.map((institution) => (
           <div className="admin-row" key={institution.id}>
             <div className="admin-row-main">
               <strong>{institution.name}</strong>
@@ -151,15 +170,29 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
   }
 
   async function toggleActive(career: Career) {
-    try { await appApi.setCareerActive(career.id, !career.isActive); onChanged() }
-    catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
+    try {
+      await appApi.setCareerActive(career.id, !career.isActive)
+      report(career.isActive ? `${career.name}: oculta. El estudiante ya no la ve.` : `${career.name}: activa. El estudiante ya la ve.`)
+      onChanged()
+    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
+  }
+
+  // Si la institucion esta inactiva, activar solo la carrera no la haria visible: se activan las dos.
+  async function showCareer(career: Career) {
+    try {
+      await appApi.setInstitutionActive(career.institutionId, true)
+      if (!career.isActive) await appApi.setCareerActive(career.id, true)
+      report(`${career.institutionName} y sus carreras activas: el estudiante ya las ve.`)
+      onChanged()
+    } catch (error) { report(error instanceof Error ? error.message : 'No se pudo cambiar el estado.', true) }
   }
 
   return (
     <section className="admin-section" id="carreras">
-      <h2>Carreras</h2>
+      <h2>Carreras <small className="admin-count">{careers.filter(isVisible).length} de {careers.length} las ve el estudiante</small></h2>
       <div className="admin-list">
-        {[...careers].sort((a, b) => Number(isVisible(b)) - Number(isVisible(a))).map((career) => (
+        {/* Agrupadas por institucion y en orden fijo: la fila no se mueve al hacer clic. */}
+        {[...careers].sort((a, b) => a.institutionName.localeCompare(b.institutionName) || a.name.localeCompare(b.name)).map((career) => (
           <div className="admin-row" key={career.id}>
             <div className="admin-row-main">
               <strong>{career.name}</strong>
@@ -168,7 +201,9 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
             <div className="admin-row-actions">
               <span className={`badge ${isVisible(career) ? 'badge-active' : 'badge-inactive'}`}>{isVisible(career) ? 'La ve el estudiante' : career.isActive ? 'Oculta: institución inactiva' : 'Oculta'}</span>
               <button type="button" onClick={() => setEditing(career)}>Editar</button>
-              <button type="button" onClick={() => void toggleActive(career)}>{career.isActive ? 'Desactivar' : 'Activar'}</button>
+              {institutionActive.get(career.institutionId) === false
+                ? <button type="button" onClick={() => void showCareer(career)}>Activar institución</button>
+                : <button type="button" onClick={() => void toggleActive(career)}>{career.isActive ? 'Desactivar' : 'Activar'}</button>}
             </div>
           </div>
         ))}
@@ -203,6 +238,8 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
 function CompatibilitiesSection({ compatibilities, careers, onChanged, report }: { compatibilities: Compatibility[]; careers: Career[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Compatibility | null>(null)
   const formulario = useFormularioDeEdicion(editing)
+  // Varias universidades ofrecen carreras con el mismo nombre: sin esto no se sabe de cual es la regla.
+  const institutionOf = new Map(careers.map((career) => [career.id, career.institutionName]))
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -231,7 +268,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
         {compatibilities.map((compatibility) => (
           <div className="admin-row" key={compatibility.id}>
             <div className="admin-row-main">
-              <strong>{compatibility.careerName}</strong>
+              <strong>{compatibility.careerName} · {institutionOf.get(compatibility.careerId) ?? 'Sin institución'}</strong>
               <small>{compatibility.dimension} · nivel {compatibility.compatibilityLevel} · {compatibility.rule}</small>
             </div>
             <div className="admin-row-actions">
@@ -247,7 +284,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
         <label>Carrera
           <select name="careerId" defaultValue={editing?.careerId ?? ''} required disabled={Boolean(editing)}>
             <option value="" disabled>Selecciona una carrera</option>
-            {careers.map((career) => <option key={career.id} value={career.id}>{career.name}</option>)}
+            {careers.map((career) => <option key={career.id} value={career.id}>{career.name} · {career.institutionName}</option>)}
           </select>
         </label>
         {editing && <small>La carrera de una regla existente no se puede cambiar; elimina y crea una nueva si es necesario.</small>}

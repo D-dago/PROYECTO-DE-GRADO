@@ -9,7 +9,7 @@ import { useLiveCareers } from '../services/liveData'
 export function RecommendationsPage() {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
   const [error, setError] = useState<string | null>(null)
-  useLiveCareers(setRecommendation)
+  useLiveCareers(recommendation, setRecommendation)
 
   useEffect(() => {
     appApi.recommendations({})

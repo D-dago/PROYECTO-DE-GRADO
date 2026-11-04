@@ -108,6 +108,10 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .admin-row-result[open] summary::after { content: 'Ocultar ▴'; color: var(--accent-dark); }
 .admin-result-detail { margin-top: 1rem; padding: 1.2rem; border-radius: 10px; background: #1f0a19; }
 .admin-result-detail h3 { color: var(--cream); margin: 0 0 .8rem; }
+.admin-count { margin-left: .4rem; color: var(--cream-muted); font-size: .85rem; font-weight: 400; }
+/* Aviso del panel: siempre a la vista, sin tapar los clics del resto de la pantalla. */
+.admin-toast { position: fixed; left: 50%; bottom: 1.2rem; z-index: 20; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 2rem); margin: 0; padding: .8rem 1.2rem; border-radius: 12px; background: #135c3d; color: #fff; font-weight: 600; box-shadow: 0 12px 30px rgba(0, 0, 0, .5); pointer-events: none; }
+.admin-toast-error { background: #a3123f; }
 .badge { padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
 .badge-active { background: var(--soft-accent); color: var(--green); }
 .badge-inactive { background: #f0f0ec; color: var(--muted); }
