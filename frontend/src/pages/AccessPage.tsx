@@ -8,13 +8,13 @@ import { getTokenRole } from '../services/auth'
 
 export function AccessPage({ register = false }: { register?: boolean }) {
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
 
+  // Se carga una pagina nueva para que el encabezado muestre la sesion: quedarse aqui con un mensaje dejaba
+  // "Iniciar sesion" a la vista y parecia que el acceso habia fallado. El estudiante va a la portada y no al
+  // test, porque abrir el test crea un intento y arranca el cronometro aunque solo quisiera ver su historial.
   const finish = useCallback((accessToken: string) => {
     localStorage.setItem('accessToken', accessToken)
-    setIsAdmin(getTokenRole(accessToken) === 'ADMINISTRADOR')
-    setDone(true)
+    window.location.href = getTokenRole(accessToken) === 'ADMINISTRADOR' ? '/admin' : '/'
   }, [])
   const fail = useCallback((message: string) => setError(message), [])
 
@@ -33,35 +33,21 @@ export function AccessPage({ register = false }: { register?: boolean }) {
   return (
     <main className="form-shell">
       <span className="eyebrow">Orientación vocacional</span>
-      <h1>{done && isAdmin ? 'Bienvenido, administrador' : register ? 'Crear cuenta' : 'Iniciar sesión'}</h1>
-      {done && isAdmin ? (
-        <>
-          <p className="success-message">Sesión de administrador iniciada. Desde aquí gestionas preguntas, carreras y estudiantes, y descargas los resultados en Excel o PDF.</p>
-          <a className="start-link" href="/admin">Ir al panel de administración</a>
-        </>
-      ) : done ? (
-        <>
-          <p className="success-message">Acceso correcto. Ya puedes continuar con tu perfil y test.</p>
-          <a className="start-link" href="/test">Ir al test vocacional</a>
-        </>
-      ) : (
-        <>
-          <form onSubmit={submit} className="simple-form">
-            {register && (
-              <>
-                <label>Nombre<input name="firstName" required onInput={lettersOnly} {...inputRules.name} /></label>
-                <label>Apellido<input name="lastName" required onInput={lettersOnly} {...inputRules.name} /></label>
-              </>
-            )}
-            <label>Correo<input name="email" type="email" required maxLength={254} autoComplete="email" /></label>
-            <label>Contraseña<PasswordInput name="password" minLength={8} maxLength={64} {...(register ? { pattern: '(?=.*\\p{L})(?=.*\\d).{8,64}', title: 'De 8 a 64 caracteres, con al menos una letra y un número.' } : {})} required autoComplete={register ? 'new-password' : 'current-password'} /></label>
-            <button type="submit">{register ? 'Registrarme' : 'Entrar'}</button>
-          </form>
-          <div className="form-divider">o</div>
-          <GoogleButton onSuccess={finish} onError={fail} />
-          {error && <p className="error-message">{error}</p>}
-        </>
-      )}
+      <h1>{register ? 'Crear cuenta' : 'Iniciar sesión'}</h1>
+      <form onSubmit={submit} className="simple-form">
+        {register && (
+          <>
+            <label>Nombre<input name="firstName" required onInput={lettersOnly} {...inputRules.name} /></label>
+            <label>Apellido<input name="lastName" required onInput={lettersOnly} {...inputRules.name} /></label>
+          </>
+        )}
+        <label>Correo<input name="email" type="email" required maxLength={254} autoComplete="email" /></label>
+        <label>Contraseña<PasswordInput name="password" minLength={8} maxLength={64} {...(register ? { pattern: '(?=.*\\p{L})(?=.*\\d).{8,64}', title: 'De 8 a 64 caracteres, con al menos una letra y un número.' } : {})} required autoComplete={register ? 'new-password' : 'current-password'} /></label>
+        <button type="submit">{register ? 'Registrarme' : 'Entrar'}</button>
+      </form>
+      <div className="form-divider">o</div>
+      <GoogleButton onSuccess={finish} onError={fail} />
+      {error && <p className="error-message">{error}</p>}
     </main>
   )
 }
