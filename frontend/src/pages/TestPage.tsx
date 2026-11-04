@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { riasecApi } from '../services/riasecApi'
 import type { Attempt, Question, RiasecResult } from '../types/riasec'
 import { RiasecResult as ResultView } from '../components/RiasecResult'
@@ -25,6 +25,9 @@ export function TestPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [timeLeft, setTimeLeft] = useState(QUESTION_SECONDS)
+  // El cronometro guarda la funcion answer de cuando arranco, asi que ve "saving" desactualizado. Si el
+  // tiempo se acababa con un clic aun en camino, se enviaba dos veces y el segundo envio mostraba un error.
+  const sending = useRef(false)
 
   async function loadTest() {
     try {
@@ -37,6 +40,9 @@ export function TestPage() {
       setAttempt(loadedAttempt)
       setCurrentIndex(Math.min(loadedAttempt.answered, loadedQuestions.length - 1))
       if (loadedAttempt.status === 'COMPLETED') setResult(await riasecApi.getResult(loadedAttempt.attemptId))
+      // Respondio todo pero el paso final fallo (se corto la red) y recargo la pagina: se termina aqui. Si no,
+      // quedaba frente a la ultima pregunta, ya respondida, sin ninguna forma de terminar el test.
+      else if (loadedAttempt.total > 0 && loadedAttempt.answered >= loadedAttempt.total) setResult(await riasecApi.complete(loadedAttempt.attemptId))
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'No se pudo cargar el test.')
     } finally { setLoading(false) }
@@ -52,20 +58,27 @@ export function TestPage() {
   }, [])
 
   async function answer(value: number) {
-    if (!attempt || !questions[currentIndex] || saving) return
+    if (!attempt || !questions[currentIndex] || sending.current) return
+    sending.current = true
     setSaving(true)
     setError(null)
     try {
-      const updatedAttempt = await riasecApi.submitAnswer(attempt.attemptId, questions[currentIndex].id, value)
+      // Si ya estan todas guardadas es un reintento del paso final: volver a enviar la respuesta se rechazaria.
+      const updatedAttempt = attempt.answered >= attempt.total ? attempt : await riasecApi.submitAnswer(attempt.attemptId, questions[currentIndex].id, value)
       setAttempt(updatedAttempt)
-      if (updatedAttempt.answered === updatedAttempt.total) {
+      window.dispatchEvent(new Event('profile-changed')) // el encabezado se quedaba con las monedas de antes del test
+      if (updatedAttempt.answered >= updatedAttempt.total) {
         const completed = await riasecApi.complete(attempt.attemptId)
         setResult(completed)
         setAttempt({ ...updatedAttempt, status: 'COMPLETED' })
+        window.dispatchEvent(new Event('profile-changed')) // suma el bono por terminar
       } else setCurrentIndex((index) => Math.min(index + 1, questions.length - 1))
     } catch (answerError) {
       setError(answerError instanceof Error ? answerError.message : 'No se pudo guardar la respuesta.')
-    } finally { setSaving(false) }
+    } finally {
+      sending.current = false
+      setSaving(false)
+    }
   }
 
   // Cronometro por pregunta: se reinicia cada vez que cambia currentIndex. Si llega a

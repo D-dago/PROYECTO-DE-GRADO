@@ -10,17 +10,26 @@ const dimensionLabels: [ScoreKey, string][] = [
 
 export function HistoryPage() {
   const [items, setItems] = useState<HistoryEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => { void appApi.history().then(setItems) }, [])
+  useEffect(() => {
+    appApi.history()
+      .then(setItems)
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : 'No se pudo cargar el historial.'))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <main className="content-shell">
       <span className="eyebrow">Seguimiento</span>
       <h1>Historial</h1>
       <p className="empty-state">Cada vez que terminas el test se guarda aquí tu resultado de esa vez, aunque más tarde lo repitas y te salga un perfil distinto.</p>
-      {items.length === 0 ? (
-        <p className="empty-state">Todavía no hay resultados guardados.</p>
-      ) : (
+      {/* Antes, un fallo o la propia espera se mostraban como "todavia no hay resultados". */}
+      {error && <p className="error-message">{error}</p>}
+      {loading && <p className="status-message">Cargando tu historial...</p>}
+      {!loading && !error && items.length === 0 && <p className="empty-state">Todavía no hay resultados guardados.</p>}
+      {items.length > 0 && (
         <div className="history-list">
           {items.map((item) => (
             <details className="history-card" key={item.id}>

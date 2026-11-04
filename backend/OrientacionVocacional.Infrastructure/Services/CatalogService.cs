@@ -57,6 +57,9 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
     {
         if (request.CompatibilityLevel is < 0 or > 100 || request.Dimension.Length != 1) return false;
         if (!await db.Careers.AnyAsync(item => item.Id == request.CareerId, cancellationToken)) return false;
+        // La base solo admite una regla por carrera y dimension: sin esta comprobacion, un duplicado llegaba como error 500.
+        var dimension = request.Dimension.ToUpperInvariant();
+        if (await db.CareerCompatibilities.AnyAsync(item => item.CareerId == request.CareerId && item.Dimension == dimension, cancellationToken)) return false;
         db.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = request.CareerId, Dimension = request.Dimension.ToUpperInvariant(), CompatibilityLevel = request.CompatibilityLevel, Rule = request.Rule.Trim() });
         await db.SaveChangesAsync(cancellationToken);
         return true;
@@ -164,7 +167,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
     public async Task<IReadOnlyList<CompatibilityResponse>> GetCompatibilitiesAsync(CancellationToken cancellationToken) => await db.CareerCompatibilities.AsNoTracking().Include(x => x.Career).OrderBy(x => x.Dimension).Select(x => new CompatibilityResponse(x.Id, x.CareerId, x.Career.Name, x.Dimension, x.CompatibilityLevel, x.Rule)).ToListAsync(cancellationToken);
     public async Task<bool> UpdateCompatibilityAsync(Guid id, CompatibilityRequest request, CancellationToken cancellationToken)
     {
-        var item = await db.CareerCompatibilities.FindAsync([id], cancellationToken); if (item is null) return false; item.Dimension = request.Dimension.ToUpperInvariant(); item.CompatibilityLevel = request.CompatibilityLevel; item.Rule = request.Rule.Trim(); await db.SaveChangesAsync(cancellationToken); return true;
+        var item = await db.CareerCompatibilities.FindAsync([id], cancellationToken); if (item is null) return false; var dimension = request.Dimension.ToUpperInvariant(); if (await db.CareerCompatibilities.AnyAsync(other => other.Id != id && other.CareerId == item.CareerId && other.Dimension == dimension, cancellationToken)) return false; item.Dimension = dimension; item.CompatibilityLevel = request.CompatibilityLevel; item.Rule = request.Rule.Trim(); await db.SaveChangesAsync(cancellationToken); return true;
     }
     public async Task<bool> DeleteCompatibilityAsync(Guid id, CancellationToken cancellationToken) { var item = await db.CareerCompatibilities.FindAsync([id], cancellationToken); if (item is null) return false; db.CareerCompatibilities.Remove(item); await db.SaveChangesAsync(cancellationToken); return true; }
     public async Task<IReadOnlyList<StudentAdminResponse>> GetStudentsAsync(CancellationToken cancellationToken) => await db.Users.AsNoTracking().Where(x => x.Role.Name == RoleNames.Student).OrderBy(x => x.LastName).Select(x => new StudentAdminResponse(x.Id, x.Email, x.FirstName, x.LastName, x.IsActive, x.CreatedAtUtc)).ToListAsync(cancellationToken);

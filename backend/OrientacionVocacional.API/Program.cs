@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -143,14 +143,13 @@ app.Use(async (context, next) =>
 
 // La API tambien sirve la web ya compilada (carpeta wwwroot): un solo puerto y un solo enlace.
 app.UseDefaultFiles();
-app.UseStaticFiles(new StaticFileOptions
+// Los archivos con hash (assets/) pueden cachearse; el index.html no, para ver siempre la ultima version.
+static StaticFileOptions WebFiles() => new()
 {
     OnPrepareResponse = context =>
-    {
-        // Los archivos con hash (assets/) pueden cachearse; el index.html no, para ver siempre la ultima version.
-        context.Context.Response.Headers.CacheControl = context.File.Name == "index.html" ? "no-cache" : "public,max-age=86400";
-    }
-});
+        context.Context.Response.Headers.CacheControl = context.File.Name == "index.html" ? "no-cache" : "public,max-age=86400"
+};
+app.UseStaticFiles(WebFiles());
 
 // UseRouting va DESPUES de los archivos estaticos: si el enrutador corre antes, elige la ruta comodin
 // de abajo (index.html) para cualquier archivo y los .js/.css/.jpg nunca llegan a servirse.
@@ -161,8 +160,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-// Cualquier ruta que no sea de la API (/registro, /test...) devuelve la web; las rutas /api/ inexistentes siguen dando 404.
-app.MapFallbackToFile("{*path:regex(^(?!api/).*$)}", "index.html");
+// Cualquier ruta que no sea de la API ni un archivo (/registro, /test...) devuelve la web; las rutas /api/
+// inexistentes siguen dando 404. Lleva las mismas opciones: sin ellas /test salia sin "no-cache", y un navegador
+// podia conservar un index.html viejo. assets/ se excluye porque responder con HTML a un .js que ya no existe
+// tras recompilar dejaba la pantalla en blanco; ahora da 404 y queda claro en la consola.
+app.MapFallbackToFile("{*path:regex(^(?!api/|assets/).*$)}", "index.html", WebFiles());
 
 app.Run();
 

@@ -40,10 +40,10 @@ public sealed class AdminCatalogController(ICatalogService service) : Controller
     public async Task<ActionResult<IReadOnlyList<CompatibilityResponse>>> Compatibilities(CancellationToken cancellationToken) => Ok(await service.GetCompatibilitiesAsync(cancellationToken));
 
     [HttpPost("compatibilities")]
-    public async Task<IActionResult> AddCompatibility(CompatibilityRequest request, CancellationToken cancellationToken) => await service.AddCompatibilityAsync(request, cancellationToken) ? NoContent() : BadRequest(new { message = "Regla inválida o carrera inexistente." });
+    public async Task<IActionResult> AddCompatibility(CompatibilityRequest request, CancellationToken cancellationToken) => await service.AddCompatibilityAsync(request, cancellationToken) ? NoContent() : BadRequest(new { message = "Regla inválida, carrera inexistente o esa carrera ya tiene una regla para esa dimensión." });
 
     [HttpPut("compatibilities/{id:guid}")]
-    public async Task<IActionResult> UpdateCompatibility(Guid id, CompatibilityRequest request, CancellationToken cancellationToken) => await service.UpdateCompatibilityAsync(id, request, cancellationToken) ? NoContent() : NotFound();
+    public async Task<IActionResult> UpdateCompatibility(Guid id, CompatibilityRequest request, CancellationToken cancellationToken) => await service.UpdateCompatibilityAsync(id, request, cancellationToken) ? NoContent() : BadRequest(new { message = "La regla no existe o esa carrera ya tiene otra regla para esa dimensión." });
 
     [HttpDelete("compatibilities/{id:guid}")]
     public async Task<IActionResult> DeleteCompatibility(Guid id, CancellationToken cancellationToken) => await service.DeleteCompatibilityAsync(id, cancellationToken) ? NoContent() : NotFound();

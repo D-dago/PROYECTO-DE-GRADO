@@ -103,11 +103,13 @@ public sealed class TestService(
             return (false, "Esa pregunta no forma parte de este intento.", null);
         }
 
+        // No se exige que siga activa: ya fue asignada a este intento. Si el administrador la desactiva
+        // mientras alguien hace el test, rechazarla dejaria ese intento imposible de terminar.
         var question = await dbContext.Questions
-            .SingleOrDefaultAsync(candidate => candidate.Id == request.QuestionId && candidate.IsActive, cancellationToken);
+            .SingleOrDefaultAsync(candidate => candidate.Id == request.QuestionId, cancellationToken);
         if (question is null)
         {
-            return (false, "La pregunta no existe o no está activa.", null);
+            return (false, "La pregunta no existe.", null);
         }
         if (attempt.Answers.Any(answer => answer.QuestionId == request.QuestionId))
         {
