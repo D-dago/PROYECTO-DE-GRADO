@@ -31,7 +31,7 @@ public static class InfrastructureServiceCollectionExtensions
         // Sin este tope, un proveedor de IA lento dejaba al estudiante hasta 100 s esperando su resultado.
         services.AddHttpClient("ai", client => client.Timeout = TimeSpan.FromSeconds(15));
         services.AddHttpClient("google");
-        services.AddHttpClient(SiteFramingService.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(6));
+        services.AddHttpClient(SiteFramingService.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
         services.AddMemoryCache();
         services.AddScoped<ISiteFramingService, SiteFramingService>();
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();

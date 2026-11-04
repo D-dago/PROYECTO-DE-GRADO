@@ -25,7 +25,7 @@ public sealed class SiteFramingService(OrientacionVocacionalDbContext db, IHttpC
         if (string.IsNullOrWhiteSpace(website)) return null;
 
         var cacheKey = $"site-check:{website}";
-        if (cache.TryGetValue(cacheKey, out bool embeddable)) return new SiteCheckResponse(embeddable);
+        if (cache.TryGetValue(cacheKey, out SiteCheckResponse? cached) && cached is not null) return cached;
 
         try
         {
@@ -33,18 +33,17 @@ public sealed class SiteFramingService(OrientacionVocacionalDbContext db, IHttpC
             request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (compatible; OrientacionVocacional/1.0)");
             using var response = await httpClientFactory.CreateClient(HttpClientName)
                 .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            embeddable = AllowsFraming(
+            var embeddable = AllowsFraming(
                 response.Headers.TryGetValues("X-Frame-Options", out var frameOptions) ? frameOptions : [],
                 response.Headers.TryGetValues("Content-Security-Policy", out var policies) ? policies : []);
-            cache.Set(cacheKey, embeddable, TimeSpan.FromHours(6));
-            return new SiteCheckResponse(embeddable);
+            return cache.Set(cacheKey, new SiteCheckResponse(embeddable), TimeSpan.FromHours(6));
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or UriFormatException or InvalidOperationException)
         {
-            // Que el servidor no llegue al sitio no significa que el navegador tampoco: se intenta
-            // mostrarlo igual (la ventana siempre ofrece abrirlo aparte) y se reintenta pronto.
-            cache.Set(cacheKey, true, TimeSpan.FromMinutes(5));
-            return new SiteCheckResponse(true);
+            // Sin comprobar no se asume que se puede: un sitio lento que prohibe mostrarse dentro de otra
+            // pagina dejaba al estudiante frente a un recuadro de error. Abrirlo aparte funciona siempre.
+            // Se reintenta pronto para no castigar a un sitio que solo tuvo un mal momento.
+            return cache.Set(cacheKey, new SiteCheckResponse(false, Verified: false), TimeSpan.FromMinutes(1));
         }
     }
 

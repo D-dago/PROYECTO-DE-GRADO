@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { appApi } from '../services/appApi'
 
-type WindowState = 'checking' | 'embedded' | 'blocked'
+type WindowState = 'checking' | 'embedded' | 'blocked' | 'unverified'
 
 /**
  * Ventana dentro de la misma pagina con el sitio oficial de una institucion.
@@ -28,9 +28,9 @@ export function SiteWindow({ institutionId, name, website, onClose }: { institut
       void Promise.resolve().then(() => { if (active) setState('blocked') })
     } else {
       void appApi.siteCheck(institutionId)
-        .then((result) => { if (active) setState(result.embeddable ? 'embedded' : 'blocked') })
-        // Si la comprobacion falla se intenta mostrar igual: abrirlo aparte sigue disponible arriba.
-        .catch(() => { if (active) setState('embedded') })
+        .then((result) => { if (active) setState(result.embeddable ? 'embedded' : result.verified ? 'blocked' : 'unverified') })
+        // Sin comprobar no se intenta mostrar: si el sitio lo prohibe, solo se veria un recuadro de error.
+        .catch(() => { if (active) setState('unverified') })
     }
     return () => { active = false }
   }, [institutionId, website])
@@ -44,9 +44,9 @@ export function SiteWindow({ institutionId, name, website, onClose }: { institut
       </header>
       <div className="site-window-body">
         {state === 'checking' && <p className="site-window-message">Preparando el sitio...</p>}
-        {state === 'blocked' && (
+        {(state === 'blocked' || state === 'unverified') && (
           <div className="site-window-message">
-            <p>Esta institución no permite mostrar su sitio dentro de otra página.</p>
+            <p>{state === 'blocked' ? 'Esta institución no permite mostrar su sitio dentro de otra página.' : 'Este sitio está tardando en responder. Puedes abrirlo en otra pestaña.'}</p>
             <a className="start-link" href={website} target="_blank" rel="noopener noreferrer">Abrir su sitio oficial ↗</a>
           </div>
         )}

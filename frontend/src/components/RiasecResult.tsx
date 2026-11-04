@@ -55,7 +55,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
             <h2 className="result-heading">Áreas profesionales afines</h2>
             <div className="area-chips">{interpretation.suggestedAreas.map((area) => <span key={area} className="area-chip">{area}</span>)}</div>
 
-            <h2 className="result-heading">Universidades e institutos de Cochabamba para ti</h2>
+            <h2 className="result-heading">Carreras para ti y dónde estudiarlas en Cochabamba</h2>
             <UniversityLinks careers={recommendation.items} />
           </>
         )}

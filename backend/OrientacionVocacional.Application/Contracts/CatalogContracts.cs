@@ -12,7 +12,7 @@ public sealed record HistoryResponse(
     ProfileInterpretationResponse? Interpretation);
 public sealed record AdminDashboardResponse(int Students, int Institutions, int Careers, int CompatibilityRules);
 public sealed record CompatibilityResponse(Guid Id, Guid CareerId, string CareerName, string Dimension, int CompatibilityLevel, string Rule);
-public sealed record SiteCheckResponse(bool Embeddable);
+public sealed record SiteCheckResponse(bool Embeddable, bool Verified = true);
 public sealed record StudentAdminResponse(Guid Id, string Email, string FirstName, string LastName, bool IsActive, DateTime CreatedAtUtc);
 
 public sealed class InstitutionRequest

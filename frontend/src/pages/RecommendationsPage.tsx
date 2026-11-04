@@ -20,7 +20,7 @@ export function RecommendationsPage() {
   return (
     <main className="content-shell">
       <span className="eyebrow">Según tu último test</span>
-      <h1>Dónde estudiar en Cochabamba</h1>
+      <h1>Dónde estudiar tu carrera en Cochabamba</h1>
       {error && (
         <>
           <p className="empty-state">{error}</p>

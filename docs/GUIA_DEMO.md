@@ -18,7 +18,7 @@ Para comprobar antes de empezar que todo está encendido: `GET /health` debe res
 4. Abre `/test` y responde las 12 preguntas (2 por cada una de las 6 dimensiones RIASEC, sorteadas del banco de 60).
 5. Muestra el resultado: código del perfil, tarjetas por dimensión, puntajes, explicación y el aviso de orientación no diagnóstica.
 6. Abre `/recomendaciones`; inicialmente puede mostrar que no existen alternativas si el catálogo está vacío.
-7. Muestra las universidades compatibles y abre el sitio oficial de una en la ventana interna.
+7. Muestra las carreras compatibles, con las universidades e institutos de Cochabamba que las ofrecen, y abre un sitio oficial en la ventana interna.
 8. Abre `/historial`: hay una entrada por test terminado y se despliega con el detalle completo del perfil.
 9. Abre `/skins` para mostrar las monedas ganadas y el cambio de avatar.
 10. Cierra sesión con el botón "Salir".

@@ -2,9 +2,10 @@ import { useState } from 'react'
 import type { Career } from '../services/appApi'
 import { SiteWindow } from './SiteWindow'
 
-const CARRERAS_POR_INSTITUCION = 4
+const CARRERAS_INICIALES = 8
 
-type InstitutionGroup = { id: string; name: string; website: string | null; careers: Career[] }
+type InstitutionOption = { id: string; name: string; website: string | null }
+type CareerGroup = { key: string; name: string; compatibility: number; reason: string; institutions: InstitutionOption[] }
 
 // La direccion viene de la base de datos: se vuelve a comprobar aqui para que nunca llegue a un enlace
 // o a la ventana interna algo que no sea una pagina web (por ejemplo "javascript:").
@@ -18,48 +19,72 @@ function safeWebsite(website?: string | null): string | null {
   }
 }
 
-/** Agrupa las carreras por institucion y pone primero la institucion con la carrera mas compatible. */
-function groupByInstitution(careers: Career[]): InstitutionGroup[] {
-  const groups = new Map<string, InstitutionGroup>()
+// Sin tildes ni mayusculas, para no separar "Ingenieria" de "Ingeniería" si el administrador la escribe distinto.
+function careerKey(name: string) {
+  return name.normalize('NFD').replace(/\p{M}/gu, '').trim().toLowerCase()
+}
+
+/** Una tarjeta por carrera, con todas las instituciones de Cochabamba que la ofrecen. */
+function groupByCareer(careers: Career[]): CareerGroup[] {
+  const groups = new Map<string, CareerGroup>()
   for (const career of careers) {
     // 0 % significa que la carrera no tiene regla de compatibilidad: no es una recomendacion.
     if (career.compatibility <= 0) continue
-    const group = groups.get(career.institutionId)
-    if (group) group.careers.push(career)
-    else groups.set(career.institutionId, { id: career.institutionId, name: career.institutionName, website: safeWebsite(career.institutionWebsite), careers: [career] })
+    const key = careerKey(career.name)
+    const group = groups.get(key) ?? { key, name: career.name, compatibility: 0, reason: career.compatibilityReason, institutions: [] }
+    if (career.compatibility > group.compatibility) {
+      group.compatibility = career.compatibility
+      group.reason = career.compatibilityReason
+    }
+    if (!group.institutions.some((item) => item.id === career.institutionId)) {
+      group.institutions.push({ id: career.institutionId, name: career.institutionName, website: safeWebsite(career.institutionWebsite) })
+    }
+    groups.set(key, group)
   }
-  const best = (group: InstitutionGroup) => Math.max(...group.careers.map((career) => career.compatibility))
   return [...groups.values()]
-    .map((group) => ({ ...group, careers: [...group.careers].sort((a, b) => b.compatibility - a.compatibility) }))
-    .sort((a, b) => best(b) - best(a))
+    .map((group) => ({ ...group, institutions: [...group.institutions].sort((a, b) => a.name.localeCompare(b.name)) }))
+    .sort((a, b) => b.compatibility - a.compatibility || a.name.localeCompare(b.name))
 }
 
 export function UniversityLinks({ careers }: { careers: Career[] }) {
-  const [open, setOpen] = useState<(InstitutionGroup & { website: string }) | null>(null)
-  const groups = groupByInstitution(careers)
+  const [open, setOpen] = useState<(InstitutionOption & { website: string }) | null>(null)
+  const [showAll, setShowAll] = useState(false)
+  const groups = groupByCareer(careers)
 
   if (groups.length === 0) {
-    return <p className="result-note">Todavía no hay instituciones con carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
+    return <p className="result-note">Todavía no hay carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
   }
+
+  const visible = showAll ? groups : groups.slice(0, CARRERAS_INICIALES)
 
   return (
     <>
-      <p className="result-note university-note">Consulta costos, ubicación y requisitos actualizados en la página oficial de cada institución.</p>
+      <p className="result-note university-note">Cada carrera muestra las universidades e institutos de Cochabamba donde la encontramos. Confirma costos, ubicación, requisitos y sede en la página oficial de cada uno.</p>
       <div className="university-grid">
-        {groups.map((group) => (
-          <article className="university-card" key={group.id}>
-            <h3>{group.name}</h3>
+        {visible.map((group) => (
+          <article className="university-card" key={group.key} title={group.reason}>
+            <header className="university-card-top">
+              <h3>{group.name}</h3>
+              <strong>{group.compatibility}%</strong>
+            </header>
             <ul>
-              {group.careers.slice(0, CARRERAS_POR_INSTITUCION).map((career) => (
-                <li key={career.id} title={career.compatibilityReason}><span>{career.name}</span><strong>{career.compatibility}%</strong></li>
+              {group.institutions.map((institution) => (
+                <li key={institution.id}>
+                  <span>{institution.name}</span>
+                  {institution.website
+                    ? <button type="button" onClick={() => setOpen({ ...institution, website: institution.website! })} aria-label={`Ver sitio oficial de ${institution.name}`}>Ver sitio</button>
+                    : <small>Sin sitio oficial</small>}
+                </li>
               ))}
             </ul>
-            {group.website
-              ? <button type="button" onClick={() => setOpen({ ...group, website: group.website! })}>Ver sitio oficial</button>
-              : <small>Enlace oficial pendiente de confirmar</small>}
           </article>
         ))}
       </div>
+      {groups.length > CARRERAS_INICIALES && (
+        <button type="button" className="university-more" onClick={() => setShowAll((current) => !current)}>
+          {showAll ? 'Ver menos carreras' : `Ver las ${groups.length} carreras`}
+        </button>
+      )}
       {open && <SiteWindow key={open.id} institutionId={open.id} name={open.name} website={open.website} onClose={() => setOpen(null)} />}
     </>
   )

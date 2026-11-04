@@ -5,7 +5,7 @@ import { Avatar } from './Avatar'
 
 const links = [
   { path: '/test', label: 'Test vocacional' },
-  { path: '/recomendaciones', label: 'Universidades' },
+  { path: '/recomendaciones', label: 'Dónde estudiar' },
   { path: '/historial', label: 'Historial' },
   { path: '/skins', label: 'Skins' },
   { path: '/perfil', label: 'Perfil' },

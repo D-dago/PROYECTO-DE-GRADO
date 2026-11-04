@@ -70,7 +70,7 @@ El flujo es: resultado del test, reglas deterministas, compatibilidad y universi
 
 ## 11. USAR LOS FILTROS
 
-Se muestran universidades e institutos de Cochabamba. Cada una presenta sus carreras más compatibles y el botón **Ver sitio oficial**, que abre su página en una ventana dentro del sistema. Si la institución no permite mostrarse dentro de otra página, se ofrece abrirla en otra pestaña. Costos, ubicación y requisitos se consultan en ese sitio oficial. Solo se muestran registros activos; una institución sin página confirmada aparece sin enlace.
+Se muestra una tarjeta por carrera compatible, con las universidades e institutos de Cochabamba que la ofrecen. Cada uno tiene el botón **Ver sitio**, que abre su página en una ventana dentro del sistema. Si la institución no permite mostrarse dentro de otra página, se ofrece abrirla en otra pestaña. Costos, ubicación y requisitos se consultan en ese sitio oficial. Solo se muestran registros activos; una institución sin página confirmada aparece sin enlace.
 
 ## 12. COMPARAR CARRERAS
 

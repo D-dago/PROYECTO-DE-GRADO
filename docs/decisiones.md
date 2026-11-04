@@ -23,6 +23,22 @@ Este script no se sube a git porque contiene la contraseña local de la base de 
 - Un fallo de compilación o una API que no responde detienen el script con un mensaje.
 - Si el túnel falla, el script recuerda que la página sigue disponible en la PC y en la misma red Wi-Fi.
 
+## 2026-11-04: Toda institución de Cochabamba que ofrezca la carrera
+
+**Decisión:** el estudiante ve una tarjeta por carrera con las universidades e institutos de Cochabamba que la ofrecen, en vez de una tarjeta por institución.
+
+**Alcance real:** "todas" significa todas las que tienen información comprobable. La prensa y un estudio municipal hablan de entre 72 y 170 institutos en Cochabamba, muchos sin sitio web, así que el catálogo no es exhaustivo y debe crecer desde el panel.
+
+**Se agregaron:** UCB, UPAL, UNITEPC, Salesiana, EMI, ULAT, Unifranz, UPDS e INFOCAL. INCOS N.° 3 de Quillacollo se reactivó sin enlace porque no tiene sitio oficial.
+
+**No se cargaron:** UDABOL y Nur (sus sitios no mencionan Cochabamba), Universidad Adventista (su sitio no permite leer la oferta sin navegador) e Instituto Álvarez Plata (sin evidencia de que exista en Cochabamba).
+
+**Nombres:** las denominaciones oficiales distintas se unifican para agrupar (por ejemplo, Ciencias Jurídicas pasa a Derecho) y la fuente de cada carrera guarda el nombre original. Un título técnico y una licenciatura de nombre parecido siguen separados cuando su nombre difiere.
+
+**Ventana interna:** si el servidor no logra comprobar un sitio en 10 segundos, ya no se asume que admite mostrarse dentro de la página: se ofrece otra pestaña y se reintenta al minuto. UNITEPC, Salesiana, EMI y UPEA prohíben la ventana interna.
+
+**Pendiente:** en UPB, TECBA, ULAT, Unifranz y UPDS la página no indica la sede de cada carrera, por lo que quedan en `CONFIRMAR SEDE`, aunque el estudiante las ve. Los niveles de compatibilidad son una propuesta que debe aprobar el autor de la tesis.
+
 ## 2026-11-03: Catálogo completado desde los sitios oficiales
 
 **Motivo:** las 4 universidades tenían 8 carreras estimadas por IA y ninguna regla para las dimensiones A y E, por lo que esos perfiles no tenían carreras afines.

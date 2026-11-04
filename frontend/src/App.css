@@ -213,15 +213,18 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .area-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
 .area-chip { padding: .4rem .9rem; border-radius: 999px; background: rgba(33, 184, 118, .16); color: #6fe5b0; font-size: .9rem; }
 .university-note { margin-top: 0; }
-.university-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; margin-top: 1rem; }
-.university-card { display: flex; flex-direction: column; gap: .8rem; padding: 1.2rem; border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5); }
-.university-card h3 { margin: 0; color: var(--ink); font-size: 1.05rem; line-height: 1.25; }
-.university-card ul { display: grid; gap: .45rem; margin: 0 0 auto; padding: 0; list-style: none; }
-.university-card li { display: flex; justify-content: space-between; gap: .8rem; color: var(--muted); font-size: .93rem; }
-.university-card li strong { color: var(--accent-dark); }
-.university-card button { padding: .75rem 1rem; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
-.university-card button:hover { background: var(--accent-dark); }
-.university-card small { color: var(--muted); }
+.university-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); gap: 1rem; align-items: start; margin-top: 1rem; }
+.university-card { display: grid; gap: .8rem; padding: 1.2rem; border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5); }
+.university-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: .8rem; }
+.university-card-top h3 { margin: 0; color: var(--ink); font-size: 1.08rem; line-height: 1.25; }
+.university-card-top strong { color: var(--accent-dark); font-size: 1.05rem; }
+.university-card ul { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+.university-card li { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding-top: .5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; line-height: 1.25; }
+.university-card li button { flex: none; padding: .4rem .8rem; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font-size: .82rem; font-weight: 600; cursor: pointer; }
+.university-card li button:hover { background: var(--accent-dark); }
+.university-card small { flex: none; color: var(--muted); }
+.university-more { display: block; margin: 1.2rem auto 0; padding: .75rem 1.4rem; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; background: transparent; color: var(--cream); font-weight: 600; cursor: pointer; }
+.university-more:hover { background: rgba(255, 255, 255, .1); }
 
 /* Ventana interna con el sitio oficial. Fondo blanco: es el que esperan las paginas externas. */
 html:has(.site-window[open]) { overflow: hidden; }
@@ -269,7 +272,8 @@ img, svg { max-width: 100%; }
 
   /* Formularios: 16 px evita que el celular haga zoom al tocar un campo; botones comodos de tocar */
   .simple-form input, .simple-form select { font-size: 16px; }
-  .simple-form button, .university-card button, .start-link { min-height: 2.9rem; }
+  .simple-form button, .university-more, .start-link { min-height: 2.9rem; }
+  .university-card li button { min-height: 2.5rem; }
   .google-fallback, .google-slot, .form-divider { max-width: none; }
 
   /* Test */
