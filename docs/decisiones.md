@@ -23,6 +23,26 @@ Este script no se sube a git porque contiene la contraseña local de la base de 
 - Un fallo de compilación o una API que no responde detienen el script con un mensaje.
 - Si el túnel falla, el script recuerda que la página sigue disponible en la PC y en la misma red Wi-Fi.
 
+## 2026-11-03: Catálogo completado desde los sitios oficiales
+
+**Motivo:** las 4 universidades tenían 8 carreras estimadas por IA y ninguna regla para las dimensiones A y E, por lo que esos perfiles no tenían carreras afines.
+
+**Fuentes:** [UMSS](https://www.umss.edu.bo/carreras/), [Univalle, sede Cochabamba](https://www.univalle.edu/?page_id=20106), [UPB](https://www.upb.edu/programas/pregrado) y las [facultades de USIP](https://usip.edu.bo/). Consultadas el 2026-11-03. Cada carrera guarda su fuente.
+
+**Resultado:** 28 carreras visibles, con reglas en las 6 dimensiones.
+
+| Estado | Significado |
+|---|---|
+| `VERIFICADA` | Figura en el sitio oficial, y en Univalle, en su sede Cochabamba |
+| `CONFIRMAR SEDE` | Solo UPB: su página lista la oferta general y no indica la sede de cada carrera |
+| `PENDIENTE` | Sin confirmar: las 5 instituciones ocultas y "Administración y Finanzas" de USIP |
+
+**Correcciones a los datos de la IA:** "Derecho" de la UMSS figura como Ciencias Jurídicas e "Ingeniería de Sistemas" de la UPB como Ingeniería de Sistemas Computacionales. "Administración y Finanzas" no aparece entre las carreras de USIP, así que se ocultó sin borrarla. Los costos anteriores siguen guardados sin confirmar, y las carreras nuevas no tienen costo.
+
+**Pendiente de aprobar:** los niveles de compatibilidad de las reglas nuevas son una propuesta y no vienen de las universidades: 85-90 para la dimensión principal y 45-70 para la secundaria, igual que las reglas existentes. Son un criterio de la tesis y su autor debe revisarlos.
+
+**Cambio de datos:** el catálogo vive en la base y no en una migración, como antes. Está respaldado el estado anterior en `tools/respaldos/`.
+
 ## 2026-11-03: Actualización en vivo con consultas cada 5 segundos
 
 **Decisión:** las pantallas preguntan cada 5 segundos si algo cambió, en vez de recibir un aviso del servidor.
@@ -38,8 +58,6 @@ Este script no se sube a git porque contiene la contraseña local de la base de 
 **Decisión:** a pedido del usuario, el estudiante solo ve UMSS, Univalle, UPB y USIP.
 
 UPEA e ITPM están en El Alto. TECBA, INCOS y Álvarez Plata son institutos, no universidades. Los cinco quedan inactivos, no borrados: el administrador puede reactivarlos en Instituciones. Es un cambio de datos, por lo que no hay código que excluya a nadie.
-
-**Limitación conocida:** ninguna carrera de estas cuatro universidades tiene regla para las dimensiones A (Artístico) o E (Emprendedor). Ningún registro del catálogo tiene regla E. Un perfil con esas dimensiones como principales recibe carreras afines solo por sus otras dimensiones, con porcentajes más bajos. Corregirlo requiere cargar carreras y reglas verificadas.
 
 ## 2026-11-03: Enlaces oficiales en lugar de municipio, costo y lugar
 
