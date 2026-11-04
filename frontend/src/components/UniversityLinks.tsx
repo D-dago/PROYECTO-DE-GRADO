@@ -39,12 +39,12 @@ export function UniversityLinks({ careers }: { careers: Career[] }) {
   const groups = groupByInstitution(careers)
 
   if (groups.length === 0) {
-    return <p className="result-note">Todavía no hay instituciones con carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
+    return <p className="result-note">Todavía no hay universidades con carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
   }
 
   return (
     <>
-      <p className="result-note university-note">Consulta costos, ubicación y requisitos actualizados en la página oficial de cada institución.</p>
+      <p className="result-note university-note">Consulta costos, ubicación y requisitos actualizados en la página oficial de cada universidad.</p>
       <div className="university-grid">
         {groups.map((group) => (
           <article className="university-card" key={group.id}>

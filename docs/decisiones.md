@@ -23,6 +23,14 @@ Este script no se sube a git porque contiene la contraseña local de la base de 
 - Un fallo de compilación o una API que no responde detienen el script con un mensaje.
 - Si el túnel falla, el script recuerda que la página sigue disponible en la PC y en la misma red Wi-Fi.
 
+## 2026-11-03: Solo universidades de Cochabamba
+
+**Decisión:** a pedido del usuario, el estudiante solo ve UMSS, Univalle, UPB y USIP.
+
+UPEA e ITPM están en El Alto. TECBA, INCOS y Álvarez Plata son institutos, no universidades. Los cinco quedan inactivos, no borrados: el administrador puede reactivarlos en Instituciones. Es un cambio de datos, por lo que no hay código que excluya a nadie.
+
+**Limitación conocida:** ninguna carrera de estas cuatro universidades tiene regla para las dimensiones A (Artístico) o E (Emprendedor). Ningún registro del catálogo tiene regla E. Un perfil con esas dimensiones como principales recibe carreras afines solo por sus otras dimensiones, con porcentajes más bajos. Corregirlo requiere cargar carreras y reglas verificadas.
+
 ## 2026-11-03: Enlaces oficiales en lugar de municipio, costo y lugar
 
 **Motivo:** las 9 instituciones y las 18 carreras del catálogo tienen como fuente "Estimado con ayuda de IA (Gemini), sin confirmar". Ninguna carrera tiene duración, y al menos un municipio resultó falso: el Instituto Puerto de Mejillones figura en Quillacollo, pero su propio sitio y un plan de mejora publicado por CEMSE lo ubican en El Alto.
