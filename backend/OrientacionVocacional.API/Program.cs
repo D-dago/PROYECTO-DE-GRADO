@@ -46,6 +46,10 @@ builder.Services.AddResponseCompression();
 // Ninguna peticion legitima de esta app necesita mas de 100 KB: corta cuerpos gigantes.
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 100 * 1024);
 
+// En un hosting de contenedores (Cloud Run) la plataforma indica el puerto en la variable PORT.
+var puerto = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(puerto)) builder.WebHost.UseUrls($"http://0.0.0.0:{puerto}");
+
 // Anti-abuso: limita cuantas peticiones puede hacer una misma IP. Registrar cuentas en
 // masa (llenar la base con correos) o adivinar contrasenas queda muy lento. Los topes
 // son holgados a proposito: un salon entero comparte la misma IP al registrarse.
@@ -109,7 +113,18 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // cabeceras traen la IP real del visitante: sin ellas todos compartirian el mismo limite anti-abuso.
 // Por defecto solo se confia en proxies que se conectan desde localhost.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto);
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // En Cloud Run el proxy de Google no esta en localhost: sin esto todos los visitantes compartirian la IP
+    // del proxy y un salon agotaria enseguida el limite anti-abuso. Google agrega la IP real AL FINAL del
+    // encabezado; con ForwardLimit = 1 solo se toma esa, asi un visitante no puede inventarse otra.
+    if (builder.Configuration.GetValue<bool>("Proxy:ConfiarEnEncabezados"))
+    {
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+        options.ForwardLimit = 1;
+    }
+});
 
 var app = builder.Build();
 

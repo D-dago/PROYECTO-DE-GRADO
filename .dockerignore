@@ -1,0 +1,19 @@
+# Lo que no debe entrar a la imagen: dependencias y compilados locales (se generan dentro),
+# secretos y respaldos de la base, y material que no es codigo.
+**/node_modules
+**/bin
+**/obj
+backend/OrientacionVocacional.API/wwwroot
+frontend/dist
+tools
+*.local.*
+**/.env
+.git
+.github
+.claude
+.VSCodeCounter
+docs
+/*.pdf
+/*.jpg
+/*.jpeg
+/*.png
