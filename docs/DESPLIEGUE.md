@@ -1,43 +1,51 @@
-# Publicar en Google Cloud Run con la base en Neon
+# Publicar en Render con la base en Neon (gratis y sin tarjeta)
 
-El sistema corre en un contenedor de **Google Cloud Run** y guarda los datos en una base PostgreSQL de **Neon**. Cloud Run se apaga cuando nadie lo usa y vuelve a arrancar en unos segundos. Ambos son gratuitos dentro de su cuota.
+La página corre en **Render** (plan gratuito) y los datos se guardan en una base PostgreSQL de **Neon** (plan gratuito). Render duerme la página tras 15 minutos sin visitas, y un aviso de **UptimeRobot** cada 5 minutos la mantiene despierta. Las 750 horas gratis al mes de Render alcanzan para tener un servicio encendido todo el mes.
 
 ## Qué se publica
 
-- El `Dockerfile` de la raíz compila la web y la API en una sola imagen. La API sirve la web, igual que en la PC.
-- La base de la nube **no es la de la PC**. Lleva el catálogo (instituciones, carreras, reglas y preguntas) y dos cuentas: el administrador y el estudiante de prueba. Los estudiantes reales quedan solo en la PC.
-- El respaldo que se sube es `tools/respaldos/para-la-nube-2026-11-05.dump`. No se sube a git.
+- El `Dockerfile` compila la web y la API en una sola imagen. `render.yaml` le indica a Render cómo publicarla.
+- La base de la nube **no es la de la PC**. Lleva el catálogo (instituciones, carreras, reglas y preguntas), la cuenta de administrador y la de estudiante de prueba. Los estudiantes reales quedan solo en la PC. El archivo que se sube es `tools/respaldos/para-la-nube-2026-11-05.dump`, que no se sube a git.
 
-## Lo que hace el dueño de las cuentas
+## Pasos
 
-1. **Google Cloud:** crear una cuenta en <https://console.cloud.google.com>, crear un proyecto y activar la facturación. Pide tarjeta, aunque el uso de esta aplicación entra en la cuota gratuita. Conviene crear una alerta de presupuesto de 1 USD en *Facturación > Presupuestos y alertas*.
-2. **Neon:** crear una cuenta en <https://neon.tech> y un proyecto en la región **AWS São Paulo (sa-east-1)**, la más cercana a Bolivia. Copiar la cadena de conexión (*Connection string*) y guardarla en un archivo `neon.local.txt` en la raíz del proyecto. Ese archivo no se sube a git.
-3. **Iniciar sesión en Google desde la PC:** con el Google Cloud CLI instalado, ejecutar `gcloud auth login` y elegir la cuenta.
+1. **Neon**
+   1. Crea una cuenta en <https://neon.tech>; puedes entrar con GitHub.
+   2. Crea un proyecto en la región **AWS US East (N. Virginia)**, que es la de Render.
+   3. Copia la *Connection string* y guárdala en `neon.local.txt`, en la raíz del proyecto. Ese archivo no se sube a git.
+   4. Con eso se carga la base:
 
-## Lo que se hace después (puede hacerlo Claude)
+      ```bash
+      pg_restore --no-owner --no-privileges -d "<cadena de Neon>" tools/respaldos/para-la-nube-2026-11-05.dump
+      ```
 
-```bash
-# 1. Cargar la base en Neon (la cadena de conexión sale de neon.local.txt)
-pg_restore --no-owner --no-privileges -d "<cadena de Neon>" tools/respaldos/para-la-nube-2026-11-05.dump
+2. **Render**
+   1. Crea una cuenta en <https://render.com> entrando con GitHub.
+   2. Elige *New > Blueprint* y selecciona el repositorio `PROYECTO-DE-GRADO`.
+   3. Render pide `ConnectionStrings__PostgreSQL`. Pega la cadena en formato Npgsql (ver la tabla de abajo).
+   4. Pulsa *Apply*. La primera publicación tarda unos 10 minutos. La dirección queda como `https://orientacion-vocacional.onrender.com` o con un sufijo si ese nombre está ocupado.
 
-# 2. Publicar desde la carpeta del proyecto
-gcloud run deploy orientacion-vocacional --source . --region southamerica-east1 \
-  --allow-unauthenticated --min-instances 0 --max-instances 1 --memory 512Mi \
-  --set-env-vars "ConnectionStrings__PostgreSQL=<cadena Npgsql de Neon>,Jwt__Key=<clave nueva>,Jwt__Issuer=OrientacionVocacional.API,Jwt__Audience=OrientacionVocacional.Frontend"
-```
-
-`--max-instances 1` no es solo para ahorrar. La actualización en vivo y el límite anti-abuso guardan su estado en la memoria del servidor, así que con dos copias del servidor una pantalla podría no enterarse de un cambio.
+3. **UptimeRobot**
+   1. Crea una cuenta en <https://uptimerobot.com>.
+   2. Crea un monitor *HTTP(s)* hacia `https://<tu-direccion>.onrender.com/health/live`, cada **5 minutos**.
+   3. Esa ruta no consulta la base, así que Neon puede suspenderse cuando nadie usa la página y no gasta sus horas gratis.
 
 ## Configuración
 
 | Variable | Valor |
 |---|---|
-| `ConnectionStrings__PostgreSQL` | `Host=...;Database=...;Username=...;Password=...;SSL Mode=Require` (formato Npgsql, no `postgres://`) |
-| `Jwt__Key` | Clave nueva de al menos 32 bytes; no reutilizar la de la PC |
-| `Proxy__ConfiarEnEncabezados` | Ya viene en la imagen. Hace que el límite anti-abuso use la IP real de cada visitante y no la del proxy de Google |
-| `PORT` | La pone Cloud Run; la API la respeta |
-| `AI__ApiKey`, `AI__Model` | Opcionales, para la explicación con IA |
+| `ConnectionStrings__PostgreSQL` | `Host=<host>;Database=<base>;Username=<usuario>;Password=<clave>;SSL Mode=Require`. Formato Npgsql: la cadena `postgresql://` de Neon no sirve tal cual. |
+| `Jwt__Key` | La genera Render. |
+| `Proxy__ConfiarEnEncabezados` | Viene en la imagen. Hace que el límite anti-abuso use la IP de cada visitante y no la del proxy. |
+| `PORT` | La pone Render; la API la respeta. |
+| `AI__ApiKey`, `AI__Model` | Opcionales, para la explicación con IA. |
 
-## Actualizar después de un cambio
+## Actualizar
 
-Volver a ejecutar el mismo `gcloud run deploy`. Los cambios de catálogo hechos desde el panel de la nube quedan en Neon. La base de la PC y la de la nube son independientes.
+Cada `git push` a `master` vuelve a publicar solo (`autoDeploy`). Los cambios que se hagan desde el panel de la nube quedan en Neon. La base de la PC y la de la nube son independientes.
+
+## Límites del plan gratuito
+
+- 512 MB de memoria y CPU compartida: alcanza para un curso, no para cientos de personas a la vez.
+- Si UptimeRobot falla, la página vuelve a dormirse y la siguiente visita tarda cerca de un minuto.
+- Neon gratis suspende la base tras unos minutos sin uso. La primera consulta después tarda alrededor de un segundo más.

@@ -150,6 +150,10 @@ app.UseExceptionHandler(exceptionApp => exceptionApp.Run(async context =>
 }));
 
 app.MapHealthChecks("/health");
+// Solo confirma que el servidor responde, sin consultar la base. La usan Render y el aviso que mantiene
+// despierta la pagina: si tocaran la base cada pocos minutos, Neon nunca se suspenderia y gastaria
+// las horas gratuitas del mes.
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = _ => false });
 
 app.UseForwardedHeaders();
 

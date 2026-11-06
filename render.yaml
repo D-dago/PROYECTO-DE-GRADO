@@ -1,0 +1,24 @@
+# Blueprint de Render: en Render, New > Blueprint y elegir este repositorio.
+# Plan gratuito. Render duerme la pagina tras 15 minutos sin visitas; un aviso periodico a /health/live la
+# mantiene despierta (ver docs/DESPLIEGUE.md).
+services:
+  - type: web
+    name: orientacion-vocacional
+    runtime: docker
+    plan: free
+    # Virginia: la region de Render mas cercana a la base de Neon en AWS US East (N. Virginia).
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health/live
+    autoDeploy: true
+    envVars:
+      # Cadena de Neon en formato Npgsql. Render la pide al crear el Blueprint; no se guarda en git.
+      - key: ConnectionStrings__PostgreSQL
+        sync: false
+      # Render genera una clave aleatoria propia; no se reutiliza la de la PC.
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Issuer
+        value: OrientacionVocacional.API
+      - key: Jwt__Audience
+        value: OrientacionVocacional.Frontend
