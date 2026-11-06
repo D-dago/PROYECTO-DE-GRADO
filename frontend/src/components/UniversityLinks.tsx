@@ -49,17 +49,28 @@ function groupByCareer(careers: Career[]): CareerGroup[] {
 export function UniversityLinks({ careers }: { careers: Career[] }) {
   const [open, setOpen] = useState<(InstitutionOption & { website: string }) | null>(null)
   const [showAll, setShowAll] = useState(false)
+  const [query, setQuery] = useState('')
   const groups = groupByCareer(careers)
+  // Sin tildes ni mayúsculas: "derecho" encuentra "Derecho" y "ingenieria" encuentra "Ingeniería".
+  const wanted = careerKey(query)
+  const found = wanted ? groups.filter((g) => g.key.includes(wanted) || g.institutions.some((i) => careerKey(i.name).includes(wanted))) : groups
 
   if (groups.length === 0) {
     return <p className="result-note">Todavía no hay carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
   }
 
-  const visible = showAll ? groups : groups.slice(0, CARRERAS_INICIALES)
+  // Al buscar se muestran todas las coincidencias, no solo las primeras.
+  const visible = showAll || wanted ? found : found.slice(0, CARRERAS_INICIALES)
 
   return (
     <>
       <p className="result-note university-note">Cada carrera muestra las universidades e institutos de Cochabamba donde la encontramos. Confirma costos, ubicación, requisitos y sede en la página oficial de cada uno.</p>
+      <label className="university-search">
+        <span aria-hidden="true">🔍</span>
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Busca una carrera o institución (ej.: derecho)" aria-label="Buscar carrera o institución" />
+        {query && <button type="button" onClick={() => setQuery('')} aria-label="Borrar búsqueda">✕</button>}
+      </label>
+      {wanted && <p className="university-count" aria-live="polite">{found.length === 0 ? `Ninguna carrera compatible coincide con «${query.trim()}».` : `${found.length} ${found.length === 1 ? 'carrera coincide' : 'carreras coinciden'} con «${query.trim()}».`}</p>}
       <div className="university-grid">
         {visible.map((group) => (
           <article className="university-card" key={group.key} title={group.reason}>
@@ -80,7 +91,7 @@ export function UniversityLinks({ careers }: { careers: Career[] }) {
           </article>
         ))}
       </div>
-      {groups.length > CARRERAS_INICIALES && (
+      {!wanted && groups.length > CARRERAS_INICIALES && (
         <button type="button" className="university-more" onClick={() => setShowAll((current) => !current)}>
           {showAll ? 'Ver menos carreras' : `Ver las ${groups.length} carreras`}
         </button>
