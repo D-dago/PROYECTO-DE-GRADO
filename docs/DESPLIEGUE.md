@@ -37,12 +37,13 @@ La página corre en **Render** (plan gratuito) y los datos se guardan en una bas
 | `ConnectionStrings__PostgreSQL` | `Host=<host>;Database=<base>;Username=<usuario>;Password=<clave>;SSL Mode=Require`. Formato Npgsql: la cadena `postgresql://` de Neon no sirve tal cual. |
 | `Jwt__Key` | La genera Render. |
 | `Proxy__ConfiarEnEncabezados` | Viene en la imagen. Hace que el límite anti-abuso use la IP de cada visitante y no la del proxy. |
+| `Proxy__EncabezadoIp` | `CF-Connecting-IP`, en `render.yaml`. En Render el `X-Forwarded-For` conserva lo que manda el visitante y se puede falsificar; Cloudflare escribe la IP real en `CF-Connecting-IP`. Comprobado en Render el 2026-11-05: sin este ajuste, 32 intentos con IPs inventadas no se bloqueaban. |
 | `PORT` | La pone Render; la API la respeta. |
 | `AI__ApiKey`, `AI__Model` | Opcionales, para la explicación con IA. |
 
 ## Actualizar
 
-Cada `git push` a `master` vuelve a publicar solo (`autoDeploy`). Los cambios que se hagan desde el panel de la nube quedan en Neon. La base de la PC y la de la nube son independientes.
+El servicio se creó desde la dirección pública del repositorio, sin conectar la cuenta de GitHub, así que **no se publica solo**. Después de un `git push`, en Render: *Blueprint > Manual sync* si cambió `render.yaml`, y luego en el servicio *Manual Deploy > Deploy latest commit*. Los cambios que se hagan desde el panel de la nube quedan en Neon. La base de la PC y la de la nube son independientes.
 
 ## Límites del plan gratuito
 

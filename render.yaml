@@ -22,3 +22,6 @@ services:
         value: OrientacionVocacional.API
       - key: Jwt__Audience
         value: OrientacionVocacional.Frontend
+      # IP real del visitante para el limite anti-abuso: la escribe Cloudflare y no se puede falsificar.
+      - key: Proxy__EncabezadoIp
+        value: CF-Connecting-IP

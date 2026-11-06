@@ -124,6 +124,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
         options.KnownProxies.Clear();
         options.ForwardLimit = 1;
     }
+    // Algunos hostings conservan el X-Forwarded-For que manda el visitante, y entonces se puede falsificar.
+    // En Render la IP confiable la escribe Cloudflare en CF-Connecting-IP y reemplaza la que traiga el visitante.
+    var encabezadoIp = builder.Configuration["Proxy:EncabezadoIp"];
+    if (!string.IsNullOrWhiteSpace(encabezadoIp)) options.ForwardedForHeaderName = encabezadoIp;
 });
 
 var app = builder.Build();
