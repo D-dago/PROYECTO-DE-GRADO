@@ -31,9 +31,9 @@ export function TestPage() {
 
   async function loadTest() {
     try {
-      // Las preguntas se sortean por intento (2 por dimension, al azar), asi que
+      // Las preguntas se sortean por intento (4 por dimension, al azar), asi que
       // primero hay que crear/reanudar el intento y recien despues pedir cuales
-      // 12 preguntas especificas le tocaron - ya no se puede pedir en paralelo.
+      // 24 preguntas especificas le tocaron - ya no se puede pedir en paralelo.
       const loadedAttempt = await riasecApi.createAttempt()
       const loadedQuestions = await riasecApi.getAssignedQuestions(loadedAttempt.attemptId)
       setQuestions(loadedQuestions)

@@ -5,7 +5,7 @@ import type { RiasecResult } from '../types/riasec'
 import { UniversityLinks } from './UniversityLinks'
 import { useLiveCareers } from '../services/liveData'
 
-const MAX_DIMENSION_SCORE = 10 // 2 preguntas por dimension x valor maximo 5
+const MAX_DIMENSION_SCORE = 20 // 4 preguntas por dimension x valor maximo 5 (test vigente)
 
 export function RiasecResult({ result }: { result: RiasecResult }) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
@@ -16,6 +16,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
     appApi.recommendations({}).then(setRecommendation).catch(() => setFailed(true))
   }, [])
 
+  const maxScore = result.maxScore ?? MAX_DIMENSION_SCORE
   const scores = [['R', result.rScore], ['I', result.iScore], ['A', result.aScore], ['S', result.sScore], ['E', result.eScore], ['C', result.cScore]]
   const interpretation = recommendation?.interpretation
 
@@ -43,7 +44,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
 
         <div className="score-list">
           {scores.map(([code, score]) => (
-            <div key={code} className="score-row"><strong>{code}</strong><div className="score-bar"><span style={{ width: `${Number(score) / MAX_DIMENSION_SCORE * 100}%` }} /></div><span>{score}</span></div>
+            <div key={code} className="score-row"><strong>{code}</strong><div className="score-bar"><span style={{ width: `${Math.min(Number(score) / maxScore, 1) * 100}%` }} /></div><span>{score}<small> / {maxScore}</small></span></div>
           ))}
         </div>
 

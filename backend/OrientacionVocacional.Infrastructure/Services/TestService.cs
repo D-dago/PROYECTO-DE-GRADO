@@ -168,7 +168,9 @@ public sealed class TestService(
             CScore = score.CScore,
             PrimaryCode = score.PrimaryCode,
             SecondaryCode = score.SecondaryCode,
-            AlgorithmVersion = RiasecTestConstants.Version
+            // La version del intento, no la vigente: asi un intento de 12 preguntas terminado
+            // despues del cambio a 24 se sigue midiendo sobre su propio maximo.
+            AlgorithmVersion = attempt.TestVersion
         };
         attempt.Status = TestAttemptStatus.Completed;
         attempt.CompletedAtUtc = DateTime.UtcNow;
@@ -193,8 +195,8 @@ public sealed class TestService(
     }
 
     /// <summary>
-    /// Sortea 2 preguntas por dimension (12 en total) del banco de 10 por dimension,
-    /// intercaladas R,I,A,S,E,C,R,I,A,S,E,C para que nunca aparezcan dos preguntas
+    /// Sortea 4 preguntas por dimension (24 en total) del banco de 10 por dimension,
+    /// intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos preguntas
     /// seguidas de la misma dimension dentro del intento.
     /// </summary>
     private async Task AssignQuestionsAsync(TestAttempt attempt, CancellationToken cancellationToken)

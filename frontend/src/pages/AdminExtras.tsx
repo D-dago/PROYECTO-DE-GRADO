@@ -27,13 +27,14 @@ export function ResultsSection({ results, report }: { results: AdminResult[]; re
           <details className="admin-row admin-row-result" key={result.attemptId}>
             <summary className="admin-row-main">
               <strong>{result.studentName} · {result.primaryCode}{result.secondaryCode}</strong>
-              <small>{result.email} · {new Date(result.completedAtUtc).toLocaleString()} · R{result.r} I{result.i} A{result.a} S{result.s} E{result.e} C{result.c}</small>
+              <small>{result.email} · {new Date(result.completedAtUtc).toLocaleString()} · R{result.r} I{result.i} A{result.a} S{result.s} E{result.e} C{result.c} (sobre {result.maxScore})</small>
             </summary>
             <div className="admin-result-detail">
               <h3>¿Qué significa este perfil?</h3>
               <InterpretationDetail
                 interpretation={result.interpretation}
                 scores={[['R', result.r], ['I', result.i], ['A', result.a], ['S', result.s], ['E', result.e], ['C', result.c]]}
+                maxScore={result.maxScore}
               />
             </div>
           </details>
@@ -74,7 +75,7 @@ export function QuestionsSection({ questions, onChanged, report }: { questions: 
   return (
     <section className="admin-section" id="preguntas">
       <h2>Preguntas del test</h2>
-      <p className="empty-state">Cada intento sortea 2 preguntas activas por dimensión. Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
+      <p className="empty-state">Cada intento sortea 4 preguntas activas por dimensión (24 en total). Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
       <label>Filtrar por dimensión
         <select value={filter} onChange={(event) => setFilter(event.target.value)}>
           <option value="">Todas ({questions.length})</option>

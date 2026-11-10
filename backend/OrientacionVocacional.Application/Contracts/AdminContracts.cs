@@ -19,7 +19,8 @@ public sealed record AdminResultRow(
     Guid AttemptId, string StudentName, string Email, DateTime CompletedAtUtc,
     string PrimaryCode, string SecondaryCode,
     int R, int I, int A, int S, int E, int C,
-    ProfileInterpretationResponse Interpretation);
+    ProfileInterpretationResponse Interpretation,
+    int MaxScore);
 
 public sealed record AdminAnswerRow(Guid AttemptId, string StudentName, string Email, string QuestionCode, string Dimension, string QuestionText, int Value);
 

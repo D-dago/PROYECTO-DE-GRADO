@@ -89,14 +89,19 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         return profile is null ? null : await MatchCareersAsync(profile, new RecommendationFilterRequest(), cancellationToken);
     }
 
-    // Solo cuenta un perfil del test vigente (RIASEC-12-V2): los perfiles de otras versiones
-    // (el CHASIDE que se aplico un tiempo) usan letras con otro significado y darian
-    // recomendaciones sin sentido; hay que repetir el test.
-    private Task<RiasecProfile?> GetCurrentProfileAsync(Guid userId, CancellationToken cancellationToken) =>
-        db.RiasecProfiles.AsNoTracking().Where(item => item.TestAttempt.UserId == userId && item.AlgorithmVersion == RiasecTestConstants.Version).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
+    // Solo cuenta un perfil RIASEC (el test vigente de 24 preguntas o el anterior de 12): los
+    // perfiles de otras versiones (el CHASIDE que se aplico un tiempo) usan letras con otro
+    // significado y darian recomendaciones sin sentido; hay que repetir el test.
+    private Task<RiasecProfile?> GetCurrentProfileAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var versions = RiasecTestConstants.InterpretableVersions;
+        return db.RiasecProfiles.AsNoTracking().Where(item => item.TestAttempt.UserId == userId && versions.Contains(item.AlgorithmVersion)).OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync(cancellationToken);
+    }
 
     private async Task<List<CareerResponse>> MatchCareersAsync(RiasecProfile profile, RecommendationFilterRequest filter, CancellationToken cancellationToken)
     {
+        // Cada perfil se mide contra el maximo de su propio test (10 con 12 preguntas, 20 con 24).
+        var maxScore = RiasecTestConstants.MaxDimensionScoreFor(profile.AlgorithmVersion);
         var scores = new Dictionary<string, int> { ["R"] = profile.RScore, ["I"] = profile.IScore, ["A"] = profile.AScore, ["S"] = profile.SScore, ["E"] = profile.EScore, ["C"] = profile.CScore };
         // Solo lo traducible de forma segura a SQL (igualdad de Id, comparacion numerica) se
         // filtra en la base. El resto (texto libre) se compara despues, en memoria, para poder
@@ -119,7 +124,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         // que busca ("sistemas informatico") en vez de la categoria.
         if (!string.IsNullOrWhiteSpace(filter.Area)) careers = careers.Where(item => Coincide(item.Area, filter.Area) || Coincide(item.Name, filter.Area)).ToList();
 
-        return careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / RiasecTestConstants.MaxDimensionScore, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
+        return careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / maxScore, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
     }
 
     // Una entrada por test terminado, no por busqueda. RecommendationHistories guarda una fila
@@ -148,12 +153,13 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         // letras con RIASEC pero significan otra cosa: se listan para no perder el registro, sin
         // puntajes ni interpretacion que enganen. Ademas RiasecInterpretationBuilder.Build no es
         // traducible a SQL, se calcula aqui.
-        return rows.Select(row => row.AlgorithmVersion == RiasecTestConstants.Version
+        return rows.Select(row => RiasecTestConstants.IsInterpretable(row.AlgorithmVersion)
             ? new HistoryResponse(
                 row.Id, row.TestAttemptId, row.CreatedAtUtc, row.LastFilter,
                 row.PrimaryCode, row.SecondaryCode,
                 row.RScore, row.IScore, row.AScore, row.SScore, row.EScore, row.CScore,
-                RiasecInterpretationBuilder.Build(row.PrimaryCode, row.SecondaryCode))
+                RiasecInterpretationBuilder.Build(row.PrimaryCode, row.SecondaryCode),
+                RiasecTestConstants.MaxDimensionScoreFor(row.AlgorithmVersion))
             : new HistoryResponse(row.Id, row.TestAttemptId, row.CreatedAtUtc, row.LastFilter, null, null, null, null, null, null, null, null, null))
             .ToList();
     }

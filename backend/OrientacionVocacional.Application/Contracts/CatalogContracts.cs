@@ -9,7 +9,8 @@ public sealed record HistoryResponse(
     Guid Id, Guid TestAttemptId, DateTime CreatedAtUtc, string? FilterSummary,
     string? PrimaryCode, string? SecondaryCode,
     int? RScore, int? IScore, int? AScore, int? SScore, int? EScore, int? CScore,
-    ProfileInterpretationResponse? Interpretation);
+    ProfileInterpretationResponse? Interpretation,
+    int? MaxScore = null);
 public sealed record AdminDashboardResponse(int Students, int Institutions, int Careers, int CompatibilityRules);
 public sealed record CompatibilityResponse(Guid Id, Guid CareerId, string CareerName, string Dimension, int CompatibilityLevel, string Rule);
 public sealed record SiteCheckResponse(bool Embeddable, bool Verified = true);

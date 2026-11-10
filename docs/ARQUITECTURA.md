@@ -27,9 +27,11 @@ El backend emite JWT con identificador de usuario, correo y rol. Los controlador
 
 El banco contiene 60 preguntas activas, diez por cada una de las seis dimensiones: `R` (Realista), `I` (Investigador), `A` (Artístico), `S` (Social), `E` (Emprendedor) y `C` (Convencional), según la teoría de Holland. Durante un tiempo el sistema aplicó una versión CHASIDE del test; la migración `VuelveATestRiasec` restauró el banco RIASEC y dejó inactivas (orden ≥ 1000) las preguntas propias de CHASIDE (áreas H y D), porque hay respuestas guardadas que las referencian.
 
-Cada intento **sortea 12 preguntas** (2 por dimensión) y las intercala `R, I, A, S, E, C, R, I, A, S, E, C`, de modo que nunca aparezcan dos preguntas seguidas de la misma dimensión. Se responden en una escala de 1 a 5 y cada respuesta se guarda al instante.
+Cada intento **sortea 24 preguntas** (4 por dimensión) y las intercala `R, I, A, S, E, C, R, I, A, S, E, C, …`, de modo que nunca aparezcan dos preguntas seguidas de la misma dimensión. Se responden en una escala de 1 a 5 y cada respuesta se guarda al instante.
 
-El algoritmo suma las seis dimensiones, aplica un desempate fijo en el orden `R, I, A, S, E, C` y guarda el perfil con versión `RIASEC-12-V2`. El puntaje máximo por dimensión es 10 (2 preguntas × 5).
+El algoritmo suma las seis dimensiones, aplica un desempate fijo en el orden `R, I, A, S, E, C` y guarda el perfil con versión `RIASEC-24-V3`. El puntaje máximo por dimensión es 20 (4 preguntas × 5).
+
+Los resultados del test anterior de 12 preguntas (`RIASEC-12-V2`, máximo 10 por dimensión) se siguen mostrando y generan recomendaciones: cada perfil se mide contra el máximo de su propio test, así una persona que obtuvo 10 de 10 tiene la misma compatibilidad que una que obtiene 20 de 20.
 
 Los perfiles de versiones anteriores se conservan pero no se interpretan: sus letras significan otra cosa, así que no generan recomendaciones ni lectura de perfil.
 

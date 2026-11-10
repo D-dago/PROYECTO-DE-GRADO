@@ -14,11 +14,12 @@ export type HistoryEntry = {
   primaryCode?: string; secondaryCode?: string
   rScore?: number; iScore?: number; aScore?: number; sScore?: number; eScore?: number; cScore?: number
   interpretation?: ProfileInterpretation
+  maxScore?: number
 }
 
 export type AdminQuestion = { id: string; code: string; text: string; dimension: string; isActive: boolean; order: number }
 export type AdminUser = { id: string; email: string; fullName: string; role: string; isActive: boolean; createdAtUtc: string; coins: number; completedTests: number }
-export type AdminResult = { attemptId: string; studentName: string; email: string; completedAtUtc: string; primaryCode: string; secondaryCode: string; r: number; i: number; a: number; s: number; e: number; c: number; interpretation: ProfileInterpretation }
+export type AdminResult = { attemptId: string; studentName: string; email: string; completedAtUtc: string; primaryCode: string; secondaryCode: string; r: number; i: number; a: number; s: number; e: number; c: number; interpretation: ProfileInterpretation; maxScore: number }
 
 export const appApi = {
   adminQuestions: () => request<AdminQuestion[]>('/admin/questions'),

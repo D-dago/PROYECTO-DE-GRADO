@@ -148,7 +148,7 @@ public class AdminServiceTests
     {
         var context = TestSupport.CreateContext();
         var service = new AdminService(context);
-        var results = new[] { new AdminResultRow(Guid.NewGuid(), "Estudiante Prueba", "prueba@test.local", DateTime.UtcNow, "RI", "A", 10, 6, 4, 4, 4, 4, RiasecInterpretationBuilder.Build("RI", "A")) };
+        var results = new[] { new AdminResultRow(Guid.NewGuid(), "Estudiante Prueba", "prueba@test.local", DateTime.UtcNow, "RI", "A", 10, 6, 4, 4, 4, 4, RiasecInterpretationBuilder.Build("RI", "A"), 20) };
         var answers = new[] { new AdminAnswerRow(results[0].AttemptId, "Estudiante Prueba", "prueba@test.local", "R01", "R", "Pregunta de prueba", 4) };
 
         var bytes = service.BuildExcel(results, answers);
@@ -163,7 +163,7 @@ public class AdminServiceTests
     {
         var context = TestSupport.CreateContext();
         var service = new AdminService(context);
-        var results = new[] { new AdminResultRow(Guid.NewGuid(), "Estudiante Prueba", "prueba@test.local", DateTime.UtcNow, "RI", "A", 10, 6, 4, 4, 4, 4, RiasecInterpretationBuilder.Build("RI", "A")) };
+        var results = new[] { new AdminResultRow(Guid.NewGuid(), "Estudiante Prueba", "prueba@test.local", DateTime.UtcNow, "RI", "A", 10, 6, 4, 4, 4, 4, RiasecInterpretationBuilder.Build("RI", "A"), 20) };
 
         var bytes = service.BuildPdf(results);
 

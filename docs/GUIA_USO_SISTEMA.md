@@ -54,13 +54,13 @@ Entra a `/registro`, escribe nombre, apellido, correo y contraseña. Luego entra
 
 ## 8. REALIZAR EL TEST VOCACIONAL (RIASEC)
 
-Abre `/test` y responde las 12 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada intento sortea 2 preguntas por cada una de las 6 dimensiones desde un banco de 60, así que dos intentos no traen las mismas preguntas. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
+Abre `/test` y responde las 24 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada intento sortea 4 preguntas por cada una de las 6 dimensiones desde un banco de 60, así que dos intentos no traen las mismas preguntas. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
 
 Cada respuesta da 1 moneda y terminar el test da 50; las monedas se gastan en `/skins`.
 
 ## 9. INTERPRETAR EL RESULTADO
 
-Las seis dimensiones RIASEC (teoría de Holland) son: `R` Realista, `I` Investigador, `A` Artístico, `S` Social, `E` Emprendedor y `C` Convencional. El código principal usa las dos dimensiones con mayor puntuación y el secundario la tercera; los empates se resuelven en el orden fijo `R, I, A, S, E, C`. El puntaje máximo por dimensión es 10.
+Las seis dimensiones RIASEC (teoría de Holland) son: `R` Realista, `I` Investigador, `A` Artístico, `S` Social, `E` Emprendedor y `C` Convencional. El código principal usa las dos dimensiones con mayor puntuación y el secundario la tercera; los empates se resuelven en el orden fijo `R, I, A, S, E, C`. El puntaje máximo por dimensión es 20 (10 en los resultados anteriores de 12 preguntas).
 
 La pantalla de resultado explica qué significa cada letra del perfil, muestra los puntajes, las áreas profesionales afines y las carreras del catálogo ordenadas por compatibilidad. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.
 
@@ -118,7 +118,7 @@ Inicia el backend con `dotnet run --project OrientacionVocacional.API` y el fron
 
 ## 21. RESULTADOS Y RECOMENDACIONES
 
-El resultado conserva las seis puntuaciones, código principal, secundario y versión del algoritmo (`RIASEC-12-V2`). Un resultado de otra versión del test (por ejemplo, del período en que se aplicó CHASIDE) se conserva pero ya no se interpreta ni genera recomendaciones: sus letras significan otra cosa y habría que repetir el test. Las recomendaciones solo aparecen cuando existen carreras y reglas cargadas.
+El resultado conserva las seis puntuaciones, código principal, secundario y versión del algoritmo (`RIASEC-24-V3`; los resultados del test anterior de 12 preguntas, `RIASEC-12-V2`, se siguen mostrando y recomendando sobre su propio máximo). Un resultado de otra versión del test (por ejemplo, del período en que se aplicó CHASIDE) se conserva pero ya no se interpreta ni genera recomendaciones: sus letras significan otra cosa y habría que repetir el test. Las recomendaciones solo aparecen cuando existen carreras y reglas cargadas.
 
 ## 22. FUENTES Y FECHAS
 

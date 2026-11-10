@@ -28,4 +28,8 @@ public sealed record RiasecResultResponse(
     string PrimaryCode,
     string SecondaryCode,
     DateTime CreatedAtUtc,
-    string AlgorithmVersion);
+    string AlgorithmVersion)
+{
+    /// <summary>Maximo por dimension del test que produjo este resultado (10 con 12 preguntas, 20 con 24).</summary>
+    public int MaxScore => OrientacionVocacional.Domain.Constants.RiasecTestConstants.MaxDimensionScoreFor(AlgorithmVersion);
+}

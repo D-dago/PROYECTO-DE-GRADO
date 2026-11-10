@@ -204,7 +204,9 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .result-code { color: var(--accent); font-size: clamp(5rem, 15vw, 10rem); line-height: .8; letter-spacing: -.08em; margin: 3rem 0; }
 .result-code small { color: #2ecc82; font-size: .35em; letter-spacing: 0; margin-left: .25em; }
 .score-list { display: grid; gap: .9rem; }
-.score-row { display: grid; grid-template-columns: 1.4rem 1fr 2rem; gap: .8rem; align-items: center; color: var(--cream); }
+.score-row { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr) auto; gap: .8rem; align-items: center; color: var(--cream); }
+.score-row > span:last-child { white-space: nowrap; text-align: right; min-width: 3.4rem; }
+.score-row > span:last-child small { color: var(--cream-muted); }
 .score-bar { height: .45rem; background: rgba(255, 255, 255, .12); border-radius: 999px; }
 .result-note { color: var(--cream-muted); max-width: 60ch; margin-top: 2rem; }
 .result-heading { color: var(--cream); font-size: 1.25rem; margin: 2.2rem 0 .9rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }

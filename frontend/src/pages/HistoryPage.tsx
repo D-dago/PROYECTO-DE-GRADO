@@ -53,6 +53,7 @@ export function HistoryPage() {
                   <InterpretationDetail
                     interpretation={item.interpretation}
                     scores={[['R', item.rScore ?? 0], ['I', item.iScore ?? 0], ['A', item.aScore ?? 0], ['S', item.sScore ?? 0], ['E', item.eScore ?? 0], ['C', item.cScore ?? 0]]}
+                    maxScore={item.maxScore}
                   />
                 </div>
               )}

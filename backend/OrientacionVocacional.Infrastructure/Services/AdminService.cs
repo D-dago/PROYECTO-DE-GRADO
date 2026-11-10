@@ -41,7 +41,7 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
         var question = await db.Questions.SingleOrDefaultAsync(candidate => candidate.Id == id, cancellationToken);
         if (question is null) return (false, "La pregunta no existe.", null);
 
-        // Cada intento sortea 2 por area: con menos de 2 activas el test no se podria armar.
+        // Cada intento sortea 4 por area: con menos de 4 activas el test no se podria armar.
         var remainingActive = await db.Questions.CountAsync(candidate => candidate.Dimension == question.Dimension && candidate.IsActive && candidate.Id != id, cancellationToken);
         var staysActiveInSameArea = request.IsActive && request.Dimension == question.Dimension;
         if (!staysActiveInSameArea && question.IsActive && remainingActive < RiasecTestConstants.QuestionsPerDimensionPerAttempt)
@@ -67,25 +67,29 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
 
     public async Task<IReadOnlyList<AdminResultRow>> GetResultsAsync(CancellationToken cancellationToken)
     {
+        // Tambien los del test anterior de 12 preguntas: son RIASEC, solo cambia el maximo.
+        var versions = RiasecTestConstants.InterpretableVersions;
         var rows = await db.RiasecProfiles.AsNoTracking()
-            .Where(profile => profile.AlgorithmVersion == RiasecTestConstants.Version)
+            .Where(profile => versions.Contains(profile.AlgorithmVersion))
             .OrderByDescending(profile => profile.CreatedAtUtc)
             .Select(profile => new
             {
                 profile.TestAttemptId, profile.TestAttempt.User.FirstName, profile.TestAttempt.User.LastName, profile.TestAttempt.User.Email,
-                profile.CreatedAtUtc, profile.PrimaryCode, profile.SecondaryCode,
+                profile.CreatedAtUtc, profile.PrimaryCode, profile.SecondaryCode, profile.AlgorithmVersion,
                 profile.RScore, profile.IScore, profile.AScore, profile.SScore, profile.EScore, profile.CScore
             })
             .ToListAsync(cancellationToken);
         return rows.Select(row => new AdminResultRow(row.TestAttemptId, $"{row.FirstName} {row.LastName}", row.Email, row.CreatedAtUtc, row.PrimaryCode, row.SecondaryCode,
             row.RScore, row.IScore, row.AScore, row.SScore, row.EScore, row.CScore,
-            RiasecInterpretationBuilder.Build(row.PrimaryCode, row.SecondaryCode))).ToList();
+            RiasecInterpretationBuilder.Build(row.PrimaryCode, row.SecondaryCode),
+            RiasecTestConstants.MaxDimensionScoreFor(row.AlgorithmVersion))).ToList();
     }
 
     public async Task<IReadOnlyList<AdminAnswerRow>> GetAnswersAsync(CancellationToken cancellationToken)
     {
+        var versions = RiasecTestConstants.InterpretableVersions;
         var rows = await db.Answers.AsNoTracking()
-            .Where(answer => answer.TestAttempt.Status == TestAttemptStatus.Completed && answer.TestAttempt.TestVersion == RiasecTestConstants.Version)
+            .Where(answer => answer.TestAttempt.Status == TestAttemptStatus.Completed && versions.Contains(answer.TestAttempt.TestVersion))
             .OrderBy(answer => answer.TestAttempt.CompletedAtUtc).ThenBy(answer => answer.Question.Order)
             .Select(answer => new
             {
@@ -100,12 +104,12 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
     {
         using var workbook = new XLWorkbook();
         var sheet = workbook.Worksheets.Add("Resultados");
-        string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "R", "I", "A", "S", "E", "C"];
+        string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "R", "I", "A", "S", "E", "C", "Sobre"];
         for (var column = 0; column < header.Length; column++) sheet.Cell(1, column + 1).Value = header[column];
         for (var index = 0; index < results.Count; index++)
         {
             var row = results[index];
-            object[] values = [row.StudentName, row.Email, row.CompletedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"), row.PrimaryCode + row.SecondaryCode, row.R, row.I, row.A, row.S, row.E, row.C];
+            object[] values = [row.StudentName, row.Email, row.CompletedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"), row.PrimaryCode + row.SecondaryCode, row.R, row.I, row.A, row.S, row.E, row.C, row.MaxScore];
             for (var column = 0; column < values.Length; column++) sheet.Cell(index + 2, column + 1).Value = XLCellValue.FromObject(values[column]);
         }
         sheet.Row(1).Style.Font.Bold = true;
@@ -146,14 +150,14 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
                 table.ColumnsDefinition(columns =>
                 {
                     columns.RelativeColumn(3); columns.RelativeColumn(4); columns.RelativeColumn(2.2f); columns.RelativeColumn(1.5f);
-                    for (var index = 0; index < 6; index++) columns.RelativeColumn(0.8f);
+                    for (var index = 0; index < 7; index++) columns.RelativeColumn(0.8f);
                 });
-                string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "R", "I", "A", "S", "E", "C"];
+                string[] header = ["Estudiante", "Correo", "Fecha", "Perfil", "R", "I", "A", "S", "E", "C", "Sobre"];
                 table.Header(row => { foreach (var title in header) row.Cell().Background(Colors.Grey.Lighten2).Padding(4).Text(title).Bold(); });
                 foreach (var item in results)
                 {
                     string[] cells = [item.StudentName, item.Email, item.CompletedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm"), item.PrimaryCode + item.SecondaryCode,
-                        item.R.ToString(), item.I.ToString(), item.A.ToString(), item.S.ToString(), item.E.ToString(), item.C.ToString()];
+                        item.R.ToString(), item.I.ToString(), item.A.ToString(), item.S.ToString(), item.E.ToString(), item.C.ToString(), item.MaxScore.ToString()];
                     foreach (var cell in cells) table.Cell().BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Padding(4).Text(cell);
                 }
             });
