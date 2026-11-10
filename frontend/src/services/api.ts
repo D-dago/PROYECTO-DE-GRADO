@@ -1,3 +1,5 @@
+import { clearToken, getToken } from './auth'
+
 // Publicada (npm run build), la API sirve la web: se llama a la misma direccion, "/api", y funciona
 // igual en la PC, en el celular o por internet. En desarrollo (npm run dev) la web y la API estan en
 // puertos distintos: se usa el host con el que se abrio la pagina (con "localhost" fijo el celular
@@ -5,7 +7,7 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? `http://${window.location.hostname}:5194/api` : '/api')
 
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('accessToken')
+  const token = getToken()
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...options,
     headers: {
@@ -21,7 +23,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
     if (response.status === 401 && token) {
       // La sesion expiro o el token ya no es valido: se limpia y se manda a login
       // en vez de dejar que cada pantalla falle con un error generico.
-      localStorage.removeItem('accessToken')
+      clearToken()
       if (window.location.pathname !== '/login') window.location.href = '/login'
     }
     const body = await response.json().catch(() => null) as { message?: string; errors?: Record<string, string[]> } | null
@@ -39,7 +41,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 
 // Descarga un archivo protegido: el token va en el header, asi que no sirve un simple <a href>.
 export async function downloadFile(path: string, fallbackName: string) {
-  const token = localStorage.getItem('accessToken')
+  const token = getToken()
   const response = await fetch(`${apiBaseUrl}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
   if (!response.ok) throw new Error(response.status === 403 ? 'Solo el administrador puede descargar esto.' : `No se pudo descargar (HTTP ${response.status}).`)
   const name = /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? fallbackName

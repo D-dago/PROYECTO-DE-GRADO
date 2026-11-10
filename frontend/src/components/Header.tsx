@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { appApi } from '../services/appApi'
-import { getTokenRole } from '../services/auth'
+import { clearToken, getToken, getTokenRole } from '../services/auth'
 import { Avatar } from './Avatar'
 
 const links = [
@@ -19,7 +19,7 @@ const adminLinks = [
 ]
 
 export function Header() {
-  const token = localStorage.getItem('accessToken')
+  const token = getToken()
   const role = token ? getTokenRole(token) : ''
   const isStudent = role === 'ESTUDIANTE'
   const path = window.location.pathname
@@ -52,7 +52,7 @@ export function Header() {
   }, [open])
 
   function logout() {
-    localStorage.removeItem('accessToken')
+    clearToken()
     window.location.href = '/'
   }
 

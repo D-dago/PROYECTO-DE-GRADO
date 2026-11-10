@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import './App.css'
 import { Header } from './components/Header'
 import { FallingPetals } from './components/FallingPetals'
-import { getTokenRole } from './services/auth'
+import { getToken, getTokenRole } from './services/auth'
 
 // Cada pagina se descarga solo cuando se visita: un estudiante en el celular no paga por el panel de administrador.
 const TestPage = lazy(() => import('./pages/TestPage').then((module) => ({ default: module.TestPage })))
@@ -15,7 +15,7 @@ const SkinsPage = lazy(() => import('./pages/SkinsPage').then((module) => ({ def
 
 function App() {
   const path = window.location.pathname
-  const token = localStorage.getItem('accessToken')
+  const token = getToken()
   const protectedPath = ['/perfil', '/test', '/recomendaciones', '/historial', '/skins', '/admin'].includes(path)
 
   return (

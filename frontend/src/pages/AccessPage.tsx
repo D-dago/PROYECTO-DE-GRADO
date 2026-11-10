@@ -4,7 +4,7 @@ import { appApi } from '../services/appApi'
 import { PasswordInput } from '../components/PasswordInput'
 import { GoogleButton } from '../components/GoogleButton'
 import { inputRules, lettersOnly } from '../services/inputFilters'
-import { getTokenRole } from '../services/auth'
+import { getTokenRole, saveToken } from '../services/auth'
 
 export function AccessPage({ register = false }: { register?: boolean }) {
   const [error, setError] = useState<string | null>(null)
@@ -13,7 +13,7 @@ export function AccessPage({ register = false }: { register?: boolean }) {
   // "Iniciar sesion" a la vista y parecia que el acceso habia fallado. El estudiante va a la portada y no al
   // test, porque abrir el test crea un intento y arranca el cronometro aunque solo quisiera ver su historial.
   const finish = useCallback((accessToken: string) => {
-    localStorage.setItem('accessToken', accessToken)
+    saveToken(accessToken)
     window.location.href = getTokenRole(accessToken) === 'ADMINISTRADOR' ? '/admin' : '/'
   }, [])
   const fail = useCallback((message: string) => setError(message), [])
