@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OrientacionVocacional.Application.Configuration;
+using OrientacionVocacional.API.Security;
 using OrientacionVocacional.Domain.Constants;
 using OrientacionVocacional.Infrastructure.DependencyInjection;
 using OrientacionVocacional.Infrastructure.Persistence;
@@ -50,9 +52,14 @@ builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 
 var puerto = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(puerto)) builder.WebHost.UseUrls($"http://0.0.0.0:{puerto}");
 
-// Anti-abuso: limita cuantas peticiones puede hacer una misma IP. Registrar cuentas en
-// masa (llenar la base con correos) o adivinar contrasenas queda muy lento. Los topes
-// son holgados a proposito: un salon entero comparte la misma IP al registrarse.
+// Anti-abuso pensado para un colegio: TODOS sus estudiantes salen a internet por la MISMA IP. Antes
+// todo se contaba por IP (300 peticiones/min, 30 logins/min, 40 registros/hora) y con 40 estudiantes
+// respondiendo a la vez el 85 % de las respuestas se rechazaba (medido, ver docs/CAPACIDAD.md). Ahora:
+//  - con sesion, el tope es por estudiante (su id en el token): uno no puede frenar a los demas;
+//  - sin sesion (registro, login), por IP pero con topes para un colegio entero;
+//  - adivinar contrasenas se frena por cuenta (LoginAttemptGuard), no por IP.
+builder.Services.AddSingleton<PasswordWorkGate>();
+builder.Services.AddSingleton<LoginAttemptGuard>();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -62,10 +69,16 @@ builder.Services.AddRateLimiter(options =>
         await context.HttpContext.Response.WriteAsync("{\"message\":\"Demasiados intentos. Espera un momento e inténtalo de nuevo.\"}", token);
     };
     static string Ip(HttpContext context) => context.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
-    options.AddPolicy("register", context => RateLimitPartition.GetFixedWindowLimiter(Ip(context), _ => new FixedWindowRateLimiterOptions { PermitLimit = 40, Window = TimeSpan.FromHours(1) }));
-    options.AddPolicy("login", context => RateLimitPartition.GetFixedWindowLimiter(Ip(context), _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1) }));
+    // Requiere que UseAuthentication corra ANTES que UseRateLimiter (ver mas abajo).
+    static string? UserId(HttpContext context) =>
+        context.User.Identity?.IsAuthenticated == true ? (context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? context.User.FindFirstValue("sub")) : null;
+    options.AddPolicy("register", context => RateLimitPartition.GetFixedWindowLimiter(Ip(context), _ => new FixedWindowRateLimiterOptions { PermitLimit = 600, Window = TimeSpan.FromHours(1) }));
+    options.AddPolicy("login", context => RateLimitPartition.GetFixedWindowLimiter(Ip(context), _ => new FixedWindowRateLimiterOptions { PermitLimit = 600, Window = TimeSpan.FromMinutes(1) }));
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-        RateLimitPartition.GetFixedWindowLimiter(Ip(context), _ => new FixedWindowRateLimiterOptions { PermitLimit = 300, Window = TimeSpan.FromMinutes(1) }));
+        UserId(context) is { } userId
+            // Un estudiante real hace, como mucho, unas pocas peticiones por segundo.
+            ? RateLimitPartition.GetFixedWindowLimiter("u:" + userId, _ => new FixedWindowRateLimiterOptions { PermitLimit = 300, Window = TimeSpan.FromMinutes(1) })
+            : RateLimitPartition.GetFixedWindowLimiter("ip:" + Ip(context), _ => new FixedWindowRateLimiterOptions { PermitLimit = 3000, Window = TimeSpan.FromMinutes(1) }));
 });
 
 var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
@@ -188,8 +201,9 @@ app.UseStaticFiles(WebFiles());
 // de abajo (index.html) para cualquier archivo y los .js/.css/.jpg nunca llegan a servirse.
 app.UseRouting();
 app.UseCors("Frontend");
-app.UseRateLimiter();
+// Autenticacion antes del limitador: asi el limitador sabe que estudiante hace cada peticion.
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapControllers();

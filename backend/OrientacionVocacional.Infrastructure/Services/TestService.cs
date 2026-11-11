@@ -17,6 +17,9 @@ public sealed class TestService(
         var current = await dbContext.TestAttempts
             .Include(attempt => attempt.Answers)
             .Include(attempt => attempt.AssignedQuestions)
+            // Dos colecciones en una sola consulta multiplican filas (24 respuestas x 24 preguntas = 576);
+            // divididas son dos consultas chicas y mucho menos trabajo para el servidor.
+            .AsSplitQuery()
             .Where(attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress && attempt.TestVersion == RiasecTestConstants.Version)
             .OrderByDescending(attempt => attempt.StartedAtUtc)
             .FirstOrDefaultAsync(cancellationToken);
@@ -48,6 +51,9 @@ public sealed class TestService(
         var attempt = await dbContext.TestAttempts
             .Include(candidate => candidate.Answers)
             .Include(candidate => candidate.AssignedQuestions)
+            // Dos colecciones en una sola consulta multiplican filas (24 respuestas x 24 preguntas = 576);
+            // divididas son dos consultas chicas y mucho menos trabajo para el servidor.
+            .AsSplitQuery()
             .SingleOrDefaultAsync(
                 candidate => candidate.Id == attemptId && candidate.UserId == userId,
                 cancellationToken);
@@ -84,34 +90,37 @@ public sealed class TestService(
             return (false, "La respuesta debe estar entre 1 y 5.", null);
         }
 
-        var attempt = await dbContext.TestAttempts
-            .Include(candidate => candidate.Answers)
-            .Include(candidate => candidate.AssignedQuestions)
-            .SingleOrDefaultAsync(
-                candidate => candidate.Id == attemptId && candidate.UserId == userId,
-                cancellationToken);
-        if (attempt is null)
+        // Es la peticion que mas se repite (24 por estudiante), asi que no carga el intento con todas sus
+        // respuestas y preguntas: una sola consulta trae solo lo que hace falta comprobar. Medido con 120
+        // estudiantes, cargar y rastrear todo costaba unas 4 veces mas CPU (ver docs/CAPACIDAD.md).
+        var state = await dbContext.TestAttempts
+            .AsNoTracking()
+            .Where(candidate => candidate.Id == attemptId && candidate.UserId == userId)
+            .Select(candidate => new
+            {
+                candidate.Status,
+                Total = candidate.AssignedQuestions.Count,
+                Answered = candidate.Answers.Count,
+                // Si fue asignada, la pregunta existe (llave foranea). No se exige que siga activa: si el
+                // administrador la desactiva mientras alguien hace el test, rechazarla dejaria ese intento
+                // imposible de terminar.
+                IsAssigned = candidate.AssignedQuestions.Any(assigned => assigned.QuestionId == request.QuestionId),
+                IsAnswered = candidate.Answers.Any(answer => answer.QuestionId == request.QuestionId)
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (state is null)
         {
             return (false, "El intento no existe.", null);
         }
-        if (attempt.Status != TestAttemptStatus.InProgress)
+        if (state.Status != TestAttemptStatus.InProgress)
         {
             return (false, "El intento ya fue completado.", null);
         }
-        if (attempt.AssignedQuestions.All(assigned => assigned.QuestionId != request.QuestionId))
+        if (!state.IsAssigned)
         {
             return (false, "Esa pregunta no forma parte de este intento.", null);
         }
-
-        // No se exige que siga activa: ya fue asignada a este intento. Si el administrador la desactiva
-        // mientras alguien hace el test, rechazarla dejaria ese intento imposible de terminar.
-        var question = await dbContext.Questions
-            .SingleOrDefaultAsync(candidate => candidate.Id == request.QuestionId, cancellationToken);
-        if (question is null)
-        {
-            return (false, "La pregunta no existe.", null);
-        }
-        if (attempt.Answers.Any(answer => answer.QuestionId == request.QuestionId))
+        if (state.IsAnswered)
         {
             return (false, "La pregunta ya fue respondida en este intento.", null);
         }
@@ -120,13 +129,20 @@ public sealed class TestService(
         {
             Id = Guid.NewGuid(),
             TestAttemptId = attemptId,
-            QuestionId = question.Id,
+            QuestionId = request.QuestionId,
             Value = request.Value
         });
         var user = await dbContext.Users.SingleAsync(candidate => candidate.Id == userId, cancellationToken);
         user.Coins += RiasecTestConstants.CoinsPerAnswer;
         await dbContext.SaveChangesAsync(cancellationToken);
-        return (true, null, ToAttemptResponse(attempt, user.Coins));
+        var answered = state.Answered + 1;
+        return (true, null, new TestAttemptResponse(
+            attemptId,
+            answered,
+            state.Total,
+            state.Total == 0 ? 0 : Math.Round(answered * 100m / state.Total, 2),
+            TestAttemptStatus.InProgress.ToString().ToUpperInvariant(),
+            user.Coins));
     }
 
     public async Task<(bool Success, string? Error, RiasecResultResponse? Result)> CompleteAsync(
@@ -139,6 +155,9 @@ public sealed class TestService(
                 .ThenInclude(answer => answer.Question)
             .Include(candidate => candidate.AssignedQuestions)
             .Include(candidate => candidate.RiasecProfile)
+            // Dos colecciones en una sola consulta multiplican filas (24 respuestas x 24 preguntas = 576);
+            // divididas son dos consultas chicas y mucho menos trabajo para el servidor.
+            .AsSplitQuery()
             .SingleOrDefaultAsync(
                 candidate => candidate.Id == attemptId && candidate.UserId == userId,
                 cancellationToken);

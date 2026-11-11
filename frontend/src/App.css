@@ -168,6 +168,8 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .simple-form input, .simple-form select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; text-overflow: ellipsis; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
 .simple-form button { padding: .8rem 1.2rem; border: 0; border-radius: 999px; background: var(--green); color: #fff; cursor: pointer; font-weight: 600; transition: filter .15s; }
 .simple-form button:hover { filter: brightness(.92); }
+.simple-form button:disabled { cursor: wait; filter: saturate(.6) brightness(.9); }
+.queue-message { margin: 0; padding: .8rem 1rem; border-radius: 14px; background: rgba(242, 169, 59, .14); border: 1px solid rgba(242, 169, 59, .4); color: var(--cream); font-size: .92rem; }
 .password-field { position: relative; display: block; }
 .password-field input { width: 100%; box-sizing: border-box; padding-right: 3rem; }
 .simple-form .password-toggle { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); width: auto; padding: .4rem; background: transparent; color: var(--muted); border-radius: 8px; line-height: 0; }

@@ -23,6 +23,7 @@
     <ProjectReference Include="..\OrientacionVocacional.Domain\OrientacionVocacional.Domain.csproj" />
     <ProjectReference Include="..\OrientacionVocacional.Application\OrientacionVocacional.Application.csproj" />
     <ProjectReference Include="..\OrientacionVocacional.Infrastructure\OrientacionVocacional.Infrastructure.csproj" />
+    <ProjectReference Include="..\OrientacionVocacional.API\OrientacionVocacional.API.csproj" />
   </ItemGroup>
 
 </Project>

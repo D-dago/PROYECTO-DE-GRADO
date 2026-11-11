@@ -23,8 +23,10 @@ public static class InfrastructureServiceCollectionExtensions
             throw new InvalidOperationException("ConnectionStrings:PostgreSQL no está configurada.");
         }
 
+        // Neon suspende la base tras unos minutos sin uso y puede cortar una conexion al despertar o al
+        // cambiar de tamano: esos errores pasajeros se reintentan solos en vez de llegar al estudiante.
         services.AddDbContext<OrientacionVocacionalDbContext>(options =>
-            options.UseNpgsql(connectionString));
+            options.UseNpgsql(connectionString, npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null)));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
         services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.SectionName));

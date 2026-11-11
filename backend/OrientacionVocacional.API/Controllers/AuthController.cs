@@ -4,14 +4,31 @@ using Microsoft.AspNetCore.RateLimiting;
 using OrientacionVocacional.Domain.Constants;
 using OrientacionVocacional.Application.Contracts;
 using OrientacionVocacional.Application.Interfaces;
+using OrientacionVocacional.API.Security;
 
 namespace OrientacionVocacional.API.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController(IAuthService authService, IGoogleTokenValidator googleValidator) : ControllerBase
+public sealed class AuthController(
+    IAuthService authService,
+    IGoogleTokenValidator googleValidator,
+    PasswordWorkGate passwordWork,
+    LoginAttemptGuard loginGuard) : ControllerBase
 {
     public sealed record GoogleLoginRequest(string IdToken);
+
+    /// <summary>
+    /// Si la fila para registrarse o entrar es demasiado larga, se avisa al instante cuantos segundos esperar
+    /// (encabezado Retry-After): la pagina reintenta sola y muestra que esta en fila, en vez de quedarse
+    /// colgada hasta que internet corte la peticion.
+    /// </summary>
+    private ObjectResult? QueueIsFull()
+    {
+        if (passwordWork.RetryAfterSeconds() is not { } seconds) return null;
+        Response.Headers.RetryAfter = seconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = $"Hay muchos estudiantes entrando a la vez. Estás en fila: reintentamos en {seconds} segundos.", retryAfter = seconds });
+    }
 
     [HttpPost("google")]
     [OrientacionVocacional.API.Live.NotifyDataChange(OrientacionVocacional.API.Live.DataArea.Activity)]
@@ -31,9 +48,12 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
             return Unauthorized(new { message = "No se pudo validar tu cuenta de Google." });
         }
 
+        if (QueueIsFull() is { } busyGoogle) return busyGoogle;
+
         try
         {
-            var response = await authService.LoginExternalAsync(identity.Email, identity.FirstName, identity.LastName, cancellationToken);
+            // Una cuenta nueva por Google tambien calcula un hash: espera su turno como las demas.
+            var response = await passwordWork.RunAsync(() => authService.LoginExternalAsync(identity.Email, identity.FirstName, identity.LastName, cancellationToken), cancellationToken);
             return response is null ? Unauthorized(new { message = "Tu cuenta está desactivada." }) : Ok(response);
         }
         catch (InvalidOperationException exception)
@@ -52,10 +72,11 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
     {
         var emailProblem = RegistrationPolicy.CheckEmail(request.Email.Trim());
         if (emailProblem is not null) return BadRequest(new { message = emailProblem });
+        if (QueueIsFull() is { } busy) return busy;
 
         try
         {
-            var response = await authService.RegisterAsync(request, cancellationToken);
+            var response = await passwordWork.RunAsync(() => authService.RegisterAsync(request, cancellationToken), cancellationToken);
             return response is null
                 ? Conflict(new { message = "El correo ya está registrado." })
                 : Created("api/auth/me", response);
@@ -73,10 +94,22 @@ public sealed class AuthController(IAuthService authService, IGoogleTokenValidat
         LoginRequest request,
         CancellationToken cancellationToken)
     {
-        var response = await authService.LoginAsync(request, cancellationToken);
-        return response is null
-            ? Unauthorized(new { message = "Credenciales inválidas." })
-            : Ok(response);
+        if (loginGuard.IsLocked(request.Email))
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, new { message = $"Demasiados intentos fallidos con este correo. Espera {LoginAttemptGuard.LockMinutes} minutos e inténtalo de nuevo." });
+        }
+
+        if (QueueIsFull() is { } busy) return busy;
+
+        var response = await passwordWork.RunAsync(() => authService.LoginAsync(request, cancellationToken), cancellationToken);
+        if (response is null)
+        {
+            loginGuard.RegisterFailure(request.Email);
+            return Unauthorized(new { message = "Credenciales inválidas." });
+        }
+
+        loginGuard.Reset(request.Email);
+        return Ok(response);
     }
 
     [HttpPost("logout")]

@@ -6,7 +6,33 @@ import { clearToken, getToken } from './auth'
 // buscaria la API en si mismo y fallaria).
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? `http://${window.location.hostname}:5194/api` : '/api')
 
+// Registro e inicio de sesion: si el servidor dice que hay fila (503 con Retry-After), se espera lo que
+// indica y se reintenta solo, avisando a la pantalla con el evento "auth-queue" (segundos de espera).
+const AUTH_PATHS = ['/auth/login', '/auth/register', '/auth/google']
+const MAX_QUEUE_RETRIES = 20
+
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await requestOnce<T>(path, options)
+    } catch (error) {
+      const wait = error instanceof QueueError && AUTH_PATHS.includes(path) && attempt < MAX_QUEUE_RETRIES ? error.seconds : null
+      if (wait === null) throw error
+      window.dispatchEvent(new CustomEvent('auth-queue', { detail: wait }))
+      await new Promise((resolve) => setTimeout(resolve, wait * 1000))
+    }
+  }
+}
+
+class QueueError extends Error {
+  readonly seconds: number
+  constructor(message: string, seconds: number) {
+    super(message)
+    this.seconds = seconds
+  }
+}
+
+async function requestOnce<T>(path: string, options: RequestInit): Promise<T> {
   const token = getToken()
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...options,
@@ -27,6 +53,8 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
       if (window.location.pathname !== '/login') window.location.href = '/login'
     }
     const body = await response.json().catch(() => null) as { message?: string; errors?: Record<string, string[]> } | null
+    const retryAfter = Number(response.headers.get('Retry-After'))
+    if (response.status === 503 && retryAfter > 0) throw new QueueError(body?.message ?? 'Hay mucha gente entrando a la vez.', Math.min(retryAfter, 60))
     // Los errores de validacion del servidor llegan como { errors: { Campo: [mensaje] } }.
     const validation = body?.errors ? Object.values(body.errors).flat()[0] : undefined
     throw new Error(body?.message ?? validation ?? (response.status === 413 ? 'El envío es demasiado grande.' : `Error HTTP ${response.status}`))
