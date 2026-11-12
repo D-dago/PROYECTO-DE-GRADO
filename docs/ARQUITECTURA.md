@@ -25,13 +25,13 @@ El backend emite JWT con identificador de usuario, correo y rol. Los controlador
 
 ## Test RIASEC
 
-El banco contiene 60 preguntas activas, diez por cada una de las seis dimensiones: `R` (Realista), `I` (Investigador), `A` (Artístico), `S` (Social), `E` (Emprendedor) y `C` (Convencional), según la teoría de Holland. Durante un tiempo el sistema aplicó una versión CHASIDE del test; la migración `VuelveATestRiasec` restauró el banco RIASEC y dejó inactivas (orden ≥ 1000) las preguntas propias de CHASIDE (áreas H y D), porque hay respuestas guardadas que las referencian.
+El test aplica el **Perfil de Intereses O*NET** en su versión oficial en español: 30 actividades de trabajo, cinco por cada una de las seis dimensiones de Holland: `R` (Realista), `I` (Investigador), `A` (Artístico), `S` (Social), `E` (Emprendedor) y `C` (Convencional). La migración `TestPerfilInteresesOnet` las cargó (códigos `OR1` a `OC5`) y dejó inactivas (orden ≥ 1000) las 60 preguntas propias anteriores; las de CHASIDE (áreas H y D) ya lo estaban. Se conservan porque hay respuestas guardadas que las referencian. Los textos son de las O*NET Career Exploration Tools (USDOL/ETA) y se usan sin cambios, según la O*NET Tools Developer License.
 
-Cada intento **sortea 24 preguntas** (4 por dimensión) y las intercala `R, I, A, S, E, C, R, I, A, S, E, C, …`, de modo que nunca aparezcan dos preguntas seguidas de la misma dimensión. Se responden en una escala de 1 a 5 y cada respuesta se guarda al instante.
+Es una **forma fija**: todos los intentos reciben las mismas 30 actividades (las 5 primeras activas de cada dimensión), en el orden oficial `R, I, A, S, E, C, R, I, A, S, E, C, …`, de modo que nunca aparezcan dos seguidas de la misma dimensión. Antes se sorteaban 4 de 10 por dimensión, y así cada estudiante respondía un test distinto. La pantalla no muestra la dimensión de cada actividad. Se responde con la escala de O*NET (Me disgusta mucho … Me gusta mucho, guardada como 1 a 5) y cada respuesta se guarda al instante.
 
-El algoritmo suma las seis dimensiones, aplica un desempate fijo en el orden `R, I, A, S, E, C` y guarda el perfil con versión `RIASEC-24-V3`. El puntaje máximo por dimensión es 20 (4 preguntas × 5).
+El algoritmo `ONET-30-V4` puntúa cada respuesta de 0 a 4 (respuesta − 1) y suma cada dimensión (máximo 20 = 5 × 4). El código del perfil sigue a O*NET: solo cuentan las dimensiones por encima del promedio de las seis del propio estudiante (puntaje z > 0), hasta tres, de mayor a menor; los empates de la primera se resuelven en el orden `R, I, A, S, E, C` y los demás por cercanía a la primera en el hexágono. Si ninguna supera el promedio, el perfil es plano: se guarda sin código y la interpretación lo explica.
 
-Los resultados del test anterior de 12 preguntas (`RIASEC-12-V2`, máximo 10 por dimensión) se siguen mostrando y generan recomendaciones: cada perfil se mide contra el máximo de su propio test, así una persona que obtuvo 10 de 10 tiene la misma compatibilidad que una que obtiene 20 de 20.
+Los resultados de los tests anteriores de 24 preguntas (`RIASEC-24-V3`, valores 1 a 5, máximo 20) y de 12 preguntas (`RIASEC-12-V2`, máximo 10) se siguen mostrando y generan recomendaciones con su propia puntuación: cada perfil se mide contra el máximo de su propio test, así una persona que obtuvo 10 de 10 tiene la misma compatibilidad que una que obtiene 20 de 20.
 
 Los perfiles de versiones anteriores se conservan pero no se interpretan: sus letras significan otra cosa, así que no generan recomendaciones ni lectura de perfil.
 

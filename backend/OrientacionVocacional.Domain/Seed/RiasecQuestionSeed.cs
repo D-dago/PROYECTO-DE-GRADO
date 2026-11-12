@@ -4,8 +4,55 @@ namespace OrientacionVocacional.Domain.Seed;
 
 public static class RiasecQuestionSeed
 {
-    // Formato de cada texto: "Actividad concreta (ej.: ejemplo corto)". El frontend separa
-    // el ejemplo y lo muestra en un tono mas suave debajo de la actividad.
+    // Perfil de Intereses O*NET, version en espanol (30 actividades, 5 por dimension), en el orden
+    // oficial: una actividad de cada dimension en ciclo R, I, A, S, E, C. Textos sin cambios, tal como
+    // los presenta https://onetinterestprofiler.org/es/ (consultado el 2026-11-12). Contenido de las
+    // O*NET Career Exploration Tools del U.S. Department of Labor, Employment and Training
+    // Administration (USDOL/ETA), usado segun la O*NET Tools Developer License. Si se cambia un texto,
+    // la licencia exige avisar que USDOL/ETA no aprobo la modificacion y validar la version nueva.
+    private static readonly (string Dimension, string Text)[] OnetItems =
+    [
+        ("R", "Construir gabinetes para cocinas"),
+        ("I", "Elaborar nueva medicina"),
+        ("A", "Escribir libros u obras de teatro"),
+        ("S", "Ayudar a personas con problemas personales o emocionales"),
+        ("E", "Administrar un departamento en una compañía grande"),
+        ("C", "Instala software en las computadoras en una gran red"),
+        ("R", "Reparar electrodomésticos"),
+        ("I", "Estudiar maneras para reducir la contaminación del agua"),
+        ("A", "Componer y hacer arreglos musicales"),
+        ("S", "Orientar a las personas sobre carreras"),
+        ("E", "Comenzar su propio negocio"),
+        ("C", "Operar una calculadora"),
+        ("R", "Ensamblar partes electrónicas"),
+        ("I", "Realizar experimentos químicos"),
+        ("A", "Crear efectos especiales para películas"),
+        ("S", "Realizar terapia de rehabilitación"),
+        ("E", "Negociar contratos comerciales"),
+        ("C", "Mantener registros de envíos y recepción"),
+        ("R", "Manejar un camión para entregar paquetes a oficinas y hogares"),
+        ("I", "Examinar muestras de sangre con el uso de un microscopio"),
+        ("A", "Pintar escenografías para obras de teatro"),
+        ("S", "Hacer trabajo voluntario en organizaciones sin fines de lucro"),
+        ("E", "Comercializar una nueva línea de ropa"),
+        ("C", "Identificar el inventario de suministros con una computadora de mano"),
+        ("R", "Probar la calidad de las partes antes de un envío"),
+        ("I", "Desarrollar una mejor manera de predecir el estado del tiempo o clima"),
+        ("A", "Escribir libretos para películas o programas de televisión"),
+        ("S", "Enseñar una clase de high school"),
+        ("E", "Vender mercancía en una tienda por departamentos"),
+        ("C", "Colocar sellos, separar y repartir correo para una organización"),
+    ];
+
+    // Ids de las actividades O*NET: numero 101-105 dentro de cada dimension (las 1-10 son del banco anterior).
+    private const int OnetNumberOffset = 100;
+    // El banco propio anterior queda inactivo con Order >= 2000: fuera del test y del banco del administrador.
+    private const int PreviousBankOrderStart = 2000;
+    private const int ChasideOrderStart = 1060;
+
+    // Banco propio que usaron las versiones V1 a V3 ("Actividad (ej.: ejemplo corto)"). Ya no se
+    // aplica, pero se conserva INACTIVO porque hay respuestas guardadas que lo referencian y la
+    // clave foranea es restrictiva.
     private static readonly (string Dimension, string[] Texts)[] Dimensions =
     [
         ("R", [
@@ -108,49 +155,61 @@ public static class RiasecQuestionSeed
 
     public static IReadOnlyList<Question> Create()
     {
-        // El orden se intercala entre dimensiones (R,I,A,S,E,C,R,I,A,S,E,C,...) en vez
-        // de agrupar las 10 preguntas de cada dimension seguidas. Si el estudiante ve
-        // 10 preguntas "parecidas" en fila reconoce el patron y empieza a responder
-        // "para ser consistente" en vez de genuino, lo que sesga el resultado.
-        var questionsByDimension = Dimensions
-            .Select(dimension => dimension.Texts
-                .Select((text, index) => new Question
-                {
-                    Id = QuestionId(dimension.Dimension, index + 1),
-                    Code = $"{dimension.Dimension}{index + 1:00}",
-                    Text = text,
-                    Dimension = dimension.Dimension,
-                    IsActive = true
-                })
-                .ToArray())
-            .ToArray();
+        var questions = new List<Question>(OnetItems.Length + 60 + Legacy.Length);
 
-        var order = 1;
-        var interleaved = new List<Question>(60 + Legacy.Length);
+        // 1) Perfil de Intereses O*NET: activas, en el orden oficial (1 a 30). El ciclo R,I,A,S,E,C
+        // evita que aparezcan seguidas dos actividades de la misma dimension. Codigo "O" + letra + n
+        // (OR1...OC5): el administrador solo genera codigos letra + numero, asi que no chocan.
+        var perDimension = new Dictionary<string, int>();
+        for (var index = 0; index < OnetItems.Length; index++)
+        {
+            var (dimension, text) = OnetItems[index];
+            var number = perDimension[dimension] = perDimension.GetValueOrDefault(dimension) + 1;
+            questions.Add(new Question
+            {
+                Id = QuestionId(dimension, OnetNumberOffset + number),
+                Code = $"O{dimension}{number}",
+                Text = text,
+                Dimension = dimension,
+                Order = index + 1,
+                IsActive = true
+            });
+        }
+
+        // 2) Banco propio anterior (V1-V3): inactivo, con los mismos ids y codigos de siempre.
+        var order = PreviousBankOrderStart;
         for (var index = 0; index < 10; index++)
         {
-            foreach (var dimension in questionsByDimension)
+            foreach (var (dimension, texts) in Dimensions)
             {
-                var question = dimension[index];
-                question.Order = order++;
-                interleaved.Add(question);
+                questions.Add(new Question
+                {
+                    Id = QuestionId(dimension, index + 1),
+                    Code = $"{dimension}{index + 1:00}",
+                    Text = texts[index],
+                    Dimension = dimension,
+                    Order = ++order,
+                    IsActive = false
+                });
             }
         }
 
-        foreach (var (dimension, number, text) in Legacy)
+        // 3) CHASIDE (areas H y D): inactivas, con el mismo orden que ya tenian en la base.
+        for (var index = 0; index < Legacy.Length; index++)
         {
-            interleaved.Add(new Question
+            var (dimension, number, text) = Legacy[index];
+            questions.Add(new Question
             {
                 Id = QuestionId(dimension, number),
                 Code = $"{dimension}{number:00}",
                 Text = text,
                 Dimension = dimension,
-                Order = 1000 + interleaved.Count,
+                Order = ChasideOrderStart + index,
                 IsActive = false
             });
         }
 
-        return interleaved;
+        return questions;
     }
 
     public static Guid QuestionId(string dimension, int number)

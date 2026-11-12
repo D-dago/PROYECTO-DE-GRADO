@@ -3,7 +3,7 @@
 Medido el 2026-11-11 con pruebas de carga que simulan a estudiantes de **un mismo colegio**. Todos salen a internet por la **misma IP**, que es el caso real de un aula o un laboratorio. Cada estudiante simulado:
 
 1. se registra;
-2. abre el test y responde las 24 preguntas;
+2. abre el test y responde las preguntas (24 cuando se midió; hoy son 30);
 3. ve su resultado, "Dónde estudiar" y su historial.
 
 Mientras tanto, su pantalla consulta cada 5 s si hubo cambios.

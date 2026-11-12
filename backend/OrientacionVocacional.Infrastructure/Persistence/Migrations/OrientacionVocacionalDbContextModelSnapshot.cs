@@ -250,11 +250,281 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("10000000-0001-4000-8000-000000000000"),
-                            Code = "R01",
+                            Id = new Guid("10000000-0101-4000-8000-000000000000"),
+                            Code = "OR1",
                             Dimension = "R",
                             IsActive = true,
                             Order = 1,
+                            Text = "Construir gabinetes para cocinas"
+                        },
+                        new
+                        {
+                            Id = new Guid("20000000-0101-4000-8000-000000000000"),
+                            Code = "OI1",
+                            Dimension = "I",
+                            IsActive = true,
+                            Order = 2,
+                            Text = "Elaborar nueva medicina"
+                        },
+                        new
+                        {
+                            Id = new Guid("30000000-0101-4000-8000-000000000000"),
+                            Code = "OA1",
+                            Dimension = "A",
+                            IsActive = true,
+                            Order = 3,
+                            Text = "Escribir libros u obras de teatro"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0101-4000-8000-000000000000"),
+                            Code = "OS1",
+                            Dimension = "S",
+                            IsActive = true,
+                            Order = 4,
+                            Text = "Ayudar a personas con problemas personales o emocionales"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0101-4000-8000-000000000000"),
+                            Code = "OE1",
+                            Dimension = "E",
+                            IsActive = true,
+                            Order = 5,
+                            Text = "Administrar un departamento en una compañía grande"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0101-4000-8000-000000000000"),
+                            Code = "OC1",
+                            Dimension = "C",
+                            IsActive = true,
+                            Order = 6,
+                            Text = "Instala software en las computadoras en una gran red"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0102-4000-8000-000000000000"),
+                            Code = "OR2",
+                            Dimension = "R",
+                            IsActive = true,
+                            Order = 7,
+                            Text = "Reparar electrodomésticos"
+                        },
+                        new
+                        {
+                            Id = new Guid("20000000-0102-4000-8000-000000000000"),
+                            Code = "OI2",
+                            Dimension = "I",
+                            IsActive = true,
+                            Order = 8,
+                            Text = "Estudiar maneras para reducir la contaminación del agua"
+                        },
+                        new
+                        {
+                            Id = new Guid("30000000-0102-4000-8000-000000000000"),
+                            Code = "OA2",
+                            Dimension = "A",
+                            IsActive = true,
+                            Order = 9,
+                            Text = "Componer y hacer arreglos musicales"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0102-4000-8000-000000000000"),
+                            Code = "OS2",
+                            Dimension = "S",
+                            IsActive = true,
+                            Order = 10,
+                            Text = "Orientar a las personas sobre carreras"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0102-4000-8000-000000000000"),
+                            Code = "OE2",
+                            Dimension = "E",
+                            IsActive = true,
+                            Order = 11,
+                            Text = "Comenzar su propio negocio"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0102-4000-8000-000000000000"),
+                            Code = "OC2",
+                            Dimension = "C",
+                            IsActive = true,
+                            Order = 12,
+                            Text = "Operar una calculadora"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0103-4000-8000-000000000000"),
+                            Code = "OR3",
+                            Dimension = "R",
+                            IsActive = true,
+                            Order = 13,
+                            Text = "Ensamblar partes electrónicas"
+                        },
+                        new
+                        {
+                            Id = new Guid("20000000-0103-4000-8000-000000000000"),
+                            Code = "OI3",
+                            Dimension = "I",
+                            IsActive = true,
+                            Order = 14,
+                            Text = "Realizar experimentos químicos"
+                        },
+                        new
+                        {
+                            Id = new Guid("30000000-0103-4000-8000-000000000000"),
+                            Code = "OA3",
+                            Dimension = "A",
+                            IsActive = true,
+                            Order = 15,
+                            Text = "Crear efectos especiales para películas"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0103-4000-8000-000000000000"),
+                            Code = "OS3",
+                            Dimension = "S",
+                            IsActive = true,
+                            Order = 16,
+                            Text = "Realizar terapia de rehabilitación"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0103-4000-8000-000000000000"),
+                            Code = "OE3",
+                            Dimension = "E",
+                            IsActive = true,
+                            Order = 17,
+                            Text = "Negociar contratos comerciales"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0103-4000-8000-000000000000"),
+                            Code = "OC3",
+                            Dimension = "C",
+                            IsActive = true,
+                            Order = 18,
+                            Text = "Mantener registros de envíos y recepción"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0104-4000-8000-000000000000"),
+                            Code = "OR4",
+                            Dimension = "R",
+                            IsActive = true,
+                            Order = 19,
+                            Text = "Manejar un camión para entregar paquetes a oficinas y hogares"
+                        },
+                        new
+                        {
+                            Id = new Guid("20000000-0104-4000-8000-000000000000"),
+                            Code = "OI4",
+                            Dimension = "I",
+                            IsActive = true,
+                            Order = 20,
+                            Text = "Examinar muestras de sangre con el uso de un microscopio"
+                        },
+                        new
+                        {
+                            Id = new Guid("30000000-0104-4000-8000-000000000000"),
+                            Code = "OA4",
+                            Dimension = "A",
+                            IsActive = true,
+                            Order = 21,
+                            Text = "Pintar escenografías para obras de teatro"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0104-4000-8000-000000000000"),
+                            Code = "OS4",
+                            Dimension = "S",
+                            IsActive = true,
+                            Order = 22,
+                            Text = "Hacer trabajo voluntario en organizaciones sin fines de lucro"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0104-4000-8000-000000000000"),
+                            Code = "OE4",
+                            Dimension = "E",
+                            IsActive = true,
+                            Order = 23,
+                            Text = "Comercializar una nueva línea de ropa"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0104-4000-8000-000000000000"),
+                            Code = "OC4",
+                            Dimension = "C",
+                            IsActive = true,
+                            Order = 24,
+                            Text = "Identificar el inventario de suministros con una computadora de mano"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0105-4000-8000-000000000000"),
+                            Code = "OR5",
+                            Dimension = "R",
+                            IsActive = true,
+                            Order = 25,
+                            Text = "Probar la calidad de las partes antes de un envío"
+                        },
+                        new
+                        {
+                            Id = new Guid("20000000-0105-4000-8000-000000000000"),
+                            Code = "OI5",
+                            Dimension = "I",
+                            IsActive = true,
+                            Order = 26,
+                            Text = "Desarrollar una mejor manera de predecir el estado del tiempo o clima"
+                        },
+                        new
+                        {
+                            Id = new Guid("30000000-0105-4000-8000-000000000000"),
+                            Code = "OA5",
+                            Dimension = "A",
+                            IsActive = true,
+                            Order = 27,
+                            Text = "Escribir libretos para películas o programas de televisión"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0105-4000-8000-000000000000"),
+                            Code = "OS5",
+                            Dimension = "S",
+                            IsActive = true,
+                            Order = 28,
+                            Text = "Enseñar una clase de high school"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0105-4000-8000-000000000000"),
+                            Code = "OE5",
+                            Dimension = "E",
+                            IsActive = true,
+                            Order = 29,
+                            Text = "Vender mercancía en una tienda por departamentos"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0105-4000-8000-000000000000"),
+                            Code = "OC5",
+                            Dimension = "C",
+                            IsActive = true,
+                            Order = 30,
+                            Text = "Colocar sellos, separar y repartir correo para una organización"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0001-4000-8000-000000000000"),
+                            Code = "R01",
+                            Dimension = "R",
+                            IsActive = false,
+                            Order = 2001,
                             Text = "Reparar cosas con herramientas (ej.: arreglar una bicicleta o un enchufe)"
                         },
                         new
@@ -262,8 +532,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0001-4000-8000-000000000000"),
                             Code = "I01",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 2,
+                            IsActive = false,
+                            Order = 2002,
                             Text = "Descubrir cómo funciona algo (ej.: cómo una app guarda tus datos)"
                         },
                         new
@@ -271,8 +541,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0001-4000-8000-000000000000"),
                             Code = "A01",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 3,
+                            IsActive = false,
+                            Order = 2003,
                             Text = "Dibujar o diseñar (ej.: un logotipo, un afiche)"
                         },
                         new
@@ -280,8 +550,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0001-4000-8000-000000000000"),
                             Code = "S01",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 4,
+                            IsActive = false,
+                            Order = 2004,
                             Text = "Explicar algo a quien no lo entiende (ej.: ayudar a un compañero con matemáticas)"
                         },
                         new
@@ -289,8 +559,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0001-4000-8000-000000000000"),
                             Code = "E01",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 5,
+                            IsActive = false,
+                            Order = 2005,
                             Text = "Tomar la iniciativa en un proyecto (ej.: proponer y arrancar una actividad)"
                         },
                         new
@@ -298,8 +568,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0001-4000-8000-000000000000"),
                             Code = "C01",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 6,
+                            IsActive = false,
+                            Order = 2006,
                             Text = "Ordenar información para encontrarla fácil (ej.: carpetas, cuadernos, archivos)"
                         },
                         new
@@ -307,8 +577,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0002-4000-8000-000000000000"),
                             Code = "R02",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 7,
+                            IsActive = false,
+                            Order = 2007,
                             Text = "Aprender haciendo, no leyendo (ej.: armar algo siguiendo pasos)"
                         },
                         new
@@ -316,8 +586,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0002-4000-8000-000000000000"),
                             Code = "I02",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 8,
+                            IsActive = false,
+                            Order = 2008,
                             Text = "Resolver acertijos o problemas de lógica (ej.: sudoku, ajedrez)"
                         },
                         new
@@ -325,8 +595,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0002-4000-8000-000000000000"),
                             Code = "A02",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 9,
+                            IsActive = false,
+                            Order = 2009,
                             Text = "Inventar ideas nuevas para un proyecto (ej.: el tema de una feria del colegio)"
                         },
                         new
@@ -334,8 +604,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0002-4000-8000-000000000000"),
                             Code = "S02",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 10,
+                            IsActive = false,
+                            Order = 2010,
                             Text = "Escuchar los problemas de otras personas (ej.: aconsejar a un amigo)"
                         },
                         new
@@ -343,8 +613,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0002-4000-8000-000000000000"),
                             Code = "E02",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 11,
+                            IsActive = false,
+                            Order = 2011,
                             Text = "Dirigir o coordinar un equipo (ej.: ser capitán o jefe de grupo)"
                         },
                         new
@@ -352,8 +622,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0002-4000-8000-000000000000"),
                             Code = "C02",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 12,
+                            IsActive = false,
+                            Order = 2012,
                             Text = "Seguir listas y pasos definidos (ej.: una receta, un manual)"
                         },
                         new
@@ -361,8 +631,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0003-4000-8000-000000000000"),
                             Code = "R03",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 13,
+                            IsActive = false,
+                            Order = 2013,
                             Text = "Desarmar objetos para entender cómo funcionan (ej.: un celular viejo, un radio)"
                         },
                         new
@@ -370,8 +640,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0003-4000-8000-000000000000"),
                             Code = "I03",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 14,
+                            IsActive = false,
+                            Order = 2014,
                             Text = "Analizar información antes de decidir (ej.: comparar precios y calidad)"
                         },
                         new
@@ -379,8 +649,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0003-4000-8000-000000000000"),
                             Code = "A03",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 15,
+                            IsActive = false,
+                            Order = 2015,
                             Text = "Combinar colores, formas o estilos (ej.: decorar un espacio, armar un outfit)"
                         },
                         new
@@ -388,8 +658,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0003-4000-8000-000000000000"),
                             Code = "S03",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 16,
+                            IsActive = false,
+                            Order = 2016,
                             Text = "Enseñar una habilidad a alguien (ej.: tocar guitarra, cocinar)"
                         },
                         new
@@ -397,8 +667,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0003-4000-8000-000000000000"),
                             Code = "E03",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 17,
+                            IsActive = false,
+                            Order = 2017,
                             Text = "Presentar una idea frente a otras personas (ej.: exponer ante todo el curso)"
                         },
                         new
@@ -406,8 +676,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0003-4000-8000-000000000000"),
                             Code = "C03",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 18,
+                            IsActive = false,
+                            Order = 2018,
                             Text = "Revisar que un documento no tenga errores (ej.: corregir ortografía o cifras)"
                         },
                         new
@@ -415,8 +685,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0004-4000-8000-000000000000"),
                             Code = "R04",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 19,
+                            IsActive = false,
+                            Order = 2019,
                             Text = "Trabajo manual que exige precisión (ej.: carpintería, soldadura)"
                         },
                         new
@@ -424,8 +694,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0004-4000-8000-000000000000"),
                             Code = "I04",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 20,
+                            IsActive = false,
+                            Order = 2020,
                             Text = "Hacer experimentos para probar una idea (ej.: qué abono hace crecer mejor una planta)"
                         },
                         new
@@ -433,8 +703,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0004-4000-8000-000000000000"),
                             Code = "A04",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 21,
+                            IsActive = false,
+                            Order = 2021,
                             Text = "Crear contenido para redes o video (ej.: editar un reel, grabar un podcast)"
                         },
                         new
@@ -442,8 +712,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0004-4000-8000-000000000000"),
                             Code = "S04",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 22,
+                            IsActive = false,
+                            Order = 2022,
                             Text = "Trabajar en equipo (ej.: un grupo de estudio, un proyecto grupal)"
                         },
                         new
@@ -451,8 +721,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0004-4000-8000-000000000000"),
                             Code = "E04",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 23,
+                            IsActive = false,
+                            Order = 2023,
                             Text = "Crear tu propio negocio (ej.: vender ropa, comida o servicios)"
                         },
                         new
@@ -460,8 +730,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0004-4000-8000-000000000000"),
                             Code = "C04",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 24,
+                            IsActive = false,
+                            Order = 2024,
                             Text = "Registrar datos de forma ordenada (ej.: llevar las cuentas en una planilla)"
                         },
                         new
@@ -469,8 +739,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0005-4000-8000-000000000000"),
                             Code = "R05",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 25,
+                            IsActive = false,
+                            Order = 2025,
                             Text = "Manejar máquinas o equipos (ej.: un torno, un tractor, una impresora 3D)"
                         },
                         new
@@ -478,8 +748,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0005-4000-8000-000000000000"),
                             Code = "I05",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 26,
+                            IsActive = false,
+                            Order = 2026,
                             Text = "Comparar datos y encontrar patrones (ej.: en qué meses suben las ventas)"
                         },
                         new
@@ -487,8 +757,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0005-4000-8000-000000000000"),
                             Code = "A05",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 27,
+                            IsActive = false,
+                            Order = 2027,
                             Text = "Expresar tu creatividad con libertad (ej.: pintar, bailar, componer)"
                         },
                         new
@@ -496,8 +766,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0005-4000-8000-000000000000"),
                             Code = "S05",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 28,
+                            IsActive = false,
+                            Order = 2028,
                             Text = "Apoyar a tu comunidad (ej.: voluntariado, campañas de ayuda)"
                         },
                         new
@@ -505,8 +775,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0005-4000-8000-000000000000"),
                             Code = "E05",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 29,
+                            IsActive = false,
+                            Order = 2029,
                             Text = "Tomar decisiones bajo presión (ej.: resolver un imprevisto a último momento)"
                         },
                         new
@@ -514,8 +784,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0005-4000-8000-000000000000"),
                             Code = "C05",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 30,
+                            IsActive = false,
+                            Order = 2030,
                             Text = "Planificar antes de empezar una actividad (ej.: armar un cronograma de estudio)"
                         },
                         new
@@ -523,8 +793,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0006-4000-8000-000000000000"),
                             Code = "R06",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 31,
+                            IsActive = false,
+                            Order = 2031,
                             Text = "Trabajar al aire libre con las manos (ej.: cultivar, construir, cuidar animales)"
                         },
                         new
@@ -532,8 +802,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0006-4000-8000-000000000000"),
                             Code = "I06",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 32,
+                            IsActive = false,
+                            Order = 2032,
                             Text = "Hacer preguntas hasta entender el porqué (ej.: por qué ocurre un terremoto)"
                         },
                         new
@@ -541,8 +811,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0006-4000-8000-000000000000"),
                             Code = "A06",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 33,
+                            IsActive = false,
+                            Order = 2033,
                             Text = "Escribir historias, poemas o textos propios (ej.: un cuento, letras de canciones)"
                         },
                         new
@@ -550,8 +820,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0006-4000-8000-000000000000"),
                             Code = "S06",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 34,
+                            IsActive = false,
+                            Order = 2034,
                             Text = "Animar a un compañero que se siente mal (ej.: motivarlo antes de un examen)"
                         },
                         new
@@ -559,8 +829,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0006-4000-8000-000000000000"),
                             Code = "E06",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 35,
+                            IsActive = false,
+                            Order = 2035,
                             Text = "Negociar para llegar a un acuerdo (ej.: regatear un precio, resolver un conflicto)"
                         },
                         new
@@ -568,8 +838,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0006-4000-8000-000000000000"),
                             Code = "C06",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 36,
+                            IsActive = false,
+                            Order = 2036,
                             Text = "Trabajar con tablas y registros (ej.: Excel, listas de asistencia)"
                         },
                         new
@@ -577,8 +847,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0007-4000-8000-000000000000"),
                             Code = "R07",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 37,
+                            IsActive = false,
+                            Order = 2037,
                             Text = "Construir algo siguiendo un plano (ej.: una mesa o una casita de madera)"
                         },
                         new
@@ -586,8 +856,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0007-4000-8000-000000000000"),
                             Code = "I07",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 38,
+                            IsActive = false,
+                            Order = 2038,
                             Text = "Investigar la causa de un problema (ej.: por qué bajan las notas en un curso)"
                         },
                         new
@@ -595,8 +865,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0007-4000-8000-000000000000"),
                             Code = "A07",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 39,
+                            IsActive = false,
+                            Order = 2039,
                             Text = "Fotografía, video, música o diseño (ej.: sacar fotos, mezclar una canción)"
                         },
                         new
@@ -604,8 +874,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0007-4000-8000-000000000000"),
                             Code = "S07",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 40,
+                            IsActive = false,
+                            Order = 2040,
                             Text = "Orientar a alguien en una decisión difícil (ej.: ayudarle a elegir colegio o carrera)"
                         },
                         new
@@ -613,8 +883,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0007-4000-8000-000000000000"),
                             Code = "E07",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 41,
+                            IsActive = false,
+                            Order = 2041,
                             Text = "Planificar cómo lograr una meta (ej.: reunir dinero para el viaje de curso)"
                         },
                         new
@@ -622,8 +892,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0007-4000-8000-000000000000"),
                             Code = "C07",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 42,
+                            IsActive = false,
+                            Order = 2042,
                             Text = "Mantener tus materiales organizados (ej.: útiles, archivos del celular)"
                         },
                         new
@@ -631,8 +901,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0008-4000-8000-000000000000"),
                             Code = "R08",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 43,
+                            IsActive = false,
+                            Order = 2043,
                             Text = "Encontrar y corregir una falla técnica (ej.: por qué no enciende una computadora)"
                         },
                         new
@@ -640,8 +910,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0008-4000-8000-000000000000"),
                             Code = "I08",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 44,
+                            IsActive = false,
+                            Order = 2044,
                             Text = "Temas de ciencia y tecnología (ej.: robótica, biología, astronomía)"
                         },
                         new
@@ -649,8 +919,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0008-4000-8000-000000000000"),
                             Code = "A08",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 45,
+                            IsActive = false,
+                            Order = 2045,
                             Text = "Convertir una idea en algo visual (ej.: un boceto, una maqueta, una presentación)"
                         },
                         new
@@ -658,8 +928,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0008-4000-8000-000000000000"),
                             Code = "S08",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 46,
+                            IsActive = false,
+                            Order = 2046,
                             Text = "Trabajar directamente con personas (ej.: atender, acompañar, cuidar)"
                         },
                         new
@@ -667,8 +937,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0008-4000-8000-000000000000"),
                             Code = "E08",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 47,
+                            IsActive = false,
+                            Order = 2047,
                             Text = "Convencer a otros de tu propuesta (ej.: lograr que apoyen tu idea)"
                         },
                         new
@@ -676,8 +946,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0008-4000-8000-000000000000"),
                             Code = "C08",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 48,
+                            IsActive = false,
+                            Order = 2048,
                             Text = "Comprobar que todos los datos estén completos (ej.: revisar un formulario)"
                         },
                         new
@@ -685,8 +955,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0009-4000-8000-000000000000"),
                             Code = "R09",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 49,
+                            IsActive = false,
+                            Order = 2049,
                             Text = "Usar herramientas técnicas o de medición (ej.: multímetro, nivel, calibrador)"
                         },
                         new
@@ -694,8 +964,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0009-4000-8000-000000000000"),
                             Code = "I09",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 50,
+                            IsActive = false,
+                            Order = 2050,
                             Text = "Entender cómo funciona algo antes de usarlo (ej.: leer cómo trabaja un motor)"
                         },
                         new
@@ -703,8 +973,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0009-4000-8000-000000000000"),
                             Code = "A09",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 51,
+                            IsActive = false,
+                            Order = 2051,
                             Text = "Buscar soluciones distintas a las de siempre (ej.: reusar objetos para hacer algo nuevo)"
                         },
                         new
@@ -712,8 +982,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0009-4000-8000-000000000000"),
                             Code = "S09",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 52,
+                            IsActive = false,
+                            Order = 2052,
                             Text = "Organizar actividades para un grupo (ej.: una kermés, un campeonato)"
                         },
                         new
@@ -721,8 +991,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0009-4000-8000-000000000000"),
                             Code = "E09",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 53,
+                            IsActive = false,
+                            Order = 2053,
                             Text = "Asumir la responsabilidad de un proyecto (ej.: ser el encargado de un evento)"
                         },
                         new
@@ -730,8 +1000,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0009-4000-8000-000000000000"),
                             Code = "C09",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 54,
+                            IsActive = false,
+                            Order = 2054,
                             Text = "Seguir normas claras para hacer una tarea (ej.: reglamentos, procedimientos)"
                         },
                         new
@@ -739,8 +1009,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("10000000-0010-4000-8000-000000000000"),
                             Code = "R10",
                             Dimension = "R",
-                            IsActive = true,
-                            Order = 55,
+                            IsActive = false,
+                            Order = 2055,
                             Text = "Terminar una tarea con un resultado que se ve y se toca (ej.: una pared pintada)"
                         },
                         new
@@ -748,8 +1018,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("20000000-0010-4000-8000-000000000000"),
                             Code = "I10",
                             Dimension = "I",
-                            IsActive = true,
-                            Order = 56,
+                            IsActive = false,
+                            Order = 2056,
                             Text = "Aprender por tu cuenta temas complejos (ej.: programación, estadística)"
                         },
                         new
@@ -757,8 +1027,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("30000000-0010-4000-8000-000000000000"),
                             Code = "A10",
                             Dimension = "A",
-                            IsActive = true,
-                            Order = 57,
+                            IsActive = false,
+                            Order = 2057,
                             Text = "Proyectos donde importe tu estilo personal (ej.: tu propia marca de ropa)"
                         },
                         new
@@ -766,8 +1036,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("40000000-0010-4000-8000-000000000000"),
                             Code = "S10",
                             Dimension = "S",
-                            IsActive = true,
-                            Order = 58,
+                            IsActive = false,
+                            Order = 2058,
                             Text = "Sentirte bien al ayudar a alguien a mejorar (ej.: ver que aprende gracias a ti)"
                         },
                         new
@@ -775,8 +1045,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("50000000-0010-4000-8000-000000000000"),
                             Code = "E10",
                             Dimension = "E",
-                            IsActive = true,
-                            Order = 59,
+                            IsActive = false,
+                            Order = 2059,
                             Text = "Competir para lograr un objetivo (ej.: ganar un concurso, ser el mejor vendedor)"
                         },
                         new
@@ -784,8 +1054,8 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Id = new Guid("60000000-0010-4000-8000-000000000000"),
                             Code = "C10",
                             Dimension = "C",
-                            IsActive = true,
-                            Order = 60,
+                            IsActive = false,
+                            Order = 2060,
                             Text = "Llevar control de fechas y pendientes (ej.: agenda, calendario de entregas)"
                         },
                         new

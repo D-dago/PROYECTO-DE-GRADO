@@ -89,3 +89,13 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Enlaces:** cada dirección se comprobó abriendo el sitio el 2026-11-03. INCOS e Instituto Álvarez Plata quedan sin enlace porque no se encontró una página oficial confirmable. El administrador puede agregarlo en Instituciones.
 
 **Ventana interna:** el servidor comprueba las cabeceras `X-Frame-Options` y `frame-ancestors` de cada sitio, y guarda el resultado 6 horas. Si el sitio prohíbe mostrarse dentro de otra página (hoy UPEA), se ofrece abrirlo en otra pestaña. No se usa un proxy porque saltarse esa prohibición rompería los sitios y su seguridad.
+
+## 2026-11-12: el test aplica el Perfil de Intereses O*NET en español (ORION #25)
+
+**Decisión:** el test deja el banco propio de 60 preguntas (se sorteaban 4 por dimensión) y aplica las 30 actividades del Perfil de Intereses O*NET en español, sin cambios, en forma fija y en el orden oficial. Escala O*NET (Me disgusta mucho … Me gusta mucho), puntaje 0-4 por respuesta y 0-20 por dimensión, y perfil calculado como O*NET: solo cuentan las dimensiones sobre el promedio del propio estudiante, hasta tres, con desempate por el hexágono; sin ninguna, perfil plano sin código. Versión `ONET-30-V4`.
+
+**Motivo:** una psicopedagoga observó el banco y el método. La revisión (`Desktop/CORRESIONES 2/REVISION_BANCO_PREGUNTAS_RIASEC.docx`) confirmó que, con el sorteo, cada estudiante respondía un test distinto y los puntajes no eran comparables; que 4 ítems por dimensión dan una confiabilidad baja; que la escala Nada … Totalmente no separaba "me disgusta" de "me da igual"; y que muchos ítems medían hábitos o rasgos, no intereses. El O*NET es gratuito, está validado y su licencia permite usarlo con atribución.
+
+**Detalles:** códigos `OR1` a `OC5` (el administrador solo genera letra + número, así que no chocan). El test toma las 5 primeras preguntas activas de cada dimensión por su orden: si el administrador desactiva una actividad, entra la siguiente activa. La pantalla ya no muestra la dimensión de cada actividad (O*NET tampoco). Los resultados de 24 y 12 preguntas se siguen mostrando con su propia puntuación.
+
+**Limitaciones:** cambiar un texto O*NET obliga, según la licencia, a avisar que USDOL/ETA no aprobó la modificación y a validar la versión nueva. El cronómetro de 30 s que marca "No estoy seguro/a" al vencerse no es parte del O*NET. La migración `TestPerfilInteresesOnet` debe aplicarse a la base de Neon antes de publicar este cambio; si no, el test aplicaría el banco anterior con la puntuación nueva.

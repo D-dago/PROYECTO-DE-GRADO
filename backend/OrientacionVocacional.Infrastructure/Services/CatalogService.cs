@@ -89,7 +89,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         return profile is null ? null : await MatchCareersAsync(profile, new RecommendationFilterRequest(), cancellationToken);
     }
 
-    // Solo cuenta un perfil RIASEC (el test vigente de 24 preguntas o el anterior de 12): los
+    // Solo cuenta un perfil RIASEC (el test O*NET vigente o los anteriores de 24 y 12 preguntas): los
     // perfiles de otras versiones (el CHASIDE que se aplico un tiempo) usan letras con otro
     // significado y darian recomendaciones sin sentido; hay que repetir el test.
     private Task<RiasecProfile?> GetCurrentProfileAsync(Guid userId, CancellationToken cancellationToken)
@@ -100,7 +100,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
 
     private async Task<List<CareerResponse>> MatchCareersAsync(RiasecProfile profile, RecommendationFilterRequest filter, CancellationToken cancellationToken)
     {
-        // Cada perfil se mide contra el maximo de su propio test (10 con 12 preguntas, 20 con 24).
+        // Cada perfil se mide contra el maximo de su propio test (20 en O*NET y con 24 preguntas, 10 con 12).
         var maxScore = RiasecTestConstants.MaxDimensionScoreFor(profile.AlgorithmVersion);
         var scores = new Dictionary<string, int> { ["R"] = profile.RScore, ["I"] = profile.IScore, ["A"] = profile.AScore, ["S"] = profile.SScore, ["E"] = profile.EScore, ["C"] = profile.CScore };
         // Solo lo traducible de forma segura a SQL (igualdad de Id, comparacion numerica) se

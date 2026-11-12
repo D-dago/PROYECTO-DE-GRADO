@@ -17,7 +17,7 @@ public sealed class TestService(
         var current = await dbContext.TestAttempts
             .Include(attempt => attempt.Answers)
             .Include(attempt => attempt.AssignedQuestions)
-            // Dos colecciones en una sola consulta multiplican filas (24 respuestas x 24 preguntas = 576);
+            // Dos colecciones en una sola consulta multiplican filas (30 respuestas x 30 preguntas = 900);
             // divididas son dos consultas chicas y mucho menos trabajo para el servidor.
             .AsSplitQuery()
             .Where(attempt => attempt.UserId == userId && attempt.Status == TestAttemptStatus.InProgress && attempt.TestVersion == RiasecTestConstants.Version)
@@ -51,7 +51,7 @@ public sealed class TestService(
         var attempt = await dbContext.TestAttempts
             .Include(candidate => candidate.Answers)
             .Include(candidate => candidate.AssignedQuestions)
-            // Dos colecciones en una sola consulta multiplican filas (24 respuestas x 24 preguntas = 576);
+            // Dos colecciones en una sola consulta multiplican filas (30 respuestas x 30 preguntas = 900);
             // divididas son dos consultas chicas y mucho menos trabajo para el servidor.
             .AsSplitQuery()
             .SingleOrDefaultAsync(
@@ -90,7 +90,7 @@ public sealed class TestService(
             return (false, "La respuesta debe estar entre 1 y 5.", null);
         }
 
-        // Es la peticion que mas se repite (24 por estudiante), asi que no carga el intento con todas sus
+        // Es la peticion que mas se repite (30 por estudiante), asi que no carga el intento con todas sus
         // respuestas y preguntas: una sola consulta trae solo lo que hace falta comprobar. Medido con 120
         // estudiantes, cargar y rastrear todo costaba unas 4 veces mas CPU (ver docs/CAPACIDAD.md).
         var state = await dbContext.TestAttempts
@@ -155,7 +155,7 @@ public sealed class TestService(
                 .ThenInclude(answer => answer.Question)
             .Include(candidate => candidate.AssignedQuestions)
             .Include(candidate => candidate.RiasecProfile)
-            // Dos colecciones en una sola consulta multiplican filas (24 respuestas x 24 preguntas = 576);
+            // Dos colecciones en una sola consulta multiplican filas (30 respuestas x 30 preguntas = 900);
             // divididas son dos consultas chicas y mucho menos trabajo para el servidor.
             .AsSplitQuery()
             .SingleOrDefaultAsync(
@@ -174,7 +174,8 @@ public sealed class TestService(
             return (false, $"El test debe tener {attempt.AssignedQuestions.Count} respuestas antes de finalizar.", null);
         }
 
-        var score = scoringService.Calculate(attempt.Answers);
+        // Se puntua segun la version del intento: O*NET (0-4 por respuesta) o la anterior (1-5).
+        var score = scoringService.Calculate(attempt.Answers, attempt.TestVersion);
         var profile = new RiasecProfile
         {
             Id = Guid.NewGuid(),
@@ -187,8 +188,8 @@ public sealed class TestService(
             CScore = score.CScore,
             PrimaryCode = score.PrimaryCode,
             SecondaryCode = score.SecondaryCode,
-            // La version del intento, no la vigente: asi un intento de 12 preguntas terminado
-            // despues del cambio a 24 se sigue midiendo sobre su propio maximo.
+            // La version del intento, no la vigente: asi un intento de una version anterior terminado
+            // despues del cambio se sigue midiendo sobre su propio maximo.
             AlgorithmVersion = attempt.TestVersion
         };
         attempt.Status = TestAttemptStatus.Completed;
@@ -214,9 +215,11 @@ public sealed class TestService(
     }
 
     /// <summary>
-    /// Sortea 4 preguntas por dimension (24 en total) del banco de 10 por dimension,
-    /// intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos preguntas
-    /// seguidas de la misma dimension dentro del intento.
+    /// Forma fija del Perfil de Intereses O*NET: las 5 primeras preguntas activas de cada dimension
+    /// (por su orden), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... Con el banco sembrado son las 30
+    /// actividades O*NET en su orden oficial, iguales para todos los estudiantes. Sin sorteo: si cada
+    /// uno recibiera preguntas distintas, sus puntajes no serian comparables. Si el administrador
+    /// desactiva una, entra la siguiente activa de esa dimension.
     /// </summary>
     private async Task AssignQuestionsAsync(TestAttempt attempt, CancellationToken cancellationToken)
     {
@@ -226,7 +229,8 @@ public sealed class TestService(
         var byDimension = RiasecTestConstants.DimensionOrder.ToDictionary(
             dimension => dimension,
             dimension => pool.Where(question => question.Dimension == dimension)
-                .OrderBy(_ => Random.Shared.Next())
+                .OrderBy(question => question.Order)
+                .ThenBy(question => question.Code)
                 .Take(RiasecTestConstants.QuestionsPerDimensionPerAttempt)
                 .ToList());
 
