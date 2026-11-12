@@ -118,10 +118,11 @@ export function TestPage() {
         <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, attempt.total)} <span>de {attempt.total}</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>
         <div className="question-meta"><span className="dimension-tag">{question.dimension} · {dimensions.get(question.dimension)}</span><span className={`timer-badge${timeLeft <= 5 ? ' timer-low' : ''}`}>⏱ {timeLeft}s</span><span>{Math.round(progress)}% completado</span></div>
+        {/* La instruccion va antes de la pregunta: asi se lee antes de responder, no despues. */}
+        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser. Si el tiempo se acaba, se registra "Neutral" y avanza sola.</p>
         <QuestionText text={question.text} />
         <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={() => void answer(option.value)} disabled={saving}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
         {error && <p className="error-message">{error}</p>}
-        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser. Si el tiempo se acaba, se registra "Neutral" y avanza sola.</p>
       </section>
     </main>
   )

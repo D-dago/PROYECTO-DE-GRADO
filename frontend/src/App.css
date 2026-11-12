@@ -232,7 +232,8 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .answer-grid button:hover, .answer-grid button:focus-visible { background: rgba(236, 47, 143, .18); border-color: var(--accent); transform: translateY(-3px); outline: none; }
 .answer-grid button strong { font-size: 1.7rem; color: var(--accent); }
 .answer-grid button span { font-size: .8rem; }
-.quiz-hint { text-transform: none; letter-spacing: 0; margin: 1.5rem 0 0; }
+.quiz-hint { text-transform: none; letter-spacing: 0; margin: 1.4rem 0 0; font-size: .9rem; line-height: 1.5; }
+.quiz-hint + .question-text { margin-top: 1.2rem; }
 .result-shell { display: grid; align-content: start; }
 .result-panel h1 { margin-bottom: 1rem; }
 .result-code { color: var(--accent); font-size: clamp(5rem, 15vw, 10rem); line-height: .8; letter-spacing: -.08em; margin: 3rem 0; }
