@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
+using OrientacionVocacional.Application.Configuration;
 using OrientacionVocacional.Domain.Constants;
 using OrientacionVocacional.Application.Contracts;
 using OrientacionVocacional.Application.Interfaces;
@@ -14,8 +16,23 @@ public sealed class AuthController(
     IAuthService authService,
     IGoogleTokenValidator googleValidator,
     PasswordWorkGate passwordWork,
-    LoginAttemptGuard loginGuard) : ControllerBase
+    LoginAttemptGuard loginGuard,
+    IOptions<FirebaseOptions> firebase) : ControllerBase
 {
+    /// <summary>
+    /// Datos publicos de la app web de Firebase para "Continuar con Google". Se piden al abrir el boton, asi
+    /// la web no se recompila para cambiarlos: basta con la configuracion del servidor (seccion "Firebase").
+    /// </summary>
+    [HttpGet("firebase-config")]
+    [AllowAnonymous]
+    public IActionResult FirebaseConfig()
+    {
+        var options = firebase.Value;
+        if (!options.IsConfigured) return NotFound(new { message = "El inicio con Google todavía no está configurado (faltan los datos de Firebase en el servidor)." });
+        Response.Headers.CacheControl = "no-store";
+        return Ok(new { apiKey = options.ApiKey.Trim(), authDomain = options.AuthDomain.Trim(), projectId = options.ProjectId.Trim(), appId = options.AppId.Trim() });
+    }
+
     public sealed record GoogleLoginRequest(string IdToken);
 
     /// <summary>
@@ -39,7 +56,7 @@ public sealed class AuthController(
     {
         if (!googleValidator.IsConfigured)
         {
-            return StatusCode(503, new { message = "El inicio con Google no está configurado en el servidor (falta Google:ClientId)." });
+            return StatusCode(503, new { message = "El inicio con Google no está configurado en el servidor (faltan los datos de Firebase)." });
         }
 
         var identity = await googleValidator.ValidateAsync(request.IdToken, cancellationToken);

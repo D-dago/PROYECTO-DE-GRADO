@@ -29,13 +29,14 @@ public static class InfrastructureServiceCollectionExtensions
             options.UseNpgsql(connectionString, npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null)));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
-        services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.SectionName));
+        services.Configure<FirebaseOptions>(configuration.GetSection(FirebaseOptions.SectionName));
         // Sin este tope, un proveedor de IA lento dejaba al estudiante hasta 100 s esperando su resultado.
         services.AddHttpClient("ai", client => client.Timeout = TimeSpan.FromSeconds(15));
-        services.AddHttpClient("google");
+        services.AddHttpClient(FirebaseSigningKeys.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
         services.AddHttpClient(SiteFramingService.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
         services.AddMemoryCache();
         services.AddScoped<ISiteFramingService, SiteFramingService>();
+        services.AddSingleton<IFirebaseSigningKeys, FirebaseSigningKeys>();
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();

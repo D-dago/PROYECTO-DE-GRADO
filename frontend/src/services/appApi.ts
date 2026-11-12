@@ -34,6 +34,7 @@ export const appApi = {
   skins: () => request<SkinShop>('/student/skins'),
   buySkin: (id: string) => request<SkinShop>(`/student/skins/${id}/buy`, { method: 'POST' }),
   equipSkin: (id: string) => request<SkinShop>(`/student/skins/${id}/equip`, { method: 'POST' }),
+  firebaseConfig: () => request<{ apiKey: string; authDomain: string; projectId: string; appId: string }>('/auth/firebase-config'),
   googleLogin: (idToken: string) => request<{ accessToken: string; role: string }>('/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
   getProfile: () => request<StudentProfile>('/student/profile'),
   updateProfile: (body: unknown) => request<StudentProfile>('/student/profile', { method: 'PUT', body: JSON.stringify(body) }),
