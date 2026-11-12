@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react'
 
-type Props = { name: string; minLength?: number; maxLength?: number; pattern?: string; title?: string; required?: boolean; autoComplete?: string }
+type Props = { name: string; minLength?: number; maxLength?: number; pattern?: string; title?: string; required?: boolean; autoComplete?: string; 'aria-describedby'?: string }
 
 export function PasswordInput(props: Props) {
   const [visible, setVisible] = useState(false)

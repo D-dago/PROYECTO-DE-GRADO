@@ -47,23 +47,43 @@ export function AccessPage({ register = false }: { register?: boolean }) {
 
   return (
     <main className="form-shell">
+      {/* Los textos dejan claro que es una cuenta de ESTA pagina: hay quien cree que le piden entrar a su
+          correo y escribe la contrasena de su Gmail. */}
       <span className="eyebrow">Orientación vocacional</span>
-      <h1>{register ? 'Crear cuenta' : 'Iniciar sesión'}</h1>
+      <h1>{register ? 'Crea tu cuenta en Orientación Vocacional' : 'Entra a tu cuenta de Orientación Vocacional'}</h1>
+      <p className="access-intro">
+        {register
+          ? 'Es gratis. Con esta cuenta haces el test vocacional, guardas tus resultados y ves dónde estudiar en Cochabamba.'
+          : 'Usa el correo y la contraseña con los que te registraste en esta página.'}
+      </p>
       <form onSubmit={submit} className="simple-form">
         {register && (
           <>
-            <label>Nombre<input name="firstName" required onInput={lettersOnly} {...inputRules.name} /></label>
-            <label>Apellido<input name="lastName" required onInput={lettersOnly} {...inputRules.name} /></label>
+            <label>Tu nombre<input name="firstName" required onInput={lettersOnly} {...inputRules.name} /></label>
+            <label>Tu apellido<input name="lastName" required onInput={lettersOnly} {...inputRules.name} /></label>
           </>
         )}
-        <label>Correo<input name="email" type="email" required maxLength={254} autoComplete="email" /></label>
-        <label>Contraseña<PasswordInput name="password" minLength={8} maxLength={64} {...(register ? { pattern: '(?=.*\\p{L})(?=.*\\d).{8,64}', title: 'De 8 a 64 caracteres, con al menos una letra y un número.' } : {})} required autoComplete={register ? 'new-password' : 'current-password'} /></label>
-        <button type="submit" disabled={busy} aria-busy={busy}>{busy ? (register ? 'Creando tu cuenta…' : 'Entrando…') : (register ? 'Registrarme' : 'Entrar')}</button>
+        <label>
+          Tu correo electrónico
+          <input name="email" type="email" required maxLength={254} autoComplete="email" placeholder="ejemplo@gmail.com" aria-describedby="email-hint" />
+          <small id="email-hint">{register ? 'Será tu usuario para entrar a esta página. No entramos a tu correo ni te pedimos su contraseña.' : 'El mismo correo con el que creaste tu cuenta.'}</small>
+        </label>
+        <label>
+          {register ? 'Crea una contraseña para esta página' : 'Tu contraseña de esta página'}
+          <PasswordInput name="password" minLength={8} maxLength={64} {...(register ? { pattern: '(?=.*\\p{L})(?=.*\\d).{8,64}', title: 'De 8 a 64 caracteres, con al menos una letra y un número.' } : {})} required autoComplete={register ? 'new-password' : 'current-password'} aria-describedby="password-hint" />
+          <small id="password-hint">{register ? 'Inventa una nueva: no uses la contraseña de tu correo. Mínimo 8 caracteres, con letras y números.' : 'La que inventaste al registrarte (no es la contraseña de tu correo).'}</small>
+        </label>
+        <button type="submit" disabled={busy} aria-busy={busy}>{busy ? (register ? 'Creando tu cuenta…' : 'Entrando…') : (register ? 'Crear mi cuenta' : 'Entrar')}</button>
         {busy && queueSeconds !== null && <p className="queue-message" role="status">Hay muchos estudiantes entrando a la vez. Estás en fila; seguimos intentando solos cada {queueSeconds} segundos. No cierres la página.</p>}
       </form>
-      <div className="form-divider">o</div>
+      <div className="form-divider">{register ? 'o regístrate sin crear contraseña' : 'o entra sin contraseña'}</div>
       <GoogleButton onSuccess={finish} onError={fail} />
       {error && <p className="error-message">{error}</p>}
+      <p className="access-switch">
+        {register
+          ? <>¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></>
+          : <>¿Todavía no tienes cuenta? <a href="/registro">Créala gratis</a></>}
+      </p>
     </main>
   )
 }
