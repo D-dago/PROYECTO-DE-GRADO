@@ -53,7 +53,7 @@ export function AccessPage({ register = false }: { register?: boolean }) {
       <h1>{register ? 'Crea tu cuenta en Orientación Vocacional' : 'Entra a tu cuenta de Orientación Vocacional'}</h1>
       <p className="access-intro">
         {register
-          ? 'Es gratis. Con esta cuenta haces el test vocacional, guardas tus resultados y ves dónde estudiar en Cochabamba.'
+          ? 'Es gratis. Con esta cuenta haces el test vocacional, guardas tus resultados y recibes sugerencias de carreras y de dónde estudiarlas en Cochabamba.'
           : 'Usa el correo y la contraseña con los que te registraste en esta página.'}
       </p>
       <form onSubmit={submit} className="simple-form">
