@@ -255,7 +255,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 1,
-                            Text = "Reparar cosas con herramientas (ej.: arreglar una bicicleta o un enchufe)"
+                            Text = "¿Qué tanto te interesa reparar objetos utilizando herramientas?"
                         },
                         new
                         {
@@ -264,7 +264,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 2,
-                            Text = "Descubrir cómo funciona algo (ej.: cómo una app guarda tus datos)"
+                            Text = "¿Qué tanto te interesa descubrir cómo funcionan las cosas? Ejemplo: comprender cómo una app guarda información."
                         },
                         new
                         {
@@ -273,7 +273,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 3,
-                            Text = "Dibujar o diseñar (ej.: un logotipo, un afiche)"
+                            Text = "¿Qué tanto te interesa dibujar o crear diseños propios? Ejemplo: diseñar un logotipo o un afiche."
                         },
                         new
                         {
@@ -282,7 +282,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 4,
-                            Text = "Explicar algo a quien no lo entiende (ej.: ayudar a un compañero con matemáticas)"
+                            Text = "¿Qué tanto te interesa explicar algo para ayudar a otra persona a comprenderlo? Ejemplo: enseñar a un compañero un tema de matemáticas."
                         },
                         new
                         {
@@ -291,7 +291,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 5,
-                            Text = "Tomar la iniciativa en un proyecto (ej.: proponer y arrancar una actividad)"
+                            Text = "¿Qué tanto te interesa tomar la iniciativa para poner en marcha una actividad? Ejemplo: proponer una idea y comenzar a organizarla."
                         },
                         new
                         {
@@ -300,7 +300,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 6,
-                            Text = "Ordenar información para encontrarla fácil (ej.: carpetas, cuadernos, archivos)"
+                            Text = "¿Qué tanto te interesa organizar información para encontrarla fácilmente? Ejemplo: ordenar carpetas, cuadernos o archivos digitales."
                         },
                         new
                         {
@@ -309,7 +309,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 7,
-                            Text = "Aprender haciendo, no leyendo (ej.: armar algo siguiendo pasos)"
+                            Text = "¿Qué tanto te interesa aprender una actividad mediante la práctica? Ejemplo: aprender a armar un objeto mientras sigues instrucciones."
                         },
                         new
                         {
@@ -318,7 +318,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 8,
-                            Text = "Resolver acertijos o problemas de lógica (ej.: sudoku, ajedrez)"
+                            Text = "¿Qué tanto te interesa resolver acertijos o problemas de lógica? Ejemplo: resolver un sudoku, un problema de ajedrez o un desafío de razonamiento."
                         },
                         new
                         {
@@ -327,7 +327,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 9,
-                            Text = "Inventar ideas nuevas para un proyecto (ej.: el tema de una feria del colegio)"
+                            Text = "¿Qué tanto te interesa proponer ideas originales para un proyecto? Ejemplo: imaginar una temática novedosa para una feria escolar."
                         },
                         new
                         {
@@ -336,7 +336,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 10,
-                            Text = "Escuchar los problemas de otras personas (ej.: aconsejar a un amigo)"
+                            Text = "¿Qué tanto te interesa escuchar con atención las preocupaciones o problemas de otras personas? Ejemplo: escuchar a un amigo que atraviesa una dificultad."
                         },
                         new
                         {
@@ -345,7 +345,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 11,
-                            Text = "Dirigir o coordinar un equipo (ej.: ser capitán o jefe de grupo)"
+                            Text = "¿Qué tanto te interesa dirigir o coordinar un equipo para alcanzar una meta? Ejemplo: asumir la coordinación de un trabajo grupal."
                         },
                         new
                         {
@@ -354,7 +354,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 12,
-                            Text = "Seguir listas y pasos definidos (ej.: una receta, un manual)"
+                            Text = "¿Qué tanto te interesa realizar actividades siguiendo instrucciones paso a paso? Ejemplo: seguir un manual o una receta para completar una tarea."
                         },
                         new
                         {
@@ -363,7 +363,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 13,
-                            Text = "Desarmar objetos para entender cómo funcionan (ej.: un celular viejo, un radio)"
+                            Text = "¿Qué tanto te interesa desarmar objetos para descubrir cómo funcionan? Ejemplo: explorar piezas de una radio vieja o un celular."
                         },
                         new
                         {
@@ -372,7 +372,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 14,
-                            Text = "Analizar información antes de decidir (ej.: comparar precios y calidad)"
+                            Text = "¿Qué tanto te interesa analizar información para tomar decisiones? Ejemplo: comparar características, precios y calidad antes de elegir un producto."
                         },
                         new
                         {
@@ -381,7 +381,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 15,
-                            Text = "Combinar colores, formas o estilos (ej.: decorar un espacio, armar un outfit)"
+                            Text = "¿Qué tanto te interesa combinar colores y formas para crear una composición? Ejemplo: diseñar la decoración de un espacio o armar un “outfit”."
                         },
                         new
                         {
@@ -390,7 +390,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 16,
-                            Text = "Enseñar una habilidad a alguien (ej.: tocar guitarra, cocinar)"
+                            Text = "¿Qué tanto te interesa enseñar a alguien una habilidad que tú tienes? Ejemplo: mostrarle cómo tocar un acorde o preparar una receta."
                         },
                         new
                         {
@@ -399,7 +399,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 17,
-                            Text = "Presentar una idea frente a otras personas (ej.: exponer ante todo el curso)"
+                            Text = "¿Qué tanto te interesa presentar tus ideas ante un grupo de personas? Ejemplo: exponer una propuesta frente a tu curso."
                         },
                         new
                         {
@@ -408,7 +408,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 18,
-                            Text = "Revisar que un documento no tenga errores (ej.: corregir ortografía o cifras)"
+                            Text = "¿Qué tanto te interesa revisar documentos para detectar errores? Ejemplo: comprobar la ortografía o las cifras de un informe."
                         },
                         new
                         {
@@ -417,7 +417,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 19,
-                            Text = "Trabajo manual que exige precisión (ej.: carpintería, soldadura)"
+                            Text = "¿Qué tanto te interesa realizar trabajos manuales que requieren precisión? Ejemplo: cortar, soldar o crear piezas para fabricar un objeto."
                         },
                         new
                         {
@@ -426,7 +426,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 20,
-                            Text = "Hacer experimentos para probar una idea (ej.: qué abono hace crecer mejor una planta)"
+                            Text = "¿Qué tanto te interesa hacer experimentos para comprobar una idea? Ejemplo: probar qué condiciones ayudan a crecer a una planta."
                         },
                         new
                         {
@@ -435,7 +435,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 21,
-                            Text = "Crear contenido para redes o video (ej.: editar un reel, grabar un podcast)"
+                            Text = "¿Qué tanto te interesa crear contenido audiovisual? Ejemplo: grabar y editar un video corto."
                         },
                         new
                         {
@@ -444,7 +444,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 22,
-                            Text = "Trabajar en equipo (ej.: un grupo de estudio, un proyecto grupal)"
+                            Text = "¿Qué tanto te interesa colaborar con otras personas para trabajar en equipo? Ejemplo: participar en un proyecto grupal o en un grupo de estudio."
                         },
                         new
                         {
@@ -453,7 +453,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 23,
-                            Text = "Crear tu propio negocio (ej.: vender ropa, comida o servicios)"
+                            Text = "¿Qué tanto te interesa emprender una actividad comercial propia? Ejemplo: organizar la venta de un producto o un servicio, o tu propio emprendimiento."
                         },
                         new
                         {
@@ -462,7 +462,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 24,
-                            Text = "Registrar datos de forma ordenada (ej.: llevar las cuentas en una planilla)"
+                            Text = "¿Qué tanto te interesa registrar datos de forma ordenada? Ejemplo: anotar ingresos y gastos en una hoja de cálculo."
                         },
                         new
                         {
@@ -471,7 +471,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 25,
-                            Text = "Manejar máquinas o equipos (ej.: un torno, un tractor, una impresora 3D)"
+                            Text = "¿Qué tanto te interesa manejar máquinas o equipos para realizar una tarea? Ejemplo: utilizar una impresora 3D, un torno o un tractor."
                         },
                         new
                         {
@@ -480,7 +480,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 26,
-                            Text = "Comparar datos y encontrar patrones (ej.: en qué meses suben las ventas)"
+                            Text = "¿Qué tanto te interesa comparar datos para descubrir patrones? Ejemplo: observar en qué meses aumenta la venta de un producto."
                         },
                         new
                         {
@@ -489,7 +489,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 27,
-                            Text = "Expresar tu creatividad con libertad (ej.: pintar, bailar, componer)"
+                            Text = "¿Qué tanto te interesa expresar tu creatividad mediante actividades artísticas? Ejemplo: pintar, bailar o componer música."
                         },
                         new
                         {
@@ -498,7 +498,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 28,
-                            Text = "Apoyar a tu comunidad (ej.: voluntariado, campañas de ayuda)"
+                            Text = "¿Qué tanto te interesa participar en actividades de ayuda a tu comunidad? Ejemplo: colaborar en una campaña solidaria o ser voluntaria/o."
                         },
                         new
                         {
@@ -507,7 +507,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 29,
-                            Text = "Tomar decisiones bajo presión (ej.: resolver un imprevisto a último momento)"
+                            Text = "¿Qué tanto te interesa tomar decisiones cuando surge un problema inesperado? Ejemplo: resolver un imprevisto en una actividad o decidir bajo presión."
                         },
                         new
                         {
@@ -516,7 +516,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 30,
-                            Text = "Planificar antes de empezar una actividad (ej.: armar un cronograma de estudio)"
+                            Text = "¿Qué tanto te interesa planificar los pasos de una actividad antes de comenzar? Ejemplo: preparar un horario o cronograma de estudio."
                         },
                         new
                         {
@@ -525,7 +525,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 31,
-                            Text = "Trabajar al aire libre con las manos (ej.: cultivar, construir, cuidar animales)"
+                            Text = "¿Qué tanto te interesa realizar trabajos prácticos al aire libre? Ejemplo: cultivar plantas o colaborar en una construcción."
                         },
                         new
                         {
@@ -534,7 +534,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 32,
-                            Text = "Hacer preguntas hasta entender el porqué (ej.: por qué ocurre un terremoto)"
+                            Text = "¿Qué tanto te interesa investigar por qué ocurren ciertos fenómenos? Ejemplo: buscar las causas de un terremoto."
                         },
                         new
                         {
@@ -543,7 +543,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 33,
-                            Text = "Escribir historias, poemas o textos propios (ej.: un cuento, letras de canciones)"
+                            Text = "¿Qué tanto te interesa escribir textos creativos? Ejemplo: inventar cuentos, poemas o letras de canciones."
                         },
                         new
                         {
@@ -552,7 +552,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 34,
-                            Text = "Animar a un compañero que se siente mal (ej.: motivarlo antes de un examen)"
+                            Text = "¿Qué tanto te interesa animar a alguien que está pasando por un momento difícil o que se siente mal? Ejemplo: apoyar a un compañero nervioso antes de un examen."
                         },
                         new
                         {
@@ -561,7 +561,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 35,
-                            Text = "Negociar para llegar a un acuerdo (ej.: regatear un precio, resolver un conflicto)"
+                            Text = "¿Qué tanto te interesa negociar con otras personas para alcanzar un acuerdo? Ejemplo: regatear un precio o resolver un conflicto."
                         },
                         new
                         {
@@ -570,7 +570,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 36,
-                            Text = "Trabajar con tablas y registros (ej.: Excel, listas de asistencia)"
+                            Text = "¿Qué tanto te interesa trabajar con tablas y registros de información? Ejemplo: completar una lista de asistencia o una hoja de cálculo (Excel)."
                         },
                         new
                         {
@@ -579,7 +579,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 37,
-                            Text = "Construir algo siguiendo un plano (ej.: una mesa o una casita de madera)"
+                            Text = "¿Qué tanto te interesa construir objetos siguiendo un plano o diseño? Ejemplo: fabricar una mesa a partir de un dibujo con medidas."
                         },
                         new
                         {
@@ -588,7 +588,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 38,
-                            Text = "Investigar la causa de un problema (ej.: por qué bajan las notas en un curso)"
+                            Text = "¿Qué tanto te interesa investigar las causas de un problema? Ejemplo: averiguar por qué bajan las calificaciones de un curso."
                         },
                         new
                         {
@@ -597,7 +597,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 39,
-                            Text = "Fotografía, video, música o diseño (ej.: sacar fotos, mezclar una canción)"
+                            Text = "¿Qué tanto te interesa crear imágenes mediante la fotografía, el video o el diseño? Ejemplo: tomar fotografías buscando un encuadre original o editar videos."
                         },
                         new
                         {
@@ -606,7 +606,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 40,
-                            Text = "Orientar a alguien en una decisión difícil (ej.: ayudarle a elegir colegio o carrera)"
+                            Text = "¿Qué tanto te interesa ayudar a otras personas a evaluar sus opciones ante una decisión? Ejemplo: conversar con un amigo que necesita elegir un curso."
                         },
                         new
                         {
@@ -615,7 +615,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 41,
-                            Text = "Planificar cómo lograr una meta (ej.: reunir dinero para el viaje de curso)"
+                            Text = "¿Qué tanto te interesa planificar estrategias para alcanzar una meta? Ejemplo: organizar acciones para reunir fondos para una actividad escolar o el viaje de curso."
                         },
                         new
                         {
@@ -624,7 +624,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 42,
-                            Text = "Mantener tus materiales organizados (ej.: útiles, archivos del celular)"
+                            Text = "¿Qué tanto te interesa mantener ordenados tus materiales y archivos? Ejemplo: organizar tus útiles o los archivos de tu celular."
                         },
                         new
                         {
@@ -633,7 +633,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 43,
-                            Text = "Encontrar y corregir una falla técnica (ej.: por qué no enciende una computadora)"
+                            Text = "¿Qué tanto te interesa encontrar y solucionar fallas en aparatos? Ejemplo: investigar por qué una computadora no enciende."
                         },
                         new
                         {
@@ -642,7 +642,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 44,
-                            Text = "Temas de ciencia y tecnología (ej.: robótica, biología, astronomía)"
+                            Text = "¿Qué tanto te interesa explorar temas científicos? Ejemplo: aprender sobre biología, astronomía o robótica."
                         },
                         new
                         {
@@ -651,7 +651,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 45,
-                            Text = "Convertir una idea en algo visual (ej.: un boceto, una maqueta, una presentación)"
+                            Text = "¿Qué tanto te interesa transformar tus ideas en representaciones visuales? Ejemplo: hacer un boceto, una maqueta o una presentación."
                         },
                         new
                         {
@@ -660,7 +660,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 46,
-                            Text = "Trabajar directamente con personas (ej.: atender, acompañar, cuidar)"
+                            Text = "¿Qué tanto te interesa realizar actividades de atención y apoyo directo a personas? Ejemplo: orientar, cuidar o acompañar a alguien que necesita ayuda."
                         },
                         new
                         {
@@ -669,7 +669,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 47,
-                            Text = "Convencer a otros de tu propuesta (ej.: lograr que apoyen tu idea)"
+                            Text = "¿Qué tanto te interesa convencer a otras personas para que apoyen tu propuesta? Ejemplo: explicar las ventajas de una idea para conseguir apoyo."
                         },
                         new
                         {
@@ -678,7 +678,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 48,
-                            Text = "Comprobar que todos los datos estén completos (ej.: revisar un formulario)"
+                            Text = "¿Qué tanto te interesa comprobar que los datos estén completos? Ejemplo: revisar que un formulario no tenga campos vacíos."
                         },
                         new
                         {
@@ -687,7 +687,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 49,
-                            Text = "Usar herramientas técnicas o de medición (ej.: multímetro, nivel, calibrador)"
+                            Text = "¿Qué tanto te interesa utilizar instrumentos para medir con precisión? Ejemplo: medir dimensiones con una cinta métrica, un multímetro o un calibrador."
                         },
                         new
                         {
@@ -696,7 +696,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 50,
-                            Text = "Entender cómo funciona algo antes de usarlo (ej.: leer cómo trabaja un motor)"
+                            Text = "¿Qué tanto te interesa comprender cómo funciona un equipo antes de utilizarlo? Ejemplo: conocer cómo trabaja un motor antes de ponerlo en marcha."
                         },
                         new
                         {
@@ -705,7 +705,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 51,
-                            Text = "Buscar soluciones distintas a las de siempre (ej.: reusar objetos para hacer algo nuevo)"
+                            Text = "¿Qué tanto te interesa encontrar maneras creativas de hacer o solucionar las cosas? Ejemplo: reutilizar materiales para crear un objeto diferente."
                         },
                         new
                         {
@@ -714,7 +714,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 52,
-                            Text = "Organizar actividades para un grupo (ej.: una kermés, un campeonato)"
+                            Text = "¿Qué tanto te interesa organizar actividades para que un grupo participe? Ejemplo: coordinar una actividad recreativa escolar, un campeonato o una kermés."
                         },
                         new
                         {
@@ -723,7 +723,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 53,
-                            Text = "Asumir la responsabilidad de un proyecto (ej.: ser el encargado de un evento)"
+                            Text = "¿Qué tanto te interesa asumir la responsabilidad de llevar adelante un proyecto? Ejemplo: estar a cargo de un evento."
                         },
                         new
                         {
@@ -732,7 +732,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 54,
-                            Text = "Seguir normas claras para hacer una tarea (ej.: reglamentos, procedimientos)"
+                            Text = "¿Qué tanto te interesa realizar tareas siguiendo normas y procedimientos claros? Ejemplo: aplicar reglamentos o instrucciones establecidas para un trabajo."
                         },
                         new
                         {
@@ -741,7 +741,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 55,
-                            Text = "Terminar una tarea con un resultado que se ve y se toca (ej.: una pared pintada)"
+                            Text = "¿Qué tanto te interesa realizar tareas prácticas cuyo resultado puedas ver y tocar?"
                         },
                         new
                         {
@@ -750,7 +750,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 56,
-                            Text = "Aprender por tu cuenta temas complejos (ej.: programación, estadística)"
+                            Text = "¿Qué tanto te interesa aprender por tu cuenta temas complejos que requieren investigación? Ejemplo: investigar un concepto de programación o estadística."
                         },
                         new
                         {
@@ -759,7 +759,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 57,
-                            Text = "Proyectos donde importe tu estilo personal (ej.: tu propia marca de ropa)"
+                            Text = "¿Qué tanto te interesa desarrollar proyectos en los que puedas expresar tu estilo personal? Ejemplo: crear diseños propios para tu colección de ropa."
                         },
                         new
                         {
@@ -768,7 +768,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "S",
                             IsActive = true,
                             Order = 58,
-                            Text = "Sentirte bien al ayudar a alguien a mejorar (ej.: ver que aprende gracias a ti)"
+                            Text = "¿Qué tanto te interesa acompañar a alguien mientras aprende o mejora en algo? Ejemplo: ayudar a un compañero a practicar hasta que comprenda un tema."
                         },
                         new
                         {
@@ -777,7 +777,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "E",
                             IsActive = true,
                             Order = 59,
-                            Text = "Competir para lograr un objetivo (ej.: ganar un concurso, ser el mejor vendedor)"
+                            Text = "¿Qué tanto te interesa participar en actividades donde compites por alcanzar un objetivo? Ejemplo: participar en un concurso con una meta definida o ser el mejor vendedor."
                         },
                         new
                         {
@@ -786,7 +786,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "C",
                             IsActive = true,
                             Order = 60,
-                            Text = "Llevar control de fechas y pendientes (ej.: agenda, calendario de entregas)"
+                            Text = "¿Qué tanto te interesa llevar un control de fechas y tareas pendientes? Ejemplo: usar una agenda o un calendario para registrar entregas."
                         },
                         new
                         {

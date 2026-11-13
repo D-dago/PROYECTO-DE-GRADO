@@ -5,7 +5,7 @@ import type { RiasecResult } from '../types/riasec'
 import { UniversityLinks } from './UniversityLinks'
 import { useLiveCareers } from '../services/liveData'
 
-const MAX_DIMENSION_SCORE = 20 // 4 preguntas por dimension x valor maximo 5 (test vigente)
+const MAX_DIMENSION_SCORE = 50 // 10 preguntas por dimension x valor maximo 5 (test vigente)
 
 export function RiasecResult({ result }: { result: RiasecResult }) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)

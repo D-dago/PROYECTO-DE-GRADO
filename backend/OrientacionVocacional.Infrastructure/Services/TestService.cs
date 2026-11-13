@@ -214,9 +214,10 @@ public sealed class TestService(
     }
 
     /// <summary>
-    /// Sortea 4 preguntas por dimension (24 en total) del banco de 10 por dimension,
-    /// intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos preguntas
-    /// seguidas de la misma dimension dentro del intento.
+    /// Forma fija: las mismas preguntas para todos, las 10 primeras activas de cada dimension por su
+    /// orden (60 en total), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos
+    /// seguidas de la misma dimension. Antes se sorteaban 4 de 10 y cada estudiante respondia un
+    /// test distinto, asi que sus puntajes no se podian comparar.
     /// </summary>
     private async Task AssignQuestionsAsync(TestAttempt attempt, CancellationToken cancellationToken)
     {
@@ -226,7 +227,8 @@ public sealed class TestService(
         var byDimension = RiasecTestConstants.DimensionOrder.ToDictionary(
             dimension => dimension,
             dimension => pool.Where(question => question.Dimension == dimension)
-                .OrderBy(_ => Random.Shared.Next())
+                .OrderBy(question => question.Order)
+                .ThenBy(question => question.Code)
                 .Take(RiasecTestConstants.QuestionsPerDimensionPerAttempt)
                 .ToList());
 
@@ -235,6 +237,9 @@ public sealed class TestService(
         {
             foreach (var dimension in RiasecTestConstants.DimensionOrder)
             {
+                // El administrador no puede dejar un area con menos de 10 activas; si aun asi faltara
+                // alguna (datos antiguos), el intento sigue con las que hay en vez de fallar.
+                if (round >= byDimension[dimension].Count) continue;
                 var question = byDimension[dimension][round];
                 dbContext.AssignedQuestions.Add(new AssignedQuestion
                 {

@@ -33,6 +33,9 @@ public sealed class RiasecTests
         Assert.Equal(17, legacy.Count);
         Assert.All(legacy, question => Assert.Contains(question.Dimension, new[] { "H", "D" }));
         Assert.All(legacy, question => Assert.True(question.Order >= 1000));
+        // Banco corregido (revision de Gabriela Lino): todas preguntan por intereses y el ejemplo va tras "Ejemplo:".
+        Assert.All(active, question => Assert.StartsWith("¿Qué tanto te interesa", question.Text));
+        Assert.All(active, question => Assert.DoesNotContain("(ej.:", question.Text));
     }
 
     [Fact]
@@ -56,7 +59,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Attempt_gets_twenty_four_questions_four_per_dimension()
+    public async Task Attempt_gets_the_sixty_questions_ten_per_dimension()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
@@ -66,18 +69,18 @@ public sealed class RiasecTests
         var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
         Assert.NotNull(assigned);
-        Assert.Equal(24, assigned!.Count);
-        Assert.Equal(24, assigned.Select(question => question.Id).Distinct().Count());
+        Assert.Equal(60, assigned!.Count);
+        Assert.Equal(60, assigned.Select(question => question.Id).Distinct().Count());
         foreach (var dimension in new[] { "R", "I", "A", "S", "E", "C" })
         {
-            Assert.Equal(4, assigned.Count(question => question.Dimension == dimension));
+            Assert.Equal(10, assigned.Count(question => question.Dimension == dimension));
         }
         // Nunca dos preguntas seguidas de la misma dimension.
         for (var index = 1; index < assigned.Count; index++)
         {
             Assert.NotEqual(assigned[index - 1].Dimension, assigned[index].Dimension);
         }
-        Assert.Equal(24, attempt.Total);
+        Assert.Equal(60, attempt.Total);
     }
 
     [Fact]
@@ -109,7 +112,7 @@ public sealed class RiasecTests
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
-        Assert.Equal(4, assigned!.Count(question => question.Dimension == "C"));
+        Assert.Equal(9, assigned!.Count(question => question.Dimension == "C"));
         Assert.DoesNotContain(assigned!, question => question.Id == inactiveQuestion.Id);
     }
 
@@ -182,7 +185,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Cannot_complete_with_twenty_three_answers_but_can_with_twenty_four()
+    public async Task Cannot_complete_with_fifty_nine_answers_but_can_with_sixty()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
@@ -190,7 +193,7 @@ public sealed class RiasecTests
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
         var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
 
-        foreach (var question in assigned!.Take(23))
+        foreach (var question in assigned!.Take(59))
         {
             var response = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 3 }, CancellationToken.None);
             Assert.True(response.Success);
@@ -198,28 +201,28 @@ public sealed class RiasecTests
 
         var incomplete = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
         Assert.False(incomplete.Success);
-        Assert.Equal("El test debe tener 24 respuestas antes de finalizar.", incomplete.Error);
+        Assert.Equal("El test debe tener 60 respuestas antes de finalizar.", incomplete.Error);
 
-        var last = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned![23].Id, Value = 3 }, CancellationToken.None);
+        var last = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned![59].Id, Value = 3 }, CancellationToken.None);
         var complete = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
 
         Assert.True(last.Success);
         Assert.True(complete.Success);
         Assert.NotNull(complete.Result);
-        Assert.Equal(12, complete.Result!.RScore); // 4 preguntas x valor 3
-        Assert.Equal(20, complete.Result.MaxScore);
+        Assert.Equal(30, complete.Result!.RScore); // 10 preguntas x valor 3
+        Assert.Equal(50, complete.Result.MaxScore);
         Assert.Equal(RiasecTestConstants.Version, complete.Result.AlgorithmVersion);
         Assert.Equal("RI", complete.Result.PrimaryCode); // empate total: orden fijo R,I,A,S,E,C
         Assert.Equal("A", complete.Result.SecondaryCode);
-        Assert.Equal(24, last.Attempt!.Coins);
+        Assert.Equal(60, last.Attempt!.Coins);
 
         var afterCompletion = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
-        Assert.Equal(74, afterCompletion!.Coins); // 24 respuestas + 50 de bono
+        Assert.Equal(110, afterCompletion!.Coins); // 60 respuestas + 50 de bono
 
         var completedAgain = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
         var afterSecondComplete = await service.GetAttemptAsync(userId, attempt.AttemptId, CancellationToken.None);
         Assert.True(completedAgain.Success);
-        Assert.Equal(74, afterSecondComplete!.Coins);
+        Assert.Equal(110, afterSecondComplete!.Coins);
     }
 
     [Fact]
@@ -252,7 +255,7 @@ public sealed class RiasecTests
         context.Careers.Add(career);
         context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "R", CompatibilityLevel = 100, Rule = "Coincide con la dimension principal." });
         var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.Version };
-        var profile = new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 20, IScore = 12, AScore = 8, SScore = 8, EScore = 8, CScore = 8, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.Version };
+        var profile = new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 50, IScore = 30, AScore = 20, SScore = 20, EScore = 20, CScore = 20, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.Version };
         context.TestAttempts.Add(attempt); context.RiasecProfiles.Add(profile);
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
@@ -350,7 +353,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Compatibility_uses_the_twenty_four_question_scale_max_score_gives_full_match()
+    public async Task Compatibility_uses_the_sixty_question_scale_max_score_gives_full_match()
     {
         await using var context = CreateContext();
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
@@ -362,7 +365,7 @@ public sealed class RiasecTests
         var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.Version };
         context.TestAttempts.Add(attempt);
         // Puntaje maximo en I (4 preguntas x 5 = 20) y la mitad en R.
-        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 10, IScore = 20, AScore = 4, SScore = 4, EScore = 4, CScore = 4, PrimaryCode = "IR", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.Version });
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 25, IScore = 50, AScore = 10, SScore = 10, EScore = 10, CScore = 10, PrimaryCode = "IR", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.Version });
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
 
@@ -381,10 +384,10 @@ public sealed class RiasecTests
         context.Institutions.Add(institution);
         context.Careers.Add(career);
         context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = "I", CompatibilityLevel = 100, Rule = "Investigador." });
-        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.PreviousVersion };
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.OlderVersion };
         context.TestAttempts.Add(attempt);
         // Test anterior: 2 preguntas por dimension, 10 era el maximo.
-        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 5, IScore = 10, AScore = 2, SScore = 2, EScore = 2, CScore = 2, PrimaryCode = "IR", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.PreviousVersion });
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 5, IScore = 10, AScore = 2, SScore = 2, EScore = 2, CScore = 2, PrimaryCode = "IR", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.OlderVersion });
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
 
@@ -398,7 +401,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task A_twelve_question_attempt_in_progress_is_not_resumed_a_new_one_with_twenty_four_starts()
+    public async Task A_twenty_four_question_attempt_in_progress_is_not_resumed_a_new_one_with_sixty_starts()
     {
         await using var context = CreateContext();
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
@@ -410,7 +413,42 @@ public sealed class RiasecTests
         var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
 
         Assert.NotEqual(old.Id, attempt.AttemptId);
-        Assert.Equal(24, attempt.Total);
+        Assert.Equal(60, attempt.Total);
+    }
+
+    [Fact]
+    public async Task Every_student_gets_exactly_the_same_questions_in_the_same_order()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var first = await TestSupport.CreatePersistedStudentAsync(context);
+        var second = await TestSupport.CreatePersistedStudentAsync(context);
+
+        var a = await service.CreateAttemptAsync(first, CancellationToken.None);
+        var b = await service.CreateAttemptAsync(second, CancellationToken.None);
+        var questionsA = await service.GetAssignedQuestionsAsync(first, a.AttemptId, CancellationToken.None);
+        var questionsB = await service.GetAssignedQuestionsAsync(second, b.AttemptId, CancellationToken.None);
+
+        // Forma fija: sin sorteo, los puntajes de distintos estudiantes se pueden comparar.
+        Assert.Equal(questionsA!.Select(q => q.Id), questionsB!.Select(q => q.Id));
+        Assert.Equal(new[] { "R01", "I01", "A01", "S01", "E01", "C01", "R02" }, questionsA!.Take(7).Select(q => q.Code));
+    }
+
+    [Fact]
+    public async Task A_result_of_the_previous_twenty_four_question_test_keeps_its_own_scale()
+    {
+        await using var context = CreateContext();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.PreviousVersion };
+        context.TestAttempts.Add(attempt);
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 20, IScore = 12, AScore = 8, SScore = 8, EScore = 8, CScore = 8, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.PreviousVersion });
+        await context.SaveChangesAsync();
+        var service = new Infrastructure.Services.CatalogService(context, new NoAi());
+
+        var entry = Assert.Single(await service.GetHistoryAsync(userId, CancellationToken.None));
+
+        Assert.Equal(20, entry.MaxScore);
+        Assert.NotNull(entry.Interpretation);
     }
 
     [Fact]
@@ -420,7 +458,7 @@ public sealed class RiasecTests
 
         Assert.Equal("RIA", interpretation.Code);
         Assert.Equal(new[] { "Realista", "Investigador", "Artístico" }, interpretation.Dimensions.Select(item => item.Name));
-        Assert.All(interpretation.Dimensions, item => Assert.StartsWith("Te atrae", item.Description));
+        Assert.All(interpretation.Dimensions, item => Assert.StartsWith("Te interesa", item.Description));
         Assert.NotEmpty(interpretation.SuggestedAreas);
         Assert.Contains("RIA", interpretation.Summary);
     }

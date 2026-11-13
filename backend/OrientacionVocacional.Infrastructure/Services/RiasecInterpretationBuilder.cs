@@ -34,7 +34,7 @@ public static class RiasecInterpretationBuilder
         var letters = code.Select(letter => letter.ToString()).Where(Dimensions.ContainsKey).Distinct().ToList();
 
         var dimensions = letters
-            .Select(letter => new DimensionInfoResponse(letter, Dimensions[letter].Name, $"Te atrae {Dimensions[letter].Traits}.", Dimensions[letter].Areas))
+            .Select(letter => new DimensionInfoResponse(letter, Dimensions[letter].Name, $"Te interesa {Dimensions[letter].Traits}.", Dimensions[letter].Areas))
             .ToList();
 
         // Las areas de la letra principal primero, sin repetir, maximo 6.

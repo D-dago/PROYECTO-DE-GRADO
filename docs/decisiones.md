@@ -89,3 +89,15 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Enlaces:** cada dirección se comprobó abriendo el sitio el 2026-11-03. INCOS e Instituto Álvarez Plata quedan sin enlace porque no se encontró una página oficial confirmable. El administrador puede agregarlo en Instituciones.
 
 **Ventana interna:** el servidor comprueba las cabeceras `X-Frame-Options` y `frame-ancestors` de cada sitio, y guarda el resultado 6 horas. Si el sitio prohíbe mostrarse dentro de otra página (hoy UPEA), se ofrece abrirlo en otra pestaña. No se usa un proxy porque saltarse esa prohibición rompería los sitios y su seguridad.
+
+## 2026-11-13: banco de 60 preguntas corregido, iguales para todos y sin cronómetro (ORION #27)
+
+**Decisión:** el test usa el banco propio de 60 preguntas reescrito según la revisión de Gabriela Lino (Word `50 preguntas pagina web - REV1LUM.docx`). Todas empiezan con «¿Qué tanto te interesa…?» y su ejemplo se muestra debajo, en letra secundaria. Todos los estudiantes responden las mismas 60 (10 por dimensión), intercaladas, sin sorteo y sin cronómetro. La pantalla ya no muestra la dimensión de cada pregunta, y la instrucción pregunta por intereses: «Lee cada actividad y elige qué tanto te gusta o te interesa, aunque nunca la hayas realizado o todavía no sepas hacerla…». Versión `RIASEC-60-V4`, máximo 50 por dimensión.
+
+**Motivo:** la revisión observó tres problemas: la instrucción hablaba de «forma de ser» (personalidad) y no de intereses; el cronómetro marcaba «Neutral» en lugar del estudiante; y mostrar la dimensión podía sesgar las respuestas. La forma fija responde a la crítica anterior de que, con el sorteo, cada estudiante respondía un test distinto.
+
+**Se deshizo** el cambio al Perfil de Intereses O*NET (ORION #25, commit `2f79c01`). No se había publicado ni aplicado a ninguna base, y el usuario eligió el banco corregido. Queda en el historial de git.
+
+**Correcciones de redacción** sobre el texto de la revisión: puntos finales, «ajedréz» → «un problema de ajedrez», «o un torno, un tractor» → «un torno o un tractor» y comas sueltas. R01 y R10 no tienen ejemplo porque la revisión no lo propuso.
+
+**Limitación:** el banco propio no tiene validación psicométrica (el O*NET sí). Los puntajes de 60 preguntas (máximo 50) no se comparan directamente con los de 24 (máximo 20), salvo como porcentaje.

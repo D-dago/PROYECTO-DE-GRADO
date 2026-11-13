@@ -3,7 +3,7 @@
 Medido el 2026-11-11 con pruebas de carga que simulan a estudiantes de **un mismo colegio**. Todos salen a internet por la **misma IP**, que es el caso real de un aula o un laboratorio. Cada estudiante simulado:
 
 1. se registra;
-2. abre el test y responde las 24 preguntas;
+2. abre el test y responde las 24 preguntas (forma vigente cuando se midió; hoy son 60, ver la nota al final);
 3. ve su resultado, "Dónde estudiar" y su historial.
 
 Mientras tanto, su pantalla consulta cada 5 s si hubo cambios.
@@ -66,5 +66,9 @@ Los scripts usados están descritos en la tarjeta ORION #20:
 - `servidor-limitado.ps1` arranca la API con el tope de CPU.
 
 Se ejecutaron contra una copia de la base local (`orientacion_e2e`), nunca contra la base de internet.
+
+## Nota: test de 60 preguntas (desde el 13-nov-2026, ORION #27)
+
+Las mediciones de arriba se hicieron con el test de 24 preguntas. Con 60, cada estudiante envía 36 respuestas más. Cada respuesta cuesta menos de 5 ms de CPU, así que el recorrido completo sube de unos 0,23 s a unos 0,4 s de CPU por estudiante. Las respuestas se reparten en más tiempo (el test dura más). Lo pesado sigue siendo registrarse e iniciar sesión, que no cambia, así que las recomendaciones se mantienen.
 
 Fuentes de los límites: [planes de Render](https://render.com/docs/compute-plans), [límites del plan gratis de Neon](https://neon.com/faqs/free-plan-limits-and-quotas).

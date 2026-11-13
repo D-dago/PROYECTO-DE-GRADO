@@ -8,13 +8,10 @@ const options = [
   { value: 4, label: 'Mucho' }, { value: 5, label: 'Totalmente' },
 ]
 
-const dimensions = new Map([
-  ['R', 'Realista'], ['I', 'Investigador'], ['A', 'Artístico'],
-  ['S', 'Social'], ['E', 'Emprendedor'], ['C', 'Convencional'],
-])
-
-const QUESTION_SECONDS = 30
-const AUTO_ANSWER_VALUE = 3 // "Neutral": lo que se registra si se acaba el tiempo sin responder
+// Sin cronometro ni respuesta automatica (revision de Gabriela Lino, ORION #27): si el estudiante
+// tardaba en leer o se distraia, el sistema marcaba "Neutral" por el y esa respuesta no reflejaba su
+// interes. Tampoco se muestra la dimension de cada pregunta mientras responde: podria asociar las
+// actividades con profesiones y sesgar sus respuestas. Las dimensiones se ven en el resultado.
 
 export function TestPage() {
   const [questions, setQuestions] = useState<Question[]>([])
@@ -24,16 +21,13 @@ export function TestPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [timeLeft, setTimeLeft] = useState(QUESTION_SECONDS)
-  // El cronometro guarda la funcion answer de cuando arranco, asi que ve "saving" desactualizado. Si el
-  // tiempo se acababa con un clic aun en camino, se enviaba dos veces y el segundo envio mostraba un error.
+  // Evita enviar dos veces la misma respuesta si se pulsa dos veces seguidas.
   const sending = useRef(false)
 
   async function loadTest() {
     try {
-      // Las preguntas se sortean por intento (4 por dimension, al azar), asi que
-      // primero hay que crear/reanudar el intento y recien despues pedir cuales
-      // 24 preguntas especificas le tocaron - ya no se puede pedir en paralelo.
+      // Primero se crea o reanuda el intento y despues se piden sus preguntas (las mismas 60 para
+      // todos, en el orden guardado en el intento).
       const loadedAttempt = await riasecApi.createAttempt()
       const loadedQuestions = await riasecApi.getAssignedQuestions(loadedAttempt.attemptId)
       setQuestions(loadedQuestions)
@@ -81,28 +75,6 @@ export function TestPage() {
     }
   }
 
-  // Cronometro por pregunta: se reinicia cada vez que cambia currentIndex. Si llega a
-  // cero sin respuesta, se auto-responde "Neutral" y se avanza (igual que un click
-  // manual), para no dejar el intento con preguntas huerfanas que nunca se podrian
-  // volver a contestar y bloquearian la finalizacion del test.
-  useEffect(() => {
-    if (loading || result || !attempt) return
-    setTimeLeft(QUESTION_SECONDS)
-    const startedAt = Date.now()
-    const interval = setInterval(() => {
-      const remaining = QUESTION_SECONDS - Math.floor((Date.now() - startedAt) / 1000)
-      if (remaining <= 0) {
-        clearInterval(interval)
-        setTimeLeft(0)
-        void answer(AUTO_ANSWER_VALUE)
-      } else {
-        setTimeLeft(remaining)
-      }
-    }, 250)
-    return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, loading, result, attempt])
-
   if (loading) return <main className="test-shell"><p className="status-message">Cargando tu test...</p></main>
   if (error && !attempt) return <main className="test-shell"><p className="error-message">{error}</p></main>
   if (result) return <ResultView result={result} />
@@ -117,9 +89,10 @@ export function TestPage() {
       <section className="quiz-panel" aria-live="polite">
         <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, attempt.total)} <span>de {attempt.total}</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>
-        <div className="question-meta"><span className="dimension-tag">{question.dimension} · {dimensions.get(question.dimension)}</span><span className={`timer-badge${timeLeft <= 5 ? ' timer-low' : ''}`}>⏱ {timeLeft}s</span><span>{Math.round(progress)}% completado</span></div>
-        {/* La instruccion va antes de la pregunta: asi se lee antes de responder, no despues. */}
-        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser. Si el tiempo se acaba, se registra "Neutral" y avanza sola.</p>
+        <div className="question-meta"><span>{Math.round(progress)}% completado</span></div>
+        {/* La instruccion va antes de la pregunta: asi se lee antes de responder. Pregunta por intereses,
+            no por la forma de ser (revision de Gabriela Lino). */}
+        <p className="quiz-hint">Lee cada actividad y elige qué tanto te gusta o te interesa, aunque nunca la hayas realizado o todavía no sepas hacerla. No hay respuestas correctas o incorrectas. Responde según tus intereses, no según lo que otras personas esperan de ti.</p>
         <QuestionText text={question.text} />
         <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={() => void answer(option.value)} disabled={saving}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
         {error && <p className="error-message">{error}</p>}
@@ -128,9 +101,10 @@ export function TestPage() {
   )
 }
 
-// El banco guarda "Actividad (ej.: ejemplo)"; se muestra la actividad grande y el ejemplo mas suave.
+// El banco guarda "¿Qué tanto te interesa...? Ejemplo: ..."; la pregunta se muestra grande y el ejemplo
+// debajo, en letra secundaria. Tambien entiende el formato anterior "Actividad (ej.: ejemplo)".
 function QuestionText({ text }: { text: string }) {
-  const match = /^(.*?)\s*\((ej\.:[^)]*)\)\s*$/.exec(text)
+  const match = /^(.*?)\s+(Ejemplo:.*)$/.exec(text) ?? /^(.*?)\s*\((ej\.:[^)]*)\)\s*$/.exec(text)
   if (!match) return <p className="question-text">{text}</p>
   return <p className="question-text">{match[1]}<span className="question-example">{match[2]}</span></p>
 }
