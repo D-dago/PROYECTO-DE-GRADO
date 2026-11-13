@@ -15,7 +15,7 @@ Para comprobar antes de empezar que todo está encendido: `GET /health` debe res
 1. Abre `/registro` y crea una cuenta (o entra con Google).
 2. Entra a `/login`.
 3. Abre `/perfil` y guarda datos académicos.
-4. Abre `/test` y responde las 30 actividades del Perfil de Intereses O*NET (5 por cada una de las 6 dimensiones RIASEC, iguales para todos).
+4. Abre `/test` y responde las 24 preguntas (4 por cada una de las 6 dimensiones RIASEC, sorteadas del banco de 60).
 5. Muestra el resultado: código del perfil, tarjetas por dimensión, puntajes, explicación y el aviso de orientación no diagnóstica.
 6. Abre `/recomendaciones`; inicialmente puede mostrar que no existen alternativas si el catálogo está vacío.
 7. Muestra las carreras compatibles, con las universidades e institutos de Cochabamba que las ofrecen, y abre un sitio oficial en la ventana interna.

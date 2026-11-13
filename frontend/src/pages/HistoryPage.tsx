@@ -35,11 +35,10 @@ export function HistoryPage() {
             <details className="history-card" key={item.id}>
               <summary className="history-card-top">
                 <strong>{new Date(item.createdAtUtc).toLocaleString()}</strong>
-                {/* Un resultado O*NET sin areas sobre el promedio no tiene codigo (perfil plano), pero si puntajes. */}
-                {item.interpretation && <span className="result-code-mini">{item.primaryCode ? <>{item.primaryCode}<small>{item.secondaryCode}</small></> : <small>Perfil plano</small>}</span>}
+                {item.primaryCode && <span className="result-code-mini">{item.primaryCode}<small>{item.secondaryCode}</small></span>}
                 <span className="history-toggle-hint">Ver detalle ▾</span>
               </summary>
-              {item.interpretation ? (
+              {item.primaryCode ? (
                 <div className="history-scores">
                   {dimensionLabels.map(([key, label]) => (
                     <span key={label}><b>{label}</b>{item[key] ?? 0}</span>

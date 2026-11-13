@@ -3,14 +3,18 @@ import { riasecApi } from '../services/riasecApi'
 import type { Attempt, Question, RiasecResult } from '../types/riasec'
 import { RiasecResult as ResultView } from '../components/RiasecResult'
 
-// Escala del Perfil de Intereses O*NET en espanol. Se guarda 1-5; el servidor la puntua 0-4.
 const options = [
-  { value: 1, label: 'Me disgusta mucho' }, { value: 2, label: 'Me disgusta' }, { value: 3, label: 'No estoy seguro/a' },
-  { value: 4, label: 'Me gusta' }, { value: 5, label: 'Me gusta mucho' },
+  { value: 1, label: 'Nada' }, { value: 2, label: 'Poco' }, { value: 3, label: 'Neutral' },
+  { value: 4, label: 'Mucho' }, { value: 5, label: 'Totalmente' },
 ]
 
+const dimensions = new Map([
+  ['R', 'Realista'], ['I', 'Investigador'], ['A', 'Artístico'],
+  ['S', 'Social'], ['E', 'Emprendedor'], ['C', 'Convencional'],
+])
+
 const QUESTION_SECONDS = 30
-const AUTO_ANSWER_VALUE = 3 // "No estoy seguro/a": lo que se registra si se acaba el tiempo sin responder
+const AUTO_ANSWER_VALUE = 3 // "Neutral": lo que se registra si se acaba el tiempo sin responder
 
 export function TestPage() {
   const [questions, setQuestions] = useState<Question[]>([])
@@ -27,9 +31,9 @@ export function TestPage() {
 
   async function loadTest() {
     try {
-      // Las preguntas se asignan a cada intento (las 30 del Perfil de Intereses O*NET),
-      // asi que primero hay que crear/reanudar el intento y recien despues pedir sus
-      // preguntas - no se puede pedir en paralelo.
+      // Las preguntas se sortean por intento (4 por dimension, al azar), asi que
+      // primero hay que crear/reanudar el intento y recien despues pedir cuales
+      // 24 preguntas especificas le tocaron - ya no se puede pedir en paralelo.
       const loadedAttempt = await riasecApi.createAttempt()
       const loadedQuestions = await riasecApi.getAssignedQuestions(loadedAttempt.attemptId)
       setQuestions(loadedQuestions)
@@ -78,7 +82,7 @@ export function TestPage() {
   }
 
   // Cronometro por pregunta: se reinicia cada vez que cambia currentIndex. Si llega a
-  // cero sin respuesta, se auto-responde "No estoy seguro/a" y se avanza (igual que un click
+  // cero sin respuesta, se auto-responde "Neutral" y se avanza (igual que un click
   // manual), para no dejar el intento con preguntas huerfanas que nunca se podrian
   // volver a contestar y bloquearian la finalizacion del test.
   useEffect(() => {
@@ -109,25 +113,22 @@ export function TestPage() {
 
   return (
     <main className="test-shell">
-      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">Perfil de Intereses O*NET · {attempt.total} actividades</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
+      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">RIASEC · {attempt.total} preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
       <section className="quiz-panel" aria-live="polite">
-        <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>¿Qué te gustaría hacer en tu trabajo?</h1></div><strong className="question-count">Actividad {Math.min(attempt.answered + 1, attempt.total)} <span>de {attempt.total}</span></strong></div>
+        <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, attempt.total)} <span>de {attempt.total}</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>
-        {/* Como en O*NET, no se muestra a que dimension pertenece cada actividad: saberlo sesga la respuesta. */}
-        <div className="question-meta"><span className={`timer-badge${timeLeft <= 5 ? ' timer-low' : ''}`}>⏱ {timeLeft}s</span><span>{Math.round(progress)}% completado</span></div>
+        <div className="question-meta"><span className="dimension-tag">{question.dimension} · {dimensions.get(question.dimension)}</span><span className={`timer-badge${timeLeft <= 5 ? ' timer-low' : ''}`}>⏱ {timeLeft}s</span><span>{Math.round(progress)}% completado</span></div>
         {/* La instruccion va antes de la pregunta: asi se lee antes de responder, no despues. */}
-        <p className="quiz-hint">Imagina que haces esta actividad en tu trabajo. No pienses si tienes la preparación necesaria ni cuánto ganarías: responde solo si te gustaría hacerla. No hay respuestas correctas. Si el tiempo se acaba, se registra "No estoy seguro/a" y avanza sola.</p>
+        <p className="quiz-hint">Elige la opción que mejor describa tu forma de ser. Si el tiempo se acaba, se registra "Neutral" y avanza sola.</p>
         <QuestionText text={question.text} />
         <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={() => void answer(option.value)} disabled={saving}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
         {error && <p className="error-message">{error}</p>}
-        <p className="quiz-source">Actividades del Perfil de Intereses O*NET (versión en español), de las O*NET Career Exploration Tools del U.S. Department of Labor, Employment and Training Administration (USDOL/ETA), usadas según la O*NET Tools Developer License. O*NET® es una marca registrada de USDOL/ETA.</p>
       </section>
     </main>
   )
 }
 
-// Las actividades O*NET no traen ejemplo. Si el administrador agrega una con "Actividad (ej.: ejemplo)",
-// se muestra la actividad grande y el ejemplo mas suave.
+// El banco guarda "Actividad (ej.: ejemplo)"; se muestra la actividad grande y el ejemplo mas suave.
 function QuestionText({ text }: { text: string }) {
   const match = /^(.*?)\s*\((ej\.:[^)]*)\)\s*$/.exec(text)
   if (!match) return <p className="question-text">{text}</p>

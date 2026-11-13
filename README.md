@@ -66,15 +66,15 @@ La migracion inicial crea `roles`, `users` y `student_profiles`, y siembra solo 
 
 ## Test vocacional RIASEC
 
-El test aplica el **Perfil de Intereses O*NET** en su version oficial en espanol: 30 actividades de trabajo, cinco por cada una de las seis dimensiones de Holland: `R` (Realista), `I` (Investigador), `A` (Artistico), `S` (Social), `E` (Emprendedor) y `C` (Convencional). Es una forma fija: todos responden las mismas actividades, en el orden oficial (ciclo `R, I, A, S, E, C`). Las 60 preguntas propias que se usaron hasta noviembre de 2026 y las de CHASIDE (areas H y D) quedan inactivas (orden >= 1000), porque hay respuestas guardadas que las referencian. Los textos son de las O*NET Career Exploration Tools (USDOL/ETA) y se usan sin cambios, segun la O*NET Tools Developer License.
+El banco tiene 60 preguntas activas, diez por cada una de las seis dimensiones: `R` (Realista), `I` (Investigador), `A` (Artistico), `S` (Social), `E` (Emprendedor) y `C` (Convencional), segun la teoria de Holland. El sistema llego a aplicar por un tiempo una version CHASIDE del test; la migracion `VuelveATestRiasec` restauro el banco RIASEC y dejo inactivas las preguntas propias de CHASIDE (areas H y D), porque hay respuestas guardadas que las referencian.
 
-La escala es Me disgusta mucho, Me disgusta, No estoy seguro/a, Me gusta y Me gusta mucho (se guarda 1-5 y se puntua 0-4), asi que cada dimension va de 0 a 20. El algoritmo `ONET-30-V4` calcula el perfil como O*NET: solo cuentan las dimensiones por encima del promedio del propio estudiante, hasta tres, y los empates se resuelven por cercania en el hexagono; si ninguna supera el promedio, el perfil es plano y no lleva codigo. Los resultados de los tests anteriores de 24 y 12 preguntas (`RIASEC-24-V3`, `RIASEC-12-V2`) se siguen mostrando y recomendando sobre su propio maximo. Los del periodo CHASIDE se conservan, pero no se interpretan ni generan recomendaciones.
+Cada intento sortea 12 preguntas (2 por dimension) y las intercala para que no salgan dos seguidas de la misma dimension. El algoritmo `RIASEC-12-V2` suma cada dimension y resuelve empates con el orden fijo `R, I, A, S, E, C`; el puntaje maximo por dimension es 10 (2 preguntas x 5). Los resultados del periodo CHASIDE se conservan, pero no se interpretan ni generan recomendaciones.
 
 Todos los endpoints requieren un JWT de estudiante:
 
-- `POST /api/test/attempts`: crea el intento con sus 30 actividades (o devuelve el intento en progreso).
+- `POST /api/test/attempts`: crea el intento y sortea sus 12 preguntas (o devuelve el intento en progreso).
 - `GET /api/test/attempts/{attemptId}`
-- `GET /api/test/attempts/{attemptId}/questions`: las preguntas asignadas a ese intento.
+- `GET /api/test/attempts/{attemptId}/questions`: las preguntas sorteadas para ese intento.
 - `POST /api/test/attempts/{attemptId}/answers` con `{ "questionId": "...", "value": 1 }`
 - `POST /api/test/attempts/{attemptId}/complete`
 - `GET /api/test/attempts/{attemptId}/result`

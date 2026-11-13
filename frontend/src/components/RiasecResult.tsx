@@ -5,7 +5,7 @@ import type { RiasecResult } from '../types/riasec'
 import { UniversityLinks } from './UniversityLinks'
 import { useLiveCareers } from '../services/liveData'
 
-const MAX_DIMENSION_SCORE = 20 // 5 actividades O*NET por dimension x 4 puntos (test vigente)
+const MAX_DIMENSION_SCORE = 20 // 4 preguntas por dimension x valor maximo 5 (test vigente)
 
 export function RiasecResult({ result }: { result: RiasecResult }) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
@@ -26,10 +26,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
       <section className="result-panel">
         <span className="eyebrow">Test terminado</span>
         <h1>Tu perfil RIASEC</h1>
-        {/* En O*NET el codigo solo lleva las areas sobre el promedio del estudiante; sin ninguna, el perfil es plano. */}
-        {result.primaryCode
-          ? <p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p>
-          : <p className="result-flat">Perfil plano: ninguna área destaca sobre las demás.</p>}
+        <p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p>
 
         <h2 className="result-heading">¿Qué significa tu perfil?</h2>
         {interpretation ? (

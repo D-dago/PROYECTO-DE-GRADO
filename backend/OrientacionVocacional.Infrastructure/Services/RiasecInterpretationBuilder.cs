@@ -43,10 +43,7 @@ public static class RiasecInterpretationBuilder
         var parts = letters.Select(letter => $"{Dimensions[letter].Name} ({Dimensions[letter].Traits})").ToList();
         var summary = parts.Count switch
         {
-            // Test O*NET: solo cuentan las areas por encima de tu propio promedio. Si ninguna lo supera
-            // (respondiste casi igual en todo), el perfil es plano y no se fuerza un codigo.
-            0 => "Ninguna área destaca sobre las demás en tus respuestas (perfil plano), así que no se puede señalar un tipo principal. " +
-                 "Te recomendamos repetir el test con calma, pensando si te gustaría hacer cada actividad en tu trabajo, y conversar con un orientador.",
+            0 => "No hay suficiente información para interpretar tu perfil.",
             1 => $"Tu perfil es {code}: lo que más destaca en ti es el tipo {parts[0]}.",
             _ => $"Tu perfil es {code}. Lo que más destaca en ti es el tipo {parts[0]}; le sigue {string.Join(", y luego ", parts.Skip(1))}."
         };

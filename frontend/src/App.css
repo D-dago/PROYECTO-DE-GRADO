@@ -231,11 +231,9 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .answer-grid button { border: 1px solid rgba(255, 255, 255, .14); border-radius: 14px; background: rgba(255, 255, 255, .03); color: var(--cream); min-height: 6.5rem; cursor: pointer; display: grid; place-content: center; gap: .4rem; transition: background .15s, border .15s, transform .15s; }
 .answer-grid button:hover, .answer-grid button:focus-visible { background: rgba(236, 47, 143, .18); border-color: var(--accent); transform: translateY(-3px); outline: none; }
 .answer-grid button strong { font-size: 1.7rem; color: var(--accent); }
-.answer-grid button span { font-size: .8rem; text-align: center; line-height: 1.25; padding: 0 .3rem; }
+.answer-grid button span { font-size: .8rem; }
 .quiz-hint { text-transform: none; letter-spacing: 0; margin: 1.4rem 0 0; font-size: .9rem; line-height: 1.5; }
 .quiz-hint + .question-text { margin-top: 1.2rem; }
-.quiz-source { color: var(--cream-muted); font-size: .7rem; line-height: 1.4; margin: 1.6rem 0 0; opacity: .8; }
-.result-flat { color: var(--cream); font-size: 1.15rem; font-weight: 700; max-width: 40ch; margin: 2rem 0; }
 .result-shell { display: grid; align-content: start; }
 .result-panel h1 { margin-bottom: 1rem; }
 .result-code { color: var(--accent); font-size: clamp(5rem, 15vw, 10rem); line-height: .8; letter-spacing: -.08em; margin: 3rem 0; }

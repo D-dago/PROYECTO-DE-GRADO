@@ -26,7 +26,7 @@ export function ResultsSection({ results, report }: { results: AdminResult[]; re
         {results.map((result) => (
           <details className="admin-row admin-row-result" key={result.attemptId}>
             <summary className="admin-row-main">
-              <strong>{result.studentName} · {result.primaryCode || result.secondaryCode ? `${result.primaryCode}${result.secondaryCode}` : 'Perfil plano'}</strong>
+              <strong>{result.studentName} · {result.primaryCode}{result.secondaryCode}</strong>
               <small>{result.email} · {new Date(result.completedAtUtc).toLocaleString()} · R{result.r} I{result.i} A{result.a} S{result.s} E{result.e} C{result.c} (sobre {result.maxScore})</small>
             </summary>
             <div className="admin-result-detail">
@@ -75,7 +75,7 @@ export function QuestionsSection({ questions, onChanged, report }: { questions: 
   return (
     <section className="admin-section" id="preguntas">
       <h2>Preguntas del test</h2>
-      <p className="empty-state">El test aplica el Perfil de Intereses O*NET: las mismas 30 actividades para todos, las 5 primeras activas de cada dimensión. Son textos oficiales: si se cambia o reemplaza uno, la licencia O*NET exige avisar que es una versión modificada y validarla. Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
+      <p className="empty-state">Cada intento sortea 4 preguntas activas por dimensión (24 en total). Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
       <label>Filtrar por dimensión
         <select value={filter} onChange={(event) => setFilter(event.target.value)}>
           <option value="">Todas ({questions.length})</option>

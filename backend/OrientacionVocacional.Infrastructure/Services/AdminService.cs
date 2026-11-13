@@ -67,7 +67,7 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
 
     public async Task<IReadOnlyList<AdminResultRow>> GetResultsAsync(CancellationToken cancellationToken)
     {
-        // Tambien los de los tests anteriores (24 y 12 preguntas): son RIASEC, solo cambia el maximo.
+        // Tambien los del test anterior de 12 preguntas: son RIASEC, solo cambia el maximo.
         var versions = RiasecTestConstants.InterpretableVersions;
         var rows = await db.RiasecProfiles.AsNoTracking()
             .Where(profile => versions.Contains(profile.AlgorithmVersion))
@@ -109,7 +109,7 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
         for (var index = 0; index < results.Count; index++)
         {
             var row = results[index];
-            object[] values = [row.StudentName, row.Email, row.CompletedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"), PerfilTexto(row.PrimaryCode, row.SecondaryCode), row.R, row.I, row.A, row.S, row.E, row.C, row.MaxScore];
+            object[] values = [row.StudentName, row.Email, row.CompletedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"), row.PrimaryCode + row.SecondaryCode, row.R, row.I, row.A, row.S, row.E, row.C, row.MaxScore];
             for (var column = 0; column < values.Length; column++) sheet.Cell(index + 2, column + 1).Value = XLCellValue.FromObject(values[column]);
         }
         sheet.Row(1).Style.Font.Bold = true;
@@ -156,7 +156,7 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
                 table.Header(row => { foreach (var title in header) row.Cell().Background(Colors.Grey.Lighten2).Padding(4).Text(title).Bold(); });
                 foreach (var item in results)
                 {
-                    string[] cells = [item.StudentName, item.Email, item.CompletedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm"), PerfilTexto(item.PrimaryCode, item.SecondaryCode),
+                    string[] cells = [item.StudentName, item.Email, item.CompletedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm"), item.PrimaryCode + item.SecondaryCode,
                         item.R.ToString(), item.I.ToString(), item.A.ToString(), item.S.ToString(), item.E.ToString(), item.C.ToString(), item.MaxScore.ToString()];
                     foreach (var cell in cells) table.Cell().BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Padding(4).Text(cell);
                 }
@@ -166,8 +166,4 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
     }
 
     private static AdminQuestionResponse ToResponse(Question question) => new(question.Id, question.Code, question.Text, question.Dimension, question.IsActive, question.Order);
-
-    // En el test O*NET un perfil sin ninguna area sobre el promedio no tiene codigo: se exporta como "Perfil plano".
-    private static string PerfilTexto(string primaryCode, string secondaryCode) =>
-        string.IsNullOrEmpty(primaryCode + secondaryCode) ? "Perfil plano" : primaryCode + secondaryCode;
 }

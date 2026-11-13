@@ -1,6 +1,6 @@
 import type { ProfileInterpretation } from '../services/appApi'
 
-// Test vigente (O*NET): 5 actividades por dimension x 4 puntos. Los resultados del test anterior
+// Test vigente: 4 preguntas por dimension x valor maximo 5. Los resultados del test anterior
 // de 12 preguntas llegan con su propio maximo (10) desde el servidor.
 const MAX_DIMENSION_SCORE = 20
 
