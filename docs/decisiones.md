@@ -101,3 +101,11 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Correcciones de redacción** sobre el texto de la revisión: puntos finales, «ajedréz» → «un problema de ajedrez», «o un torno, un tractor» → «un torno o un tractor» y comas sueltas. R01 y R10 no tienen ejemplo porque la revisión no lo propuso.
 
 **Limitación:** el banco propio no tiene validación psicométrica (el O*NET sí). Los puntajes de 60 preguntas (máximo 50) no se comparan directamente con los de 24 (máximo 20), salvo como porcentaje.
+
+## 2026-11-13: el test vuelve a 24 preguntas, iguales para todos (ORION #28)
+
+**Decisión:** cada intento presenta las mismas 24 preguntas a todos los estudiantes: las 4 primeras activas de cada dimensión del banco corregido (R01–R04, I01–I04, …), intercaladas, sin sorteo y sin cronómetro. Versión `RIASEC-24-V5`, máximo 20 por dimensión. Las otras 36 preguntas corregidas siguen en el banco; si el administrador desactiva una de las primeras, entra la siguiente activa de esa dimensión.
+
+**Motivo:** el usuario prefirió un test más corto que el de 60 preguntas (ORION #27). Se conserva la forma fija para que los puntajes de distintos estudiantes se puedan comparar.
+
+**Limitación:** 4 preguntas por dimensión dan menos confiabilidad que 10. Los resultados del test de 60 (`RIASEC-60-V4`, máximo 50) se siguen mostrando sobre su propio máximo.

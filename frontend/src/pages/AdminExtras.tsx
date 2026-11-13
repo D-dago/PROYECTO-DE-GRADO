@@ -75,7 +75,7 @@ export function QuestionsSection({ questions, onChanged, report }: { questions: 
   return (
     <section className="admin-section" id="preguntas">
       <h2>Preguntas del test</h2>
-      <p className="empty-state">Cada intento presenta las mismas 60 preguntas a todos (las 10 primeras activas de cada dimensión, intercaladas). Para cambiar una, desactívala y crea otra en su lugar. Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
+      <p className="empty-state">Cada intento presenta las mismas 24 preguntas a todos: las 4 primeras activas de cada dimensión, según su orden, intercaladas. Si desactivas una, entra la siguiente activa de esa dimensión. Cambiar el texto de una pregunta también cambia cómo se lee en respuestas ya guardadas.</p>
       <label>Filtrar por dimensión
         <select value={filter} onChange={(event) => setFilter(event.target.value)}>
           <option value="">Todas ({questions.length})</option>

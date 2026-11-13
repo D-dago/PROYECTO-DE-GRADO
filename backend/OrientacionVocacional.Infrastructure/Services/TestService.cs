@@ -214,8 +214,8 @@ public sealed class TestService(
     }
 
     /// <summary>
-    /// Forma fija: las mismas preguntas para todos, las 10 primeras activas de cada dimension por su
-    /// orden (60 en total), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos
+    /// Forma fija: las mismas preguntas para todos, las 4 primeras activas de cada dimension por su
+    /// orden (24 en total), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos
     /// seguidas de la misma dimension. Antes se sorteaban 4 de 10 y cada estudiante respondia un
     /// test distinto, asi que sus puntajes no se podian comparar.
     /// </summary>
@@ -237,7 +237,7 @@ public sealed class TestService(
         {
             foreach (var dimension in RiasecTestConstants.DimensionOrder)
             {
-                // El administrador no puede dejar un area con menos de 10 activas; si aun asi faltara
+                // El administrador no puede dejar un area con menos de 4 activas; si aun asi faltara
                 // alguna (datos antiguos), el intento sigue con las que hay en vez de fallar.
                 if (round >= byDimension[dimension].Count) continue;
                 var question = byDimension[dimension][round];

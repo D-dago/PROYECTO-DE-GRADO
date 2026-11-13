@@ -26,7 +26,7 @@ export function TestPage() {
 
   async function loadTest() {
     try {
-      // Primero se crea o reanuda el intento y despues se piden sus preguntas (las mismas 60 para
+      // Primero se crea o reanuda el intento y despues se piden sus preguntas (las mismas 24 para
       // todos, en el orden guardado en el intento).
       const loadedAttempt = await riasecApi.createAttempt()
       const loadedQuestions = await riasecApi.getAssignedQuestions(loadedAttempt.attemptId)

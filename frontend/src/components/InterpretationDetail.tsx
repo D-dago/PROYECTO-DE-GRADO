@@ -1,8 +1,8 @@
 import type { ProfileInterpretation } from '../services/appApi'
 
-// Test vigente: 10 preguntas por dimension x valor maximo 5. Los resultados de tests anteriores
-// (24 y 12 preguntas) llegan con su propio maximo (20 y 10) desde el servidor.
-const MAX_DIMENSION_SCORE = 50
+// Test vigente: 4 preguntas por dimension x valor maximo 5. Los resultados de tests anteriores
+// (60, 24 sorteadas y 12 preguntas) llegan con su propio maximo (50, 20 y 10) desde el servidor.
+const MAX_DIMENSION_SCORE = 20
 
 /**
  * El detalle completo de un resultado (tarjetas por area, barras de puntaje, resumen y areas

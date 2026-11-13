@@ -68,11 +68,11 @@ La migracion inicial crea `roles`, `users` y `student_profiles`, y siembra solo 
 
 El banco tiene 60 preguntas activas, diez por cada una de las seis dimensiones: `R` (Realista), `I` (Investigador), `A` (Artistico), `S` (Social), `E` (Emprendedor) y `C` (Convencional), segun la teoria de Holland. El sistema llego a aplicar por un tiempo una version CHASIDE del test; la migracion `VuelveATestRiasec` restauro el banco RIASEC y dejo inactivas las preguntas propias de CHASIDE (areas H y D), porque hay respuestas guardadas que las referencian.
 
-Cada intento presenta las mismas 60 preguntas a todos (10 por dimension, sin sorteo ni limite de tiempo) y las intercala para que no salgan dos seguidas de la misma dimension. El algoritmo `RIASEC-60-V4` suma cada dimension y resuelve empates con el orden fijo `R, I, A, S, E, C`; el puntaje maximo por dimension es 50 (10 preguntas x 5). Los resultados de 24 y 12 preguntas se siguen mostrando sobre su propio maximo. Los resultados del periodo CHASIDE se conservan, pero no se interpretan ni generan recomendaciones.
+Cada intento presenta las mismas 24 preguntas a todos (las 4 primeras de cada dimension del banco de 60, sin sorteo ni limite de tiempo) y las intercala para que no salgan dos seguidas de la misma dimension. El algoritmo `RIASEC-24-V5` suma cada dimension y resuelve empates con el orden fijo `R, I, A, S, E, C`; el puntaje maximo por dimension es 20 (4 preguntas x 5). Los resultados de versiones anteriores (60, 24 sorteadas y 12 preguntas) se siguen mostrando sobre su propio maximo. Los resultados del periodo CHASIDE se conservan, pero no se interpretan ni generan recomendaciones.
 
 Todos los endpoints requieren un JWT de estudiante:
 
-- `POST /api/test/attempts`: crea el intento con sus 60 preguntas (o devuelve el intento en progreso).
+- `POST /api/test/attempts`: crea el intento con sus 24 preguntas (o devuelve el intento en progreso).
 - `GET /api/test/attempts/{attemptId}`
 - `GET /api/test/attempts/{attemptId}/questions`: las preguntas del intento, en orden.
 - `POST /api/test/attempts/{attemptId}/answers` con `{ "questionId": "...", "value": 1 }`
