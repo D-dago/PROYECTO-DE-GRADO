@@ -544,6 +544,23 @@ public sealed class RiasecTests
     }
 
     [Fact]
+    public void Every_suggested_area_has_search_terms_to_find_its_careers()
+    {
+        foreach (var area in RiasecInterpretationBuilder.AllAreas)
+        {
+            var terms = RiasecInterpretationBuilder.SearchTermsFor(area);
+            Assert.True(terms.Any(term => !term.StartsWith('-')), $"El área «{area}» no tiene términos de búsqueda.");
+            // El buscador compara sin tildes y en minúsculas: un término con tilde nunca coincidiría.
+            Assert.All(terms, term => Assert.Equal(term.Normalize(System.Text.NormalizationForm.FormD).Where(ch => char.GetUnicodeCategory(ch) != System.Globalization.UnicodeCategory.NonSpacingMark).Aggregate("", (text, ch) => text + ch).ToLowerInvariant(), term));
+        }
+
+        var interpretation = RiasecInterpretationBuilder.Build("RI", "C");
+        Assert.NotNull(interpretation.AreaSearchTerms);
+        Assert.Equal(interpretation.SuggestedAreas.Order(), interpretation.AreaSearchTerms!.Keys.Order());
+        Assert.Contains("agronom", interpretation.AreaSearchTerms["Agronomía y veterinaria"]);
+    }
+
+    [Fact]
     public void Interpretation_explains_each_letter_and_suggests_areas()
     {
         var interpretation = RiasecInterpretationBuilder.Build("RI", "A");

@@ -255,6 +255,7 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .area-chip { padding: .4rem .9rem; border-radius: 999px; background: rgba(33, 184, 118, .16); color: #6fe5b0; font-size: .9rem; }
 .area-chip-button { border: 1px solid rgba(111, 229, 176, .35); font: inherit; font-size: .9rem; cursor: pointer; transition: background .15s, border-color .15s; }
 .area-chip-button:hover, .area-chip-button:focus-visible { background: rgba(33, 184, 118, .3); border-color: #6fe5b0; outline: none; }
+.area-chip-empty { opacity: .55; cursor: help; }
 .area-hint { margin: -.3rem 0 .6rem; color: var(--cream-muted); font-size: .85rem; }
 .university-note { margin-top: 0; }
 .university-search { display: flex; align-items: center; gap: .6rem; margin: 1rem 0 0; padding: 0 1rem; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); }

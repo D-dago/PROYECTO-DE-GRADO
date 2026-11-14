@@ -127,3 +127,15 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Motivo:** sugerencia en amarillo de la revisión de Ch'iti Wasi: en lugar del temporizador por pregunta (quitado en ORION #27), un cronómetro que mida cuánto tardó el cuestionario y que solo se vea al final.
 
 **Limitación:** el tiempo cuenta desde que se abre el intento. Si el estudiante deja el test a medias y lo retoma otro día, incluye esa pausa. Los resultados sin fin registrado se muestran sin tiempo. El tiempo aparece en la pantalla de resultado al terminar; el historial no lo muestra.
+
+## 2026-11-14: cada área afín muestra sus carreras y el catálogo se completó (ORION #32)
+
+**Problema:** el resultado sugería «Agronomía y veterinaria», pero el buscador respondía «Ninguna carrera compatible coincide». El catálogo no tenía carreras de esa área, la búsqueda exigía la palabra exacta («agronomía» no encontraba «Agronómica») y varias áreas genéricas no se parecían al nombre de ninguna carrera.
+
+**Decisión:**
+- Cada área afín tiene términos de búsqueda definidos junto al área en `RiasecInterpretationBuilder` y enviados en `areaSearchTerms`. Al tocar o escribir el nombre del área se buscan esos términos en el nombre de las carreras. Un término con «-» excluye («fisica» sin «deporte»).
+- La búsqueda escrita compara por raíz: sin las 2 últimas letras en palabras de 7 o más («agronomia» → «agronom»).
+- Un área sin carreras en el catálogo se muestra atenuada y no como botón.
+- Se revisó la oferta oficial de cada institución activa: 59 carreras agregadas y 10 ocultadas porque no se dictan en Cochabamba. El detalle, con las fuentes, está en [REVISION_CATALOGO_2026-11-14.md](REVISION_CATALOGO_2026-11-14.md). Hoy las 24 áreas posibles encuentran al menos una carrera.
+
+**Limitación:** las reglas de compatibilidad de las carreras nuevas son una propuesta del sistema y el autor de la tesis debe revisarlas. Una carrera sin sede confirmada en Cochabamba no se agrega.

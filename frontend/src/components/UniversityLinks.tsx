@@ -1,91 +1,32 @@
 import { useState } from 'react'
 import type { Career } from '../services/appApi'
 import { SiteWindow } from './SiteWindow'
+import { areaTermsFor, groupByCareer, matchesArea, matchScore, searchWords, type InstitutionOption } from '../services/careerSearch'
 
 const CARRERAS_INICIALES = 8
 export const CAREER_SEARCH_ID = 'buscador-carreras'
-
-type InstitutionOption = { id: string; name: string; website: string | null }
-type CareerGroup = { key: string; name: string; areas: string; compatibility: number; reason: string; institutions: InstitutionOption[] }
-
-// La direccion viene de la base de datos: se vuelve a comprobar aqui para que nunca llegue a un enlace
-// o a la ventana interna algo que no sea una pagina web (por ejemplo "javascript:").
-function safeWebsite(website?: string | null): string | null {
-  if (!website) return null
-  try {
-    const { protocol } = new URL(website)
-    return protocol === 'https:' || protocol === 'http:' ? website : null
-  } catch {
-    return null
-  }
-}
-
-// Sin tildes ni mayusculas, para no separar "Ingenieria" de "Ingeniería" si el administrador la escribe distinto.
-function careerKey(name: string) {
-  return name.normalize('NFD').replace(/\p{M}/gu, '').trim().toLowerCase()
-}
-
-// Palabras que no ayudan a buscar ("Biología, química o física" -> biologia, quimica, fisica).
-const STOPWORDS = new Set(['del', 'las', 'los', 'con', 'para', 'por', 'una', 'uno', 'que', 'sus'])
-// Palabras tan generales que, solas, traerian medio catalogo: solo ordenan, salvo que sean lo unico buscado.
-const GENERIC = new Set(['ingenieria', 'ciencia', 'ciencias', 'licenciatura', 'tecnico', 'tecnica', 'carrera', 'carreras', 'estudios', 'profesional'])
-
-function searchWords(query: string) {
-  return careerKey(query).split(/[^a-z0-9]+/).filter((word) => word.length >= 3 && !STOPWORDS.has(word))
-}
-
-/**
- * Cuantas palabras buscadas aparecen en la carrera (nombre, area o institucion). 0 = no coincide.
- * Si se busco alguna palabra especifica, la carrera debe contener al menos una; las generales solo suman.
- */
-function matchScore(group: CareerGroup, words: string[]) {
-  const text = `${group.key} ${group.areas} ${group.institutions.map((item) => careerKey(item.name)).join(' ')}`
-  const specific = words.filter((word) => !GENERIC.has(word))
-  const required = specific.length > 0 ? specific : words
-  if (!required.some((word) => text.includes(word))) return 0
-  return words.filter((word) => text.includes(word)).length
-}
-
-/** Una tarjeta por carrera, con todas las instituciones de Cochabamba que la ofrecen. */
-function groupByCareer(careers: Career[]): CareerGroup[] {
-  const groups = new Map<string, CareerGroup>()
-  for (const career of careers) {
-    // 0 % significa que la carrera no tiene regla de compatibilidad: no es una recomendacion.
-    if (career.compatibility <= 0) continue
-    const key = careerKey(career.name)
-    const group = groups.get(key) ?? { key, name: career.name, areas: '', compatibility: 0, reason: career.compatibilityReason, institutions: [] }
-    if (career.area && !group.areas.includes(careerKey(career.area))) group.areas += ` ${careerKey(career.area)}`
-    if (career.compatibility > group.compatibility) {
-      group.compatibility = career.compatibility
-      group.reason = career.compatibilityReason
-    }
-    if (!group.institutions.some((item) => item.id === career.institutionId)) {
-      group.institutions.push({ id: career.institutionId, name: career.institutionName, website: safeWebsite(career.institutionWebsite) })
-    }
-    groups.set(key, group)
-  }
-  return [...groups.values()]
-    .map((group) => ({ ...group, institutions: [...group.institutions].sort((a, b) => a.name.localeCompare(b.name)) }))
-    .sort((a, b) => b.compatibility - a.compatibility || a.name.localeCompare(b.name))
-}
 
 /**
  * La busqueda puede venir de fuera (al tocar un area afin del resultado): en ese caso el componente la
  * recibe en `query` y avisa cada cambio con `onQueryChange`. Sin esas props maneja su propia busqueda.
  */
-export function UniversityLinks({ careers, query: externalQuery, onQueryChange }: { careers: Career[]; query?: string; onQueryChange?: (query: string) => void }) {
+export function UniversityLinks({ careers, query: externalQuery, onQueryChange, areaTerms }: { careers: Career[]; query?: string; onQueryChange?: (query: string) => void; areaTerms?: Record<string, string[]> }) {
   const [open, setOpen] = useState<(InstitutionOption & { website: string }) | null>(null)
   const [showAll, setShowAll] = useState(false)
   const [ownQuery, setOwnQuery] = useState('')
   const query = externalQuery ?? ownQuery
   const setQuery = onQueryChange ?? setOwnQuery
   const groups = groupByCareer(careers)
-  // Por palabras y sin tildes: "Biologia quimica o fisica" encuentra "Bioquímica y Farmacia" e "Ingeniería Química".
+  // Si se toco o escribio un area afin ("Agronomía y veterinaria"), se buscan sus terminos; si no, por palabras
+  // y sin tildes: "Biologia quimica o fisica" encuentra "Bioquímica y Farmacia" e "Ingeniería Química".
+  const terms = areaTermsFor(query, areaTerms)
   const words = searchWords(query)
   const searching = words.length > 0
-  const found = searching
-    ? groups.map((group) => ({ group, score: matchScore(group, words) })).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.group)
-    : groups
+  const found = terms?.length
+    ? groups.filter((group) => matchesArea(group, terms))
+    : searching
+      ? groups.map((group) => ({ group, score: matchScore(group, words) })).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.group)
+      : groups
 
   if (groups.length === 0) {
     return <p className="result-note">Todavía no hay carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
@@ -107,7 +48,9 @@ export function UniversityLinks({ careers, query: externalQuery, onQueryChange }
           {!searching
             ? 'Escribe al menos una palabra de 3 letras o más.'
             : found.length === 0
-              ? `Ninguna carrera compatible coincide con «${query.trim()}». Prueba con una sola palabra del nombre de la carrera.`
+              ? terms?.length
+                ? `Todavía no hay carreras de «${query.trim()}» en el catálogo de Cochabamba.`
+                : `Ninguna carrera compatible coincide con «${query.trim()}». Prueba con una sola palabra del nombre de la carrera.`
               : `${found.length} ${found.length === 1 ? 'carrera coincide' : 'carreras coinciden'} con «${query.trim()}».`}
         </p>
       )}

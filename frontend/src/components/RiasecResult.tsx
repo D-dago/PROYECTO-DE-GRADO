@@ -3,6 +3,7 @@ import { appApi } from '../services/appApi'
 import type { Recommendation } from '../services/appApi'
 import type { RiasecResult } from '../types/riasec'
 import { CAREER_SEARCH_ID, UniversityLinks } from './UniversityLinks'
+import { countAreaCareers } from '../services/careerSearch'
 import { useLiveCareers } from '../services/liveData'
 
 const MAX_DIMENSION_SCORE = 20 // 4 preguntas por dimension x valor maximo 5 (test vigente)
@@ -74,10 +75,13 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
 
             <h2 className="result-heading">Áreas profesionales afines</h2>
             <p className="area-hint">Toca un área para ver sus carreras en Cochabamba.</p>
-            <div className="area-chips">{interpretation.suggestedAreas.map((area) => <button type="button" key={area} className="area-chip area-chip-button" onClick={() => showArea(area)} aria-label={`Ver carreras de ${area}`}>{area}</button>)}</div>
+            {/* Un area sin carreras en el catalogo no es un boton: llevaria a una busqueda vacia (ORION #32). */}
+            <div className="area-chips">{interpretation.suggestedAreas.map((area) => countAreaCareers(recommendation.items, interpretation.areaSearchTerms?.[area]) > 0
+              ? <button type="button" key={area} className="area-chip area-chip-button" onClick={() => showArea(area)} aria-label={`Ver carreras de ${area}`}>{area}</button>
+              : <span key={area} className="area-chip area-chip-empty" title="Todavía no hay carreras de esta área en el catálogo de Cochabamba">{area}</span>)}</div>
 
             <h2 className="result-heading">Carreras para ti y dónde estudiarlas en Cochabamba</h2>
-            <UniversityLinks careers={recommendation.items} query={careerQuery} onQueryChange={setCareerQuery} />
+            <UniversityLinks careers={recommendation.items} query={careerQuery} onQueryChange={setCareerQuery} areaTerms={interpretation.areaSearchTerms} />
           </>
         )}
 

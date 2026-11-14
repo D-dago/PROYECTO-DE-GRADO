@@ -28,6 +28,46 @@ public static class RiasecInterpretationBuilder
             ["Contaduría y auditoría", "Administración y finanzas", "Gestión documental y secretariado", "Informática de gestión"]),
     };
 
+    /// <summary>
+    /// Terminos con los que cada area encuentra sus carreras en el catalogo (ORION #32). El nombre del area
+    /// es generico ("Agronomia y veterinaria") y no coincide con el nombre de las carreras ("Ingenieria
+    /// Agronomica"), asi que al tocar o escribir un area se buscan estos terminos en el nombre de cada carrera:
+    /// sin tildes, en minusculas y como parte de una palabra ("agronom" encuentra "agronomica"). Un termino
+    /// con "-" delante excluye: "fisica" no debe traer "Ciencias de la Actividad Fisica y del Deporte".
+    /// </summary>
+    private static readonly Dictionary<string, string[]> AreaTerms = new()
+    {
+        ["Ingeniería civil, mecánica o electrónica"] = ["civil", "mecanic", "electronic", "electromecanic", "mecatronic", "electric"],
+        ["Construcción y arquitectura técnica"] = ["construccion", "arquitect"],
+        ["Agronomía y veterinaria"] = ["agronom", "agroindustr", "forestal", "agricol", "veterinar", "zootec"],
+        ["Técnico en mantenimiento o redes"] = ["automotriz", "mecanica industrial", "autotronic", "electrotecn", "electromecanica industrial", "redes", "telecomunic", "energias renovables"],
+        ["Medicina y ciencias de la salud"] = ["medicina", "bioquim", "odontolog", "enfermer", "nutricion", "fisioterap", "fonoaudiolog"],
+        ["Ingeniería de sistemas y ciencia de datos"] = ["sistemas", "informatic", "ciencia de datos", "software"],
+        ["Biología, química o física"] = ["biolog", "quimic", "biotecnolog", "fisica", "-deporte"],
+        ["Investigación científica"] = ["biolog", "quimic", "fisica", "matematic", "biotecnolog", "biomedic", "sociolog", "antropolog", "historia", "-deporte"],
+        ["Diseño gráfico e industrial"] = ["diseno"],
+        ["Arquitectura"] = ["arquitect", "planificacion del territorio"],
+        ["Comunicación audiovisual y publicidad"] = ["comunicacion", "audiovisual", "cine", "publicidad", "multimedia", "transmedia", "sonido"],
+        ["Artes, música y literatura"] = ["artes", "musica", "escultura", "letras", "linguistic"],
+        ["Psicología"] = ["psicolog"],
+        ["Educación"] = ["educacion", "parvulario", "linguistica aplicada", "actividad fisica"],
+        ["Enfermería y trabajo social"] = ["enfermer", "trabajo social"],
+        ["Fisioterapia y nutrición"] = ["fisioterap", "kinesiolog", "nutricion"],
+        ["Administración de empresas"] = ["administracion", "empresarial", "negocios"],
+        ["Marketing y comercio"] = ["marketing", "comercio", "comercial", "publicidad", "mercadotecnia"],
+        ["Derecho y ciencias políticas"] = ["derecho", "politic"],
+        ["Emprendimiento e innovación"] = ["emprend", "empresarial", "negocios", "comercial", "innovacion"],
+        ["Contaduría y auditoría"] = ["contadur", "auditor"],
+        ["Administración y finanzas"] = ["financ", "administracion", "economi"],
+        ["Gestión documental y secretariado"] = ["secretar", "documental"],
+        ["Informática de gestión"] = ["informatic", "sistemas", "software", "ciencia de datos"],
+    };
+
+    /// <summary>Todas las areas que puede sugerir el motor, para comprobar que cada una tiene terminos.</summary>
+    public static IEnumerable<string> AllAreas => Dimensions.Values.SelectMany(info => info.Areas).Distinct();
+
+    public static IReadOnlyList<string> SearchTermsFor(string area) => AreaTerms.TryGetValue(area, out var terms) ? terms : [];
+
     public static ProfileInterpretationResponse Build(string primaryCode, string secondaryCode)
     {
         var code = (primaryCode + secondaryCode).ToUpperInvariant();
@@ -52,6 +92,6 @@ public static class RiasecInterpretationBuilder
             summary += $" Con esta combinación conviene explorar áreas como {string.Join("; ", areas)}.";
         }
 
-        return new ProfileInterpretationResponse(code, dimensions, summary, areas);
+        return new ProfileInterpretationResponse(code, dimensions, summary, areas, areas.ToDictionary(area => area, SearchTermsFor));
     }
 }
