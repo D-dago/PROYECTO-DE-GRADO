@@ -33,9 +33,12 @@ public sealed class RiasecTests
         Assert.Equal(17, legacy.Count);
         Assert.All(legacy, question => Assert.Contains(question.Dimension, new[] { "H", "D" }));
         Assert.All(legacy, question => Assert.True(question.Order >= 1000));
-        // Banco corregido (revision de Gabriela Lino): todas preguntan por intereses y el ejemplo va tras "Ejemplo:".
+        // Banco corregido por Ch'iti Wasi (revision de Gabriela Lino): todas preguntan por intereses y solo
+        // R02, R03, I09 y A02 conservan un ejemplo, tras "Ejemplo:".
         Assert.All(active, question => Assert.StartsWith("¿Qué tanto te interesa", question.Text));
         Assert.All(active, question => Assert.DoesNotContain("(ej.:", question.Text));
+        Assert.Equal(new[] { "A02", "I09", "R02", "R03" }, active.Where(question => question.Text.Contains("Ejemplo:")).Select(question => question.Code).Order());
+        Assert.Equal(active.Count, active.Select(question => question.Text).Distinct().Count());
     }
 
     [Fact]
@@ -59,7 +62,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Attempt_gets_the_same_twenty_four_questions_four_per_dimension()
+    public async Task Attempt_gets_twenty_four_questions_four_per_dimension()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
@@ -417,21 +420,47 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Every_student_gets_exactly_the_same_questions_in_the_same_order()
+    public async Task Repeating_the_test_draws_other_questions()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
-        var first = await TestSupport.CreatePersistedStudentAsync(context);
-        var second = await TestSupport.CreatePersistedStudentAsync(context);
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var first = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var firstQuestions = await service.GetAssignedQuestionsAsync(userId, first.AttemptId, CancellationToken.None);
+        foreach (var question in firstQuestions!)
+        {
+            Assert.True((await service.SubmitAnswerAsync(userId, first.AttemptId, new() { QuestionId = question.Id, Value = 4 }, CancellationToken.None)).Success);
+        }
+        Assert.True((await service.CompleteAsync(userId, first.AttemptId, CancellationToken.None)).Success);
 
-        var a = await service.CreateAttemptAsync(first, CancellationToken.None);
-        var b = await service.CreateAttemptAsync(second, CancellationToken.None);
-        var questionsA = await service.GetAssignedQuestionsAsync(first, a.AttemptId, CancellationToken.None);
-        var questionsB = await service.GetAssignedQuestionsAsync(second, b.AttemptId, CancellationToken.None);
+        var second = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var secondQuestions = await service.GetAssignedQuestionsAsync(userId, second.AttemptId, CancellationToken.None);
 
-        // Forma fija: sin sorteo, los puntajes de distintos estudiantes se pueden comparar.
-        Assert.Equal(questionsA!.Select(q => q.Id), questionsB!.Select(q => q.Id));
-        Assert.Equal(new[] { "R01", "I01", "A01", "S01", "E01", "C01", "R02" }, questionsA!.Take(7).Select(q => q.Code));
+        // Sorteo por intento (ORION #30): 4 de 10 por area da 210^6 combinaciones; repetir las mismas
+        // 24 es practicamente imposible.
+        Assert.NotEqual(first.AttemptId, second.AttemptId);
+        Assert.Equal(24, secondQuestions!.Count);
+        Assert.False(firstQuestions.Select(q => q.Id).ToHashSet().SetEquals(secondQuestions.Select(q => q.Id)));
+    }
+
+    [Fact]
+    public async Task The_draw_uses_the_whole_bank_of_each_area_not_always_the_first_four()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var seen = new HashSet<string>();
+        for (var student = 0; student < 25; student++)
+        {
+            var userId = await TestSupport.CreatePersistedStudentAsync(context);
+            var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
+            var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+            seen.UnionWith(assigned!.Select(q => q.Code));
+        }
+
+        foreach (var dimension in RiasecTestConstants.DimensionOrder)
+        {
+            Assert.True(seen.Count(code => code.StartsWith(dimension)) > RiasecTestConstants.QuestionsPerDimensionPerAttempt);
+        }
     }
 
     [Fact]
@@ -451,14 +480,16 @@ public sealed class RiasecTests
         Assert.NotNull(entry.Interpretation);
     }
 
-    [Fact]
-    public async Task A_result_of_the_previous_twenty_four_question_test_keeps_its_own_scale()
+    [Theory]
+    [InlineData(RiasecTestConstants.PreviousVersion)]
+    [InlineData(RiasecTestConstants.Fixed24Version)]
+    public async Task A_result_of_a_previous_twenty_four_question_test_keeps_its_own_scale(string version)
     {
         await using var context = CreateContext();
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
-        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.PreviousVersion };
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = version };
         context.TestAttempts.Add(attempt);
-        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 20, IScore = 12, AScore = 8, SScore = 8, EScore = 8, CScore = 8, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.PreviousVersion });
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 20, IScore = 12, AScore = 8, SScore = 8, EScore = 8, CScore = 8, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = version });
         await context.SaveChangesAsync();
         var service = new Infrastructure.Services.CatalogService(context, new NoAi());
 

@@ -41,7 +41,7 @@ public sealed class AdminService(OrientacionVocacionalDbContext db) : IAdminServ
         var question = await db.Questions.SingleOrDefaultAsync(candidate => candidate.Id == id, cancellationToken);
         if (question is null) return (false, "La pregunta no existe.", null);
 
-        // Cada intento presenta 4 por area (forma fija): con menos de 4 activas el test quedaria incompleto.
+        // Cada intento sortea 4 por area entre las activas: con menos de 4 el test quedaria incompleto.
         var remainingActive = await db.Questions.CountAsync(candidate => candidate.Dimension == question.Dimension && candidate.IsActive && candidate.Id != id, cancellationToken);
         var staysActiveInSameArea = request.IsActive && request.Dimension == question.Dimension;
         if (!staysActiveInSameArea && question.IsActive && remainingActive < RiasecTestConstants.QuestionsPerDimensionPerAttempt)

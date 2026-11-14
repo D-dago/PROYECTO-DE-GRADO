@@ -54,7 +54,7 @@ Entra a `/registro`, escribe nombre, apellido, correo y contraseña. Luego entra
 
 ## 8. REALIZAR EL TEST VOCACIONAL (RIASEC)
 
-Abre `/test` y responde las 24 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Todos los estudiantes responden las mismas 24 preguntas (4 por cada una de las 6 dimensiones), intercaladas y sin límite de tiempo, así que sus puntajes se pueden comparar. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
+Abre `/test` y responde las 24 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada intento sortea 24 preguntas del banco de 60 (4 por cada una de las 6 dimensiones), intercaladas y sin límite de tiempo, así que repetir el test trae otras preguntas. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
 
 Cada respuesta da 1 moneda y terminar el test da 50; las monedas se gastan en `/skins`.
 
@@ -118,7 +118,7 @@ Inicia el backend con `dotnet run --project OrientacionVocacional.API` y el fron
 
 ## 21. RESULTADOS Y RECOMENDACIONES
 
-El resultado conserva las seis puntuaciones, código principal, secundario y versión del algoritmo (`RIASEC-24-V5`; los resultados de los tests anteriores de 60, 24 sorteadas y 12 preguntas, `RIASEC-60-V4`, `RIASEC-24-V3` y `RIASEC-12-V2`, se siguen mostrando y recomendando sobre su propio máximo). Un resultado de otra versión del test (por ejemplo, del período en que se aplicó CHASIDE) se conserva pero ya no se interpreta ni genera recomendaciones: sus letras significan otra cosa y habría que repetir el test. Las recomendaciones solo aparecen cuando existen carreras y reglas cargadas.
+El resultado conserva las seis puntuaciones, código principal, secundario y versión del algoritmo (`RIASEC-24-V6`; los resultados de los tests anteriores de 24 fijas, 60, 24 sorteadas del banco anterior y 12 preguntas, `RIASEC-24-V5`, `RIASEC-60-V4`, `RIASEC-24-V3` y `RIASEC-12-V2`, se siguen mostrando y recomendando sobre su propio máximo). Un resultado de otra versión del test (por ejemplo, del período en que se aplicó CHASIDE) se conserva pero ya no se interpreta ni genera recomendaciones: sus letras significan otra cosa y habría que repetir el test. Las recomendaciones solo aparecen cuando existen carreras y reglas cargadas.
 
 ## 22. FUENTES Y FECHAS
 

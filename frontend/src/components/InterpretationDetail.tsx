@@ -1,7 +1,7 @@
 import type { ProfileInterpretation } from '../services/appApi'
 
 // Test vigente: 4 preguntas por dimension x valor maximo 5. Los resultados de tests anteriores
-// (60, 24 sorteadas y 12 preguntas) llegan con su propio maximo (50, 20 y 10) desde el servidor.
+// (24 fijas, 60, 24 sorteadas y 12 preguntas) llegan con su propio maximo (20, 50, 20 y 10) desde el servidor.
 const MAX_DIMENSION_SCORE = 20
 
 /**

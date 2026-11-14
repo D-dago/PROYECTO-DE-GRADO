@@ -214,10 +214,10 @@ public sealed class TestService(
     }
 
     /// <summary>
-    /// Forma fija: las mismas preguntas para todos, las 4 primeras activas de cada dimension por su
-    /// orden (24 en total), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos
-    /// seguidas de la misma dimension. Antes se sorteaban 4 de 10 y cada estudiante respondia un
-    /// test distinto, asi que sus puntajes no se podian comparar.
+    /// Sorteo por intento (ORION #30): 4 preguntas al azar entre las activas de cada dimension (24 en
+    /// total), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos seguidas de la
+    /// misma dimension. Cada intento nuevo vuelve a sortear, asi que repetir el test trae otras
+    /// preguntas. Las elegidas quedan guardadas en el intento: si se reanuda, son las mismas.
     /// </summary>
     private async Task AssignQuestionsAsync(TestAttempt attempt, CancellationToken cancellationToken)
     {
@@ -227,8 +227,7 @@ public sealed class TestService(
         var byDimension = RiasecTestConstants.DimensionOrder.ToDictionary(
             dimension => dimension,
             dimension => pool.Where(question => question.Dimension == dimension)
-                .OrderBy(question => question.Order)
-                .ThenBy(question => question.Code)
+                .OrderBy(_ => Random.Shared.Next())
                 .Take(RiasecTestConstants.QuestionsPerDimensionPerAttempt)
                 .ToList());
 

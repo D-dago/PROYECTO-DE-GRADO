@@ -109,3 +109,13 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Motivo:** el usuario prefirió un test más corto que el de 60 preguntas (ORION #27). Se conserva la forma fija para que los puntajes de distintos estudiantes se puedan comparar.
 
 **Limitación:** 4 preguntas por dimensión dan menos confiabilidad que 10. Los resultados del test de 60 (`RIASEC-60-V4`, máximo 50) se siguen mostrando sobre su propio máximo.
+
+## 2026-11-14: banco corregido por Ch'iti Wasi, casi sin ejemplos y sorteado en cada intento (ORION #30)
+
+**Decisión:** las 60 preguntas toman el texto de la columna amarilla del Word `PREGUNTAS RIASEC - CORRECCIÓN CH'ITI WASI .docx` (revisión de Gabriela Lino), con solo correcciones de ortografía y puntuación («manual/practica» → «manual o práctica», «relacionados a» → «relacionados con», «Ejem;» → «Ejemplo:», tildes). Se quitan los ejemplos para que no guíen las respuestas; solo R02, R03, I09 y A02 conservan el ejemplo que la revisión reescribió. Cada intento vuelve a sortear 4 preguntas de cada área entre las activas (24 en total), intercaladas. Versión `RIASEC-24-V6`, máximo 20 por dimensión. Migración `BancoCorregidoChitiWasi` (solo actualiza los textos).
+
+**Motivo:** la psicopedagoga aclaró las preguntas, diferenció las que parecían iguales y quitó los ejemplos para que los resultados sean más fiables. El usuario pidió que las preguntas sean aleatorias para que el estudiante no reciba siempre las mismas ni repita el test con las mismas respuestas hasta forzar un resultado. Esto reemplaza la forma fija de ORION #28.
+
+**Detalles:** en el Word, la fila I05 repite el texto de I04 («hacer pruebas para comprobar si una idea es correcta»); se conserva la I05 anterior sin ejemplo («comparar datos para descubrir patrones») y hay que confirmarlo con la psicopedagoga. Con 4 de 10 por área hay 210⁶ combinaciones posibles: dos intentos prácticamente nunca traen las mismas 24, pero sí pueden compartir algunas. Las preguntas sorteadas quedan guardadas en el intento, así que uno a medias se reanuda con las mismas. Un intento a medias de `RIASEC-24-V5` no se reanuda: empieza uno nuevo. Los resultados de 24 fijas (`RIASEC-24-V5`), 60, 24 sorteadas del banco anterior y 12 preguntas se siguen mostrando sobre su propio máximo.
+
+**Limitación:** con el sorteo, dos estudiantes no responden exactamente el mismo test, así que sus puntajes por dimensión no son estrictamente comparables (la crítica que motivó ORION #27). La migración debe aplicarse a la base de Neon antes de publicar; si no, el test sortearía los textos anteriores.
