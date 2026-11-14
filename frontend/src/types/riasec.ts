@@ -4,6 +4,8 @@ export type Question = {
   text: string
   dimension: string
   order: number
+  /** Ya tiene respuesta en este intento: al reanudar se sigue en la primera sin responder (ORION #35). */
+  answered?: boolean
 }
 
 export type Attempt = {

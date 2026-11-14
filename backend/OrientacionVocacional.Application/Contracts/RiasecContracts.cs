@@ -1,6 +1,7 @@
 namespace OrientacionVocacional.Application.Contracts;
 
-public sealed record QuestionResponse(Guid Id, string Code, string Text, string Dimension, int Order);
+// Answered: la pregunta ya tiene respuesta en este intento (para reanudar en la primera sin responder).
+public sealed record QuestionResponse(Guid Id, string Code, string Text, string Dimension, int Order, bool Answered = false);
 
 public sealed record TestAttemptResponse(
     Guid AttemptId,

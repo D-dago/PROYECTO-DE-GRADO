@@ -157,3 +157,13 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 - **Sin repetir institución:** entre carreras con el mismo porcentaje no se ponen seguidas dos de la misma única institución si hay alternativa. Una carrera de menor porcentaje nunca sube.
 
 **Limitación:** si en un mismo porcentaje solo una institución ofrece varias carreras (por ejemplo, las ciencias básicas, que en Cochabamba solo están en la UMSS), se muestran seguidas porque no hay otra opción.
+
+## 2026-11-14: el test avanza al instante y no se traba con respuestas repetidas (ORION #35)
+
+**Problema:** al hacer varios clics, el test quedaba en una pregunta con «La pregunta ya fue respondida en este intento», sin forma de seguir. Además, cada respuesta tardaba cerca de un segundo en mostrar la siguiente pregunta, porque la pantalla esperaba al servidor.
+
+**Decisión:**
+- El servidor acepta la misma respuesta más de una vez: la confirma con el estado actual, sin volver a sumar monedas, y guarda el último valor elegido. Si dos envíos llegan a la vez, el índice único (intento, pregunta) frena al segundo y también se confirma.
+- La pantalla muestra la pregunta siguiente de inmediato y guarda las respuestas en segundo plano, en orden, con hasta 4 reintentos. Antes de calcular el resultado espera a que todas estén guardadas; si no puede, ofrece «Reintentar» sin perder nada. Si se cierra la página con respuestas sin guardar, el navegador avisa.
+- Tras mostrar una pregunta se ignoran los clics durante 0,6 s, para que varios clics seguidos no respondan la siguiente sin leerla.
+- Al recargar, el test sigue en la primera pregunta sin responder, según lo que el servidor tiene guardado.

@@ -153,7 +153,7 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Duplicate_question_answer_is_rejected()
+    public async Task A_repeated_answer_is_confirmed_without_extra_coins_and_keeps_the_last_value()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
@@ -163,10 +163,19 @@ public sealed class RiasecTests
         var request = new OrientacionVocacional.Application.Contracts.SubmitAnswerRequest { QuestionId = assigned![0].Id, Value = 1 };
 
         var first = await service.SubmitAnswerAsync(userId, attempt.AttemptId, request, CancellationToken.None);
+        // La misma respuesta llega otra vez (reintento) y luego con otro valor: se confirma, no traba el test (ORION #35).
         var duplicate = await service.SubmitAnswerAsync(userId, attempt.AttemptId, request, CancellationToken.None);
+        var changed = await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = assigned[0].Id, Value = 4 }, CancellationToken.None);
 
         Assert.True(first.Success);
-        Assert.False(duplicate.Success);
+        Assert.True(duplicate.Success);
+        Assert.True(changed.Success);
+        Assert.Equal(1, changed.Attempt!.Answered);
+        Assert.Equal(first.Attempt!.Coins, changed.Attempt.Coins);
+        Assert.Equal(4, (await context.Answers.SingleAsync()).Value);
+        var questions = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+        Assert.True(questions![0].Answered);
+        Assert.All(questions.Skip(1), question => Assert.False(question.Answered));
     }
 
     [Fact]

@@ -13,16 +13,31 @@ const options = [
 // interes. Tampoco se muestra la dimension de cada pregunta mientras responde: podria asociar las
 // actividades con profesiones y sesgar sus respuestas. Las dimensiones se ven en el resultado.
 
+// Tras mostrar una pregunta se ignoran los clics durante este tiempo: nadie la lee tan rapido, y asi un doble
+// clic o varios clics seguidos no responden la pregunta siguiente sin verla (ORION #35).
+const CLICK_GUARD_MS = 600
+// Reintentos de una respuesta que no se pudo guardar (red lenta o cortada). El servidor acepta la misma
+// respuesta dos veces sin error, asi que reintentar es seguro.
+const SAVE_RETRIES = 4
+
+type PendingAnswer = { questionId: string; value: number }
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export function TestPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [attempt, setAttempt] = useState<Attempt | null>(null)
   const [result, setResult] = useState<RiasecResult | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+  // Preguntas respondidas en pantalla (guardadas o en camino al servidor): de aqui salen el avance y la
+  // pregunta siguiente, sin esperar la confirmacion del servidor.
+  const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [finishing, setFinishing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // Evita enviar dos veces la misma respuesta si se pulsa dos veces seguidas.
-  const sending = useRef(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const pending = useRef<PendingAnswer[]>([])
+  const flushing = useRef<Promise<void> | null>(null)
+  const lockedUntil = useRef(0)
 
   async function loadTest() {
     try {
@@ -30,17 +45,54 @@ export function TestPage() {
       // ese intento, en el orden guardado: al reanudar son las mismas).
       const loadedAttempt = await riasecApi.createAttempt()
       const loadedQuestions = await riasecApi.getAssignedQuestions(loadedAttempt.attemptId)
+      const answered = new Set(loadedQuestions.filter((question) => question.answered).map((question) => question.id))
       setQuestions(loadedQuestions)
       setAttempt(loadedAttempt)
-      setCurrentIndex(Math.min(loadedAttempt.answered, loadedQuestions.length - 1))
+      setAnsweredIds(answered)
+      // Sigue en la primera pregunta sin responder (no en "cuantas van"): asi nunca queda frente a una ya respondida.
+      const firstOpen = loadedQuestions.findIndex((question) => !answered.has(question.id))
+      setCurrentIndex(firstOpen >= 0 ? firstOpen : loadedQuestions.length - 1)
       if (loadedAttempt.status === 'COMPLETED') setResult(await riasecApi.getResult(loadedAttempt.attemptId))
-      // Respondio todo pero el paso final fallo (se corto la red) y recargo la pagina: se termina aqui. Si no,
-      // quedaba frente a la ultima pregunta, ya respondida, sin ninguna forma de terminar el test.
-      else if (loadedAttempt.total > 0 && loadedAttempt.answered >= loadedAttempt.total) setResult(await riasecApi.complete(loadedAttempt.attemptId))
+      // Respondio todo pero el paso final fallo (se corto la red) y recargo la pagina: se termina aqui.
+      else if (loadedQuestions.length > 0 && firstOpen < 0) setResult(await riasecApi.complete(loadedAttempt.attemptId))
+      lockedUntil.current = performance.now() + CLICK_GUARD_MS
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'No se pudo cargar el test.')
     } finally { setLoading(false) }
   }
+
+  /** Envia en orden las respuestas pendientes, reintentando las que fallan. Si ya esta enviando, espera a ese envio. */
+  function flush(attemptId: string): Promise<void> {
+    flushing.current ??= (async () => {
+      while (pending.current.length > 0) {
+        const next = pending.current[0]
+        for (let tries = 1; ; tries++) {
+          try {
+            const updated = await riasecApi.submitAnswer(attemptId, next.questionId, next.value)
+            setAttempt(updated)
+            setSaveError(null)
+            window.dispatchEvent(new Event('profile-changed')) // el encabezado se quedaba con las monedas de antes del test
+            break
+          } catch (sendError) {
+            if (tries >= SAVE_RETRIES) {
+              setSaveError('No se pudo guardar una respuesta. Revisa tu conexión: se reintentará al responder la siguiente.')
+              throw sendError
+            }
+            await sleep(700 * tries)
+          }
+        }
+        pending.current.shift()
+      }
+    })().finally(() => { flushing.current = null })
+    return flushing.current
+  }
+
+  // Si se cierra o recarga la pagina con respuestas sin guardar, el navegador avisa.
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (pending.current.length > 0) event.preventDefault() }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [])
 
   // React StrictMode (dev) ejecuta los efectos dos veces: sin este guard se crean
   // dos intentos en paralelo y el usuario queda con dos "en progreso".
@@ -51,28 +103,34 @@ export function TestPage() {
     void loadTest()
   }, [])
 
-  async function answer(value: number) {
-    if (!attempt || !questions[currentIndex] || sending.current) return
-    sending.current = true
-    setSaving(true)
+  /** Termina el test cuando todas las respuestas quedaron guardadas. Tambien sirve para reintentar. */
+  async function finish(attemptId: string) {
+    setFinishing(true)
     setError(null)
     try {
-      // Si ya estan todas guardadas es un reintento del paso final: volver a enviar la respuesta se rechazaria.
-      const updatedAttempt = attempt.answered >= attempt.total ? attempt : await riasecApi.submitAnswer(attempt.attemptId, questions[currentIndex].id, value)
-      setAttempt(updatedAttempt)
-      window.dispatchEvent(new Event('profile-changed')) // el encabezado se quedaba con las monedas de antes del test
-      if (updatedAttempt.answered >= updatedAttempt.total) {
-        const completed = await riasecApi.complete(attempt.attemptId)
-        setResult(completed)
-        setAttempt({ ...updatedAttempt, status: 'COMPLETED' })
-        window.dispatchEvent(new Event('profile-changed')) // suma el bono por terminar
-      } else setCurrentIndex((index) => Math.min(index + 1, questions.length - 1))
-    } catch (answerError) {
-      setError(answerError instanceof Error ? answerError.message : 'No se pudo guardar la respuesta.')
-    } finally {
-      sending.current = false
-      setSaving(false)
-    }
+      await flush(attemptId)
+      setResult(await riasecApi.complete(attemptId))
+      window.dispatchEvent(new Event('profile-changed')) // suma el bono por terminar
+    } catch (finishError) {
+      setError(finishError instanceof Error ? `${finishError.message} Tus respuestas no se perdieron: pulsa Reintentar.` : 'No se pudo terminar el test. Pulsa Reintentar.')
+    } finally { setFinishing(false) }
+  }
+
+  // Avanza de inmediato a la pregunta siguiente y guarda la respuesta en segundo plano (ORION #35): antes se
+  // esperaba al servidor (cerca de un segundo en internet) y, si su confirmacion no llegaba, el test quedaba
+  // trabado en una pregunta ya respondida.
+  // clickedAt: marca de tiempo del clic (misma escala que performance.now()).
+  function answer(value: number, clickedAt: number) {
+    const question = questions[currentIndex]
+    if (!attempt || !question || finishing || answeredIds.has(question.id) || clickedAt < lockedUntil.current) return
+    lockedUntil.current = clickedAt + CLICK_GUARD_MS
+    const answered = new Set(answeredIds).add(question.id)
+    setAnsweredIds(answered)
+    pending.current.push({ questionId: question.id, value })
+    const nextOpen = questions.findIndex((candidate) => !answered.has(candidate.id))
+    if (nextOpen < 0) { void finish(attempt.attemptId); return }
+    setCurrentIndex(nextOpen)
+    void flush(attempt.attemptId).catch(() => { /* queda pendiente: se reintenta con la siguiente respuesta */ })
   }
 
   if (loading) return <main className="test-shell"><p className="status-message">Cargando tu test...</p></main>
@@ -81,21 +139,26 @@ export function TestPage() {
   if (!attempt || questions.length === 0) return <main className="test-shell"><p className="error-message">No hay preguntas disponibles.</p></main>
 
   const question = questions[currentIndex]
-  const progress = attempt.answered / attempt.total * 100
+  const total = questions.length
+  const progress = answeredIds.size / total * 100
+  const allAnswered = answeredIds.size >= total
 
   return (
     <main className="test-shell">
-      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">RIASEC · {attempt.total} preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
+      <header className="test-header"><span className="eyebrow">Orientación vocacional</span><span className="version-label">RIASEC · {total} preguntas</span><span className="coin-badge">🪙 {attempt.coins}</span></header>
       <section className="quiz-panel" aria-live="polite">
-        <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(attempt.answered + 1, attempt.total)} <span>de {attempt.total}</span></strong></div>
+        <div className="quiz-topline"><div><span className="eyebrow">Test vocacional</span><h1>Descubre qué actividades te motivan.</h1></div><strong className="question-count">Pregunta {Math.min(answeredIds.size + 1, total)} <span>de {total}</span></strong></div>
         <div className="progress-track" aria-label={`${Math.round(progress)}% completado`}><span style={{ width: `${progress}%` }} /></div>
         <div className="question-meta"><span>{Math.round(progress)}% completado</span></div>
         {/* La instruccion va antes de la pregunta: asi se lee antes de responder. Pregunta por intereses,
             no por la forma de ser (revision de Gabriela Lino). */}
         <p className="quiz-hint">Lee cada actividad y elige qué tanto te gusta o te interesa, aunque nunca la hayas realizado o todavía no sepas hacerla. No hay respuestas correctas o incorrectas. Responde según tus intereses, no según lo que otras personas esperan de ti.</p>
-        <QuestionText text={question.text} />
-        <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={() => void answer(option.value)} disabled={saving}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
-        {error && <p className="error-message">{error}</p>}
+        {/* key: al cambiar de pregunta el texto entra con una transicion corta, para que se note el cambio. */}
+        <QuestionText key={question.id} text={question.text} />
+        <div className="answer-grid">{options.map((option) => <button key={option.value} type="button" onClick={(event) => answer(option.value, event.timeStamp)} disabled={finishing || allAnswered}><strong>{option.value}</strong><span>{option.label}</span></button>)}</div>
+        {finishing && <p className="status-message">Guardando tus respuestas…</p>}
+        {saveError && !error && <p className="error-message">{saveError}</p>}
+        {error && <p className="error-message">{error} <button type="button" className="retry-button" onClick={() => void finish(attempt.attemptId)}>Reintentar</button></p>}
       </section>
     </main>
   )

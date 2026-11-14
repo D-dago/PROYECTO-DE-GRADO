@@ -69,7 +69,13 @@ public sealed class TestService(
             .AnyAsync(candidate => candidate.Id == attemptId && candidate.UserId == userId, cancellationToken);
         if (!attemptExists) return null;
 
-        return await dbContext.AssignedQuestions
+        // Answered: si la pregunta ya tiene respuesta en este intento. Al reanudar, la pantalla sigue en la
+        // primera sin responder en vez de contar respuestas (ORION #35).
+        var answeredIds = await dbContext.Answers
+            .Where(answer => answer.TestAttemptId == attemptId)
+            .Select(answer => answer.QuestionId)
+            .ToListAsync(cancellationToken);
+        var questions = await dbContext.AssignedQuestions
             .Where(assigned => assigned.TestAttemptId == attemptId)
             .Include(assigned => assigned.Question)
             .OrderBy(assigned => assigned.Order)
@@ -77,6 +83,7 @@ public sealed class TestService(
                 assigned.Question.Id, assigned.Question.Code, assigned.Question.Text,
                 assigned.Question.Dimension, assigned.Order))
             .ToListAsync(cancellationToken);
+        return questions.Select(question => question with { Answered = answeredIds.Contains(question.Id) }).ToList();
     }
 
     public async Task<(bool Success, string? Error, TestAttemptResponse? Attempt)> SubmitAnswerAsync(
@@ -122,7 +129,11 @@ public sealed class TestService(
         }
         if (state.IsAnswered)
         {
-            return (false, "La pregunta ya fue respondida en este intento.", null);
+            // Idempotente (ORION #35): la misma respuesta puede llegar dos veces (reintento del navegador o del
+            // proxy, dos pestanas, o la pantalla que reintenta porque no le llego la confirmacion). Antes se
+            // rechazaba y el test quedaba trabado en una pregunta ya respondida. Ahora se confirma con el estado
+            // actual, sin volver a sumar monedas; si el valor cambio, vale el ultimo que eligio el estudiante.
+            return await ConfirmExistingAnswerAsync(userId, attemptId, request, state.Answered, state.Total, cancellationToken);
         }
 
         dbContext.Answers.Add(new Answer
@@ -134,7 +145,18 @@ public sealed class TestService(
         });
         var user = await dbContext.Users.SingleAsync(candidate => candidate.Id == userId, cancellationToken);
         user.Coins += RiasecTestConstants.CoinsPerAnswer;
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            // Dos envios de la misma respuesta a la vez: el indice unico (intento, pregunta) frena al segundo.
+            // Se descarta lo pendiente (respuesta y moneda) y se confirma la que ya quedo guardada.
+            dbContext.ChangeTracker.Clear();
+            var answeredNow = await dbContext.Answers.CountAsync(answer => answer.TestAttemptId == attemptId, cancellationToken);
+            return await ConfirmExistingAnswerAsync(userId, attemptId, request, answeredNow, state.Total, cancellationToken);
+        }
         var answered = state.Answered + 1;
         return (true, null, new TestAttemptResponse(
             attemptId,
@@ -143,6 +165,25 @@ public sealed class TestService(
             state.Total == 0 ? 0 : Math.Round(answered * 100m / state.Total, 2),
             TestAttemptStatus.InProgress.ToString().ToUpperInvariant(),
             user.Coins));
+    }
+
+    private async Task<(bool Success, string? Error, TestAttemptResponse? Attempt)> ConfirmExistingAnswerAsync(
+        Guid userId, Guid attemptId, SubmitAnswerRequest request, int answered, int total, CancellationToken cancellationToken)
+    {
+        var existing = await dbContext.Answers.SingleAsync(
+            answer => answer.TestAttemptId == attemptId && answer.QuestionId == request.QuestionId, cancellationToken);
+        if (existing.Value != request.Value)
+        {
+            existing.Value = request.Value;
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        return (true, null, new TestAttemptResponse(
+            attemptId,
+            answered,
+            total,
+            total == 0 ? 0 : Math.Round(answered * 100m / total, 2),
+            TestAttemptStatus.InProgress.ToString().ToUpperInvariant(),
+            await GetCoinsAsync(userId, cancellationToken)));
     }
 
     public async Task<(bool Success, string? Error, RiasecResultResponse? Result)> CompleteAsync(
