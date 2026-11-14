@@ -67,3 +67,30 @@ Motivo: el resultado sugería el área «Agronomía y veterinaria», pero el cat
 - Revisar las reglas de compatibilidad propuestas (dimensión y nivel) de las 59 carreras nuevas.
 - Las carreras de la UMSS tomadas de su registro oficial (websis) no tienen página propia de la facultad que las confirme; conviene confirmarlas en la próxima convocatoria de admisión.
 - Confirmar la sede de las carreras de UPB y TECBA, y la lista completa de ULAT.
+
+## Segunda revisión: lo oculto y lo no confirmado (ORION #33)
+
+Pedido: mostrar lo oculto que sea de Cochabamba y esté vigente. Se revisó cada institución y carrera oculta, y también las visibles con fuente dudosa. Plan aplicado: `tools/catalogo/plan-33.json` (carpeta local, no se sube a git).
+
+**Se reactivó:** nada. Ningún elemento oculto se confirmó en Cochabamba con una fuente oficial actual:
+
+| Oculto | Decisión | Motivo |
+|---|---|---|
+| UPEA, Instituto Puerto de Mejillones | Siguen ocultos | Están en El Alto (La Paz) |
+| Instituto Álvarez Plata (Instituto Técnico Nacional de Comercio «Federico Álvarez Plata») | Sigue oculto | Existe en Cochabamba, pero no tiene sitio oficial y su única lista de carreras es un [plan de mejora de 2022](https://ftpnacional.cemse.edu.bo/wp-content/uploads/2022/10/PLAN-DE-MEJORA_ALVAREZ-PLATA-DIURNO.pdf). Diseño de Interiores no figura en ninguna fuente |
+| Las 10 carreras ocultadas en la primera revisión | Siguen ocultas | Su fuente oficial actual no las ubica en Cochabamba |
+| USIP: Administración y Finanzas | Sigue oculta | No figura en el sitio de USIP (ofrece el técnico superior en Administración y Negocios, ya agregado) |
+
+**Se ocultaron 8 carreras que estaban visibles:**
+
+| Institución | Carrera | Estado | Motivo |
+|---|---|---|---|
+| ULAT | Bioquímica y Farmacia, Ciencias de la Educación, Derecho, Ingeniería de Sistemas, Odontología | `NO CONFIRMADA` | El sitio oficial solo tiene páginas de [Ingeniería Civil, Auditoría, Enfermería y Medicina](https://ulat.edu.bo/wp-sitemap-posts-carrera-1.xml); su página del campus Cochabamba ya no lista carreras |
+| INCOS N.° 3 (Quillacollo) | Contaduría General, Secretariado Ejecutivo | `NO CONFIRMADA` | Habían sido estimadas con IA. No hay sitio oficial y la única fuente es un [plan de mejora de 2022](https://ftpnacional.cemse.edu.bo/wp-content/uploads/2022/10/PLAN-DE-MEJORA_IT-INCOS-Na-3.pdf) |
+| UMSS | Gastronomía | `SE DICTA FUERA DE LA CIUDAD` | Es un programa desconcentrado de la UMSS que se dicta en Cliza, Valle Alto ([Los Tiempos](https://www.lostiempos.com/taxonomy/term/64926/tema/gastronomia-cliza-64926)) |
+
+**Sin cambios, con sede por confirmar:** UPB (su campus Cochabamba existe, Av. Cap. Víctor Ustáriz km 6.5, pero su web no indica el campus de cada programa; sus 15 carreras del catálogo figuran en su oferta actual) y TECBA (sedes en Cochabamba y Sucre; sus 10 carreras figuran en su menú actual).
+
+**Área afín reemplazada:** «Gestión documental y secretariado» quedó sin ninguna carrera vigente en Cochabamba. Se reemplazó por «Comercio internacional y aduanas» (también del tipo Convencional), que sí tiene carreras (UCB, Univalle y TECBA).
+
+**Estado final en Neon:** 231 carreras visibles (179 verificadas y 52 con sede por confirmar), ninguna estimada con IA y ninguna institución visible fuera de Cochabamba. Las 24 áreas que puede sugerir el test encuentran carreras.

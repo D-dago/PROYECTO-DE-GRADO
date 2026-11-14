@@ -25,7 +25,7 @@ public static class RiasecInterpretationBuilder
         ["E"] = new("Emprendedor", "liderar, convencer, negociar y tomar la iniciativa en proyectos",
             ["Administración de empresas", "Marketing y comercio", "Derecho y ciencias políticas", "Emprendimiento e innovación"]),
         ["C"] = new("Convencional", "organizar, ordenar información y seguir procesos claros",
-            ["Contaduría y auditoría", "Administración y finanzas", "Gestión documental y secretariado", "Informática de gestión"]),
+            ["Contaduría y auditoría", "Administración y finanzas", "Comercio internacional y aduanas", "Informática de gestión"]),
     };
 
     /// <summary>
@@ -59,7 +59,8 @@ public static class RiasecInterpretationBuilder
         ["Emprendimiento e innovación"] = ["emprend", "empresarial", "negocios", "comercial", "innovacion"],
         ["Contaduría y auditoría"] = ["contadur", "auditor"],
         ["Administración y finanzas"] = ["financ", "administracion", "economi"],
-        ["Gestión documental y secretariado"] = ["secretar", "documental"],
+        // Antes "Gestión documental y secretariado": ninguna carrera vigente de Cochabamba la ofrece (ORION #33).
+        ["Comercio internacional y aduanas"] = ["comercio internacional", "finanzas internacionales", "negocios internacionales", "aduan"],
         ["Informática de gestión"] = ["informatic", "sistemas", "software", "ciencia de datos"],
     };
 

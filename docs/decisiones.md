@@ -139,3 +139,9 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 - Se revisó la oferta oficial de cada institución activa: 59 carreras agregadas y 10 ocultadas porque no se dictan en Cochabamba. El detalle, con las fuentes, está en [REVISION_CATALOGO_2026-11-14.md](REVISION_CATALOGO_2026-11-14.md). Hoy las 24 áreas posibles encuentran al menos una carrera.
 
 **Limitación:** las reglas de compatibilidad de las carreras nuevas son una propuesta del sistema y el autor de la tesis debe revisarlas. Una carrera sin sede confirmada en Cochabamba no se agrega.
+
+## 2026-11-14: solo se muestra lo confirmado en Cochabamba y vigente (ORION #33)
+
+**Decisión:** se revisó todo lo oculto del catálogo para reactivar lo que fuera de Cochabamba y estuviera vigente. Nada cumplió las dos condiciones con una fuente oficial actual. Con el mismo criterio se ocultaron 8 carreras visibles: 5 de ULAT que ya no figuran en su sitio, 2 del INCOS estimadas con IA y Gastronomía de la UMSS, que se dicta en Cliza. El área afín «Gestión documental y secretariado» se reemplazó por «Comercio internacional y aduanas», porque ya no tenía carreras vigentes. Detalle y fuentes en [REVISION_CATALOGO_2026-11-14.md](REVISION_CATALOGO_2026-11-14.md).
+
+**Criterio:** una carrera se muestra si una fuente oficial actual la ofrece y la institución está en Cochabamba. Las de UPB y TECBA siguen visibles con estado «confirmar sede»: la institución tiene sede en Cochabamba y la carrera figura en su oferta actual, aunque su web no indica la sede de cada carrera.
