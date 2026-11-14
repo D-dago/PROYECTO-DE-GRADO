@@ -119,3 +119,11 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Detalles:** en el Word, la fila I05 repite el texto de I04 («hacer pruebas para comprobar si una idea es correcta»); se conserva la I05 anterior sin ejemplo («comparar datos para descubrir patrones») y hay que confirmarlo con la psicopedagoga. Con 4 de 10 por área hay 210⁶ combinaciones posibles: dos intentos prácticamente nunca traen las mismas 24, pero sí pueden compartir algunas. Las preguntas sorteadas quedan guardadas en el intento, así que uno a medias se reanuda con las mismas. Un intento a medias de `RIASEC-24-V5` no se reanuda: empieza uno nuevo. Los resultados de 24 fijas (`RIASEC-24-V5`), 60, 24 sorteadas del banco anterior y 12 preguntas se siguen mostrando sobre su propio máximo.
 
 **Limitación:** con el sorteo, dos estudiantes no responden exactamente el mismo test, así que sus puntajes por dimensión no son estrictamente comparables (la crítica que motivó ORION #27). La migración debe aplicarse a la base de Neon antes de publicar; si no, el test sortearía los textos anteriores.
+
+## 2026-11-14: cronómetro total que solo se ve al final del test (ORION #31)
+
+**Decisión:** el resultado muestra «Tiempo para responder el test» (por ejemplo, «7 min 32 s»). Lo calcula el servidor con el inicio y el fin del intento (`StartedAtUtc` y `CompletedAtUtc`, que ya existían; no hace falta migración) y viaja en `durationSeconds` del resultado. Mientras se responde no se muestra ningún reloj.
+
+**Motivo:** sugerencia en amarillo de la revisión de Ch'iti Wasi: en lugar del temporizador por pregunta (quitado en ORION #27), un cronómetro que mida cuánto tardó el cuestionario y que solo se vea al final.
+
+**Limitación:** el tiempo cuenta desde que se abre el intento. Si el estudiante deja el test a medias y lo retoma otro día, incluye esa pausa. Los resultados sin fin registrado se muestran sin tiempo. El tiempo aparece en la pantalla de resultado al terminar; el historial no lo muestra.

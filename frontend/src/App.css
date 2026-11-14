@@ -241,6 +241,8 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .score-row > span:last-child small { color: var(--cream-muted); }
 .score-bar { height: .45rem; background: rgba(255, 255, 255, .12); border-radius: 999px; }
 .result-note { color: var(--cream-muted); max-width: 60ch; margin-top: 2rem; }
+.result-duration { color: var(--cream-muted); margin: -1.5rem 0 1.5rem; }
+.result-duration strong { color: var(--cream); white-space: nowrap; }
 .result-heading { color: var(--cream); font-size: 1.25rem; margin: 2.2rem 0 .9rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
 .source-tag { font-size: .72rem; font-weight: 600; padding: .2rem .6rem; border-radius: 999px; background: rgba(236, 47, 143, .18); color: var(--accent); letter-spacing: .03em; }
 .dimension-cards { display: grid; gap: .8rem; margin-bottom: 2rem; }
@@ -343,6 +345,7 @@ img, svg { max-width: 100%; }
 
   /* Resultado */
   .result-code { margin: 1.5rem 0; }
+  .result-duration { margin-top: -.5rem; }
   .dimension-card { padding: .8rem; gap: .8rem; }
   .dimension-letter { width: 2.5rem; height: 2.5rem; font-size: 1.25rem; }
   .result-heading { font-size: 1.1rem; margin-top: 1.6rem; }

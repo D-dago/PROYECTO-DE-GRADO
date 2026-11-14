@@ -167,7 +167,7 @@ public sealed class TestService(
         }
         if (attempt.Status == TestAttemptStatus.Completed && attempt.RiasecProfile is not null)
         {
-            return (true, null, ToResultResponse(attempt.RiasecProfile));
+            return (true, null, ToResultResponse(attempt.RiasecProfile, attempt));
         }
         if (attempt.Answers.Count != attempt.AssignedQuestions.Count)
         {
@@ -197,7 +197,7 @@ public sealed class TestService(
         var user = await dbContext.Users.SingleAsync(candidate => candidate.Id == userId, cancellationToken);
         user.Coins += RiasecTestConstants.CompletionBonusCoins;
         await dbContext.SaveChangesAsync(cancellationToken);
-        return (true, null, ToResultResponse(profile));
+        return (true, null, ToResultResponse(profile, attempt));
     }
 
     public async Task<RiasecResultResponse?> GetResultAsync(
@@ -210,7 +210,7 @@ public sealed class TestService(
             .SingleOrDefaultAsync(
                 candidate => candidate.TestAttemptId == attemptId && candidate.TestAttempt.UserId == userId,
                 cancellationToken);
-        return profile is null ? null : ToResultResponse(profile);
+        return profile is null ? null : ToResultResponse(profile, profile.TestAttempt);
     }
 
     /// <summary>
@@ -267,7 +267,16 @@ public sealed class TestService(
             coins);
     }
 
-    private static RiasecResultResponse ToResultResponse(RiasecProfile profile) => new(
+    /// <summary>
+    /// Cronometro total del test: del inicio del intento a su fin, medido con la hora del servidor (el
+    /// navegador no interviene). Si el estudiante dejo el test a medias y lo retomo despues, incluye esa pausa.
+    /// </summary>
+    private static int? DurationSecondsOf(TestAttempt attempt) =>
+        attempt.CompletedAtUtc is { } completed && completed >= attempt.StartedAtUtc
+            ? (int)Math.Round((completed - attempt.StartedAtUtc).TotalSeconds)
+            : null;
+
+    private static RiasecResultResponse ToResultResponse(RiasecProfile profile, TestAttempt attempt) => new(
         profile.Id,
         profile.TestAttemptId,
         profile.RScore,
@@ -279,5 +288,6 @@ public sealed class TestService(
         profile.PrimaryCode,
         profile.SecondaryCode,
         profile.CreatedAtUtc,
-        profile.AlgorithmVersion);
+        profile.AlgorithmVersion,
+        DurationSecondsOf(attempt));
 }

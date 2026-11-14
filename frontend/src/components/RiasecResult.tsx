@@ -7,6 +7,15 @@ import { useLiveCareers } from '../services/liveData'
 
 const MAX_DIMENSION_SCORE = 20 // 4 preguntas por dimension x valor maximo 5 (test vigente)
 
+// Cronometro total (ORION #31): "7 min 32 s", "45 s" o "1 h 05 min". Solo aparece aqui, con el resultado.
+function formatDuration(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  if (hours > 0) return `${hours} h ${String(minutes).padStart(2, '0')} min`
+  return minutes > 0 ? `${minutes} min ${seconds} s` : `${seconds} s`
+}
+
 export function RiasecResult({ result }: { result: RiasecResult }) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
   const [failed, setFailed] = useState(false)
@@ -34,6 +43,9 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
         <span className="eyebrow">Test terminado</span>
         <h1>Tu perfil RIASEC</h1>
         <p className="result-code">{result.primaryCode}<small>{result.secondaryCode}</small></p>
+        {result.durationSeconds != null && (
+          <p className="result-duration">⏱ Tiempo para responder el test: <strong>{formatDuration(result.durationSeconds)}</strong></p>
+        )}
 
         <h2 className="result-heading">¿Qué significa tu perfil?</h2>
         {interpretation ? (

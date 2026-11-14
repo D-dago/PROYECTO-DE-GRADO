@@ -444,6 +444,50 @@ public sealed class RiasecTests
     }
 
     [Fact]
+    public async Task The_result_shows_how_long_the_test_took_measured_by_the_server()
+    {
+        await using var context = CreateContext();
+        var service = CreateService(context);
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
+        var assigned = await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None);
+        foreach (var question in assigned!)
+        {
+            await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 3 }, CancellationToken.None);
+        }
+        // El intento empezo hace 7 min 32 s (hora del servidor).
+        var stored = await context.TestAttempts.SingleAsync(candidate => candidate.Id == attempt.AttemptId);
+        stored.StartedAtUtc = DateTime.UtcNow.AddSeconds(-452);
+        await context.SaveChangesAsync();
+
+        var completed = await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None);
+        var readLater = await service.GetResultAsync(userId, attempt.AttemptId, CancellationToken.None);
+
+        Assert.InRange(completed.Result!.DurationSeconds!.Value, 452, 455);
+        Assert.Equal(completed.Result.DurationSeconds, readLater!.DurationSeconds);
+        // Mientras se responde no hay tiempo: el intento en curso no lo expone.
+        Assert.DoesNotContain(typeof(TestAttemptResponse).GetProperties(), property => property.Name.Contains("Duration") || property.Name.Contains("Seconds"));
+    }
+
+    [Fact]
+    public async Task A_result_without_a_recorded_end_has_no_duration_but_is_still_shown()
+    {
+        await using var context = CreateContext();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.Fixed24Version, Status = OrientacionVocacional.Domain.Enums.TestAttemptStatus.Completed };
+        context.TestAttempts.Add(attempt);
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 20, IScore = 12, AScore = 8, SScore = 8, EScore = 8, CScore = 8, PrimaryCode = "RI", SecondaryCode = "A", AlgorithmVersion = RiasecTestConstants.Fixed24Version });
+        await context.SaveChangesAsync();
+        var service = CreateService(context);
+
+        var result = await service.GetResultAsync(userId, attempt.Id, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Null(result!.DurationSeconds);
+        Assert.Equal(20, result.MaxScore);
+    }
+
+    [Fact]
     public async Task The_draw_uses_the_whole_bank_of_each_area_not_always_the_first_four()
     {
         await using var context = CreateContext();

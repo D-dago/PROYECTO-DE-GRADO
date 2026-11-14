@@ -29,4 +29,6 @@ export type RiasecResult = {
   algorithmVersion: string
   /** Maximo por dimension del test de este resultado: 20 (24 preguntas), 50 (60 preguntas) o 10 (12 preguntas). */
   maxScore?: number
+  /** Segundos que tomo responder el test, medidos por el servidor; null si el intento no lo registro. */
+  durationSeconds?: number | null
 }

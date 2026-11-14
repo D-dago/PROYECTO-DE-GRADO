@@ -54,7 +54,7 @@ Entra a `/registro`, escribe nombre, apellido, correo y contraseña. Luego entra
 
 ## 8. REALIZAR EL TEST VOCACIONAL (RIASEC)
 
-Abre `/test` y responde las 24 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada intento sortea 24 preguntas del banco de 60 (4 por cada una de las 6 dimensiones), intercaladas y sin límite de tiempo, así que repetir el test trae otras preguntas. Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
+Abre `/test` y responde las 24 preguntas tocando una opción de 1 a 5: Nada, Poco, Neutral, Mucho o Totalmente. Cada intento sortea 24 preguntas del banco de 60 (4 por cada una de las 6 dimensiones), intercaladas y sin límite de tiempo, así que repetir el test trae otras preguntas. Mientras respondes no se muestra ningún reloj; al terminar, el resultado indica cuánto tiempo tomó responder el test (lo mide el servidor desde que se abre el intento hasta que se termina). Cada respuesta se guarda inmediatamente. Si abandonas, el intento en progreso se reutiliza al volver.
 
 Cada respuesta da 1 moneda y terminar el test da 50; las monedas se gastan en `/skins`.
 

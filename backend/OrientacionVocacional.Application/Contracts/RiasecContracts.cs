@@ -28,7 +28,11 @@ public sealed record RiasecResultResponse(
     string PrimaryCode,
     string SecondaryCode,
     DateTime CreatedAtUtc,
-    string AlgorithmVersion)
+    string AlgorithmVersion,
+    // Cronometro total (ORION #31, sugerencia de la revision de Ch'iti Wasi): segundos desde que se
+    // abrio el intento hasta que se termino. Lo calcula el servidor y solo se muestra con el resultado,
+    // nunca mientras se responde. Nulo si el intento no lo registro.
+    int? DurationSeconds = null)
 {
     /// <summary>Maximo por dimension del test que produjo este resultado (10 con 12 preguntas, 20 con 24).</summary>
     public int MaxScore => OrientacionVocacional.Domain.Constants.RiasecTestConstants.MaxDimensionScoreFor(AlgorithmVersion);
