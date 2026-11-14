@@ -37,7 +37,7 @@ Los perfiles de versiones anteriores se conservan pero no se interpretan: sus le
 
 ## Motor de reglas
 
-Las compatibilidades se almacenan por carrera y dimensión RIASEC. Las reglas que se habían cargado con letras CHASIDE se convirtieron a su dimensión RIASEC más cercana (H→S, I→R, D→R, E→I; C, A y S sin cambio). El servidor combina puntuaciones, dimensión principal/secundaria y nivel de regla para calcular un porcentaje reproducible y una explicación textual. La IA no interviene en este cálculo.
+Las compatibilidades se almacenan por carrera y dimensión RIASEC. Las reglas que se habían cargado con letras CHASIDE se convirtieron a su dimensión RIASEC más cercana (H→S, I→R, D→R, E→I; C, A y S sin cambio). El servidor calcula un porcentaje reproducible con la mejor regla de cada carrera: puntaje del estudiante en esa dimensión × nivel de la regla ÷ máximo del test. Además informa la letra de esa regla y el aporte de la segunda mejor regla (misma fórmula), que solo sirve para desempatar: a igual porcentaje va primero la carrera que también coincide con la otra letra del perfil. La pantalla muestra completas las carreras afines a las dos letras principales del código, deja las demás en «Ver otras carreras de menor afinidad» y, entre carreras con el mismo porcentaje, evita mostrar seguidas dos de la misma única institución. La IA no interviene en este cálculo.
 
 ## Catálogo
 

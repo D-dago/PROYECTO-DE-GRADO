@@ -1,7 +1,9 @@
 namespace OrientacionVocacional.Application.Contracts;
 
 public sealed record InstitutionResponse(Guid Id, string Name, string Type, string? Location, string? Municipality, string Status, string? Source, DateTime? LastUpdatedUtc, bool IsActive, string? Website);
-public sealed record CareerResponse(Guid Id, string Name, string? Area, string? Level, string? Modality, int? DurationMonths, decimal? Cost, string Status, string? Source, DateTime? LastUpdatedUtc, bool IsActive, Guid InstitutionId, string InstitutionName, int Compatibility, string CompatibilityReason, string? InstitutionWebsite);
+// MatchedDimension: letra de la regla que dio la afinidad. Support: lo que aportan las demas reglas de la
+// carrera para este perfil; solo sirve para desempatar (ORION #34).
+public sealed record CareerResponse(Guid Id, string Name, string? Area, string? Level, string? Modality, int? DurationMonths, decimal? Cost, string Status, string? Source, DateTime? LastUpdatedUtc, bool IsActive, Guid InstitutionId, string InstitutionName, int Compatibility, string CompatibilityReason, string? InstitutionWebsite, string? MatchedDimension = null, int Support = 0);
 public sealed record DimensionInfoResponse(string Code, string Name, string Description, IReadOnlyList<string> CareerAreas);
 // AreaSearchTerms: por cada area sugerida, los terminos con que el buscador encuentra sus carreras (ORION #32).
 public sealed record ProfileInterpretationResponse(string Code, IReadOnlyList<DimensionInfoResponse> Dimensions, string Summary, IReadOnlyList<string> SuggestedAreas, IReadOnlyDictionary<string, IReadOnlyList<string>>? AreaSearchTerms = null);

@@ -81,7 +81,7 @@ export function RiasecResult({ result }: { result: RiasecResult }) {
               : <span key={area} className="area-chip area-chip-empty" title="Todavía no hay carreras de esta área en el catálogo de Cochabamba">{area}</span>)}</div>
 
             <h2 className="result-heading">Carreras para ti y dónde estudiarlas en Cochabamba</h2>
-            <UniversityLinks careers={recommendation.items} query={careerQuery} onQueryChange={setCareerQuery} areaTerms={interpretation.areaSearchTerms} />
+            <UniversityLinks careers={recommendation.items} query={careerQuery} onQueryChange={setCareerQuery} areaTerms={interpretation.areaSearchTerms} profileLetters={result.primaryCode} />
           </>
         )}
 

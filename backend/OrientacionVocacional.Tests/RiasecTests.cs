@@ -378,6 +378,40 @@ public sealed class RiasecTests
     }
 
     [Fact]
+    public async Task At_equal_compatibility_the_career_that_also_matches_the_second_letter_goes_first()
+    {
+        await using var context = CreateContext();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var institution = new Institution { Id = Guid.NewGuid(), Name = "DATOS DE PRUEBA", Type = "Privada", Status = "PRUEBA" };
+        context.Institutions.Add(institution);
+        Career AddCareer(string name, params (string Dimension, int Level)[] rules)
+        {
+            var career = new Career { Id = Guid.NewGuid(), Name = name, Status = "PRUEBA", InstitutionId = institution.Id, Institution = institution };
+            context.Careers.Add(career);
+            foreach (var (dimension, level) in rules)
+                context.CareerCompatibilities.Add(new CareerCompatibility { Id = Guid.NewGuid(), CareerId = career.Id, Dimension = dimension, CompatibilityLevel = level, Rule = name });
+            return career;
+        }
+        // Las dos tienen R 90 (misma afinidad); solo Civil tiene ademas una regla en I, la otra letra del perfil.
+        AddCareer("Autotrónica", ("R", 90));
+        AddCareer("Ingeniería Civil", ("R", 90), ("I", 45));
+        var attempt = new TestAttempt { Id = Guid.NewGuid(), UserId = userId, TestVersion = RiasecTestConstants.Version };
+        context.TestAttempts.Add(attempt);
+        context.RiasecProfiles.Add(new RiasecProfile { Id = Guid.NewGuid(), TestAttemptId = attempt.Id, TestAttempt = attempt, RScore = 17, IScore = 15, AScore = 8, SScore = 10, EScore = 9, CScore = 7, PrimaryCode = "RI", SecondaryCode = "S", AlgorithmVersion = RiasecTestConstants.Version });
+        await context.SaveChangesAsync();
+        var service = new Infrastructure.Services.CatalogService(context, new NoAi());
+
+        var items = (await service.GetRecommendationsAsync(userId, new RecommendationFilterRequest(), CancellationToken.None))!.Items;
+
+        // El porcentaje no cambia (17 x 90 / 20 = 76 en las dos): solo el orden. El apoyo es la segunda regla.
+        Assert.All(items, item => Assert.Equal(76, item.Compatibility));
+        Assert.All(items, item => Assert.Equal("R", item.MatchedDimension));
+        Assert.Equal(new[] { "Ingeniería Civil", "Autotrónica" }, items.Select(item => item.Name));
+        Assert.Equal(33, items[0].Support); // 15 x 45 / 20
+        Assert.Equal(0, items[1].Support);
+    }
+
+    [Fact]
     public async Task A_result_of_the_previous_twelve_question_test_is_still_recommended_on_its_own_scale()
     {
         await using var context = CreateContext();

@@ -62,7 +62,7 @@ Cada respuesta da 1 moneda y terminar el test da 50; las monedas se gastan en `/
 
 Las seis dimensiones RIASEC (teoría de Holland) son: `R` Realista, `I` Investigador, `A` Artístico, `S` Social, `E` Emprendedor y `C` Convencional. El código principal usa las dos dimensiones con mayor puntuación y el secundario la tercera; los empates se resuelven en el orden fijo `R, I, A, S, E, C`. El puntaje máximo por dimensión es 20 (50 y 10 en los resultados anteriores de 60 y 12 preguntas).
 
-La pantalla de resultado explica qué significa cada letra del perfil, muestra los puntajes, las áreas profesionales afines y las carreras del catálogo ordenadas por compatibilidad. Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.
+La pantalla de resultado explica qué significa cada letra del perfil, muestra los puntajes, las áreas profesionales afines y todas las carreras del catálogo afines a las dos letras principales del perfil, ordenadas por compatibilidad (a igual porcentaje, primero las que también coinciden con la segunda letra, y sin repetir seguida la misma institución). Las demás carreras están en «Ver otras carreras de menor afinidad». Es una herramienta de orientación vocacional, no un diagnóstico psicológico ni determina obligatoriamente una profesión.
 
 ## 10. OBTENER RECOMENDACIONES
 

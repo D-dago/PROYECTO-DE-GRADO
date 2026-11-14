@@ -124,7 +124,23 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
         // que busca ("sistemas informatico") en vez de la categoria.
         if (!string.IsNullOrWhiteSpace(filter.Area)) careers = careers.Where(item => Coincide(item.Area, filter.Area) || Coincide(item.Name, filter.Area)).ToList();
 
-        return careers.Select(item => { var match = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).FirstOrDefault(); var level = match is null ? 0 : Math.Clamp(scores.GetValueOrDefault(match.Dimension) * match.CompatibilityLevel / maxScore, 0, 100); return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada."); }).OrderByDescending(item => item.Compatibility).ToList();
+        // Afinidad (sin cambios): la mejor regla de la carrera, puntaje de esa dimension x nivel / maximo.
+        // Apoyo (ORION #34): lo que aporta la SEGUNDA mejor regla, con la misma formula (como la segunda letra
+        // del codigo de Holland). No cambia el porcentaje: solo desempata, para que a igual afinidad vaya primero
+        // la carrera que tambien coincide con la otra letra del perfil (Civil R+I antes que Autotronica, solo R,
+        // para un perfil RI). Solo la segunda regla: sumar todas premiaria a las carreras con mas reglas cargadas.
+        int Contribution(CareerCompatibility rule) => Math.Clamp(scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel / maxScore, 0, 100);
+        return careers
+            .Select(item =>
+            {
+                var rules = item.Compatibilities.OrderByDescending(rule => scores.GetValueOrDefault(rule.Dimension) * rule.CompatibilityLevel).ToList();
+                var match = rules.FirstOrDefault();
+                var level = match is null ? 0 : Contribution(match);
+                return ToCareer(item, level, match?.Rule ?? "No existe una regla de compatibilidad cargada.", match?.Dimension, rules.Skip(1).Select(Contribution).DefaultIfEmpty(0).Max());
+            })
+            .OrderByDescending(item => item.Compatibility)
+            .ThenByDescending(item => item.Support)
+            .ToList();
     }
 
     // Una entrada por test terminado, no por busqueda. RecommendationHistories guarda una fila
@@ -206,7 +222,7 @@ public sealed class CatalogService(OrientacionVocacionalDbContext db, IAiExplana
     }
 
     private static InstitutionResponse ToInstitution(Institution item) => new(item.Id, item.Name, item.Type, item.Location, item.Municipality, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.Website);
-    private static CareerResponse ToCareer(Career item, int compatibility, string reason) => new(item.Id, item.Name, item.Area, item.Level, item.Modality, item.DurationMonths, item.Cost, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.InstitutionId, item.Institution?.Name ?? "Información pendiente de actualización", compatibility, reason, item.Institution?.Website);
+    private static CareerResponse ToCareer(Career item, int compatibility, string reason, string? matchedDimension = null, int support = 0) => new(item.Id, item.Name, item.Area, item.Level, item.Modality, item.DurationMonths, item.Cost, item.Status, item.Source, item.LastUpdatedUtc, item.IsActive, item.InstitutionId, item.Institution?.Name ?? "Información pendiente de actualización", compatibility, reason, item.Institution?.Website, matchedDimension, support);
 
     private static string? LimpiarWeb(string? web) => string.IsNullOrWhiteSpace(web) ? null : web.Trim();
 

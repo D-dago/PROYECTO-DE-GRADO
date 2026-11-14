@@ -145,3 +145,15 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Decisión:** se revisó todo lo oculto del catálogo para reactivar lo que fuera de Cochabamba y estuviera vigente. Nada cumplió las dos condiciones con una fuente oficial actual. Con el mismo criterio se ocultaron 8 carreras visibles: 5 de ULAT que ya no figuran en su sitio, 2 del INCOS estimadas con IA y Gastronomía de la UMSS, que se dicta en Cliza. El área afín «Gestión documental y secretariado» se reemplazó por «Comercio internacional y aduanas», porque ya no tenía carreras vigentes. Detalle y fuentes en [REVISION_CATALOGO_2026-11-14.md](REVISION_CATALOGO_2026-11-14.md).
 
 **Criterio:** una carrera se muestra si una fuente oficial actual la ofrece y la institución está en Cochabamba. Las de UPB y TECBA siguen visibles con estado «confirmar sede»: la institución tiene sede en Cochabamba y la carrera figura en su oferta actual, aunque su web no indica la sede de cada carrera.
+
+## 2026-11-14: todas las carreras afines al perfil, desempate por la segunda letra y sin repetir institución (ORION #34)
+
+**Problema:** con el catálogo real, un perfil RI veía 18 carreras empatadas en el mismo porcentaje, ordenadas alfabéticamente: 7 de las primeras 17 eran de INFOCAL. La pantalla mostraba solo 8 y escondía el resto tras «Ver las 87 carreras».
+
+**Decisión (sin cambiar el test, el banco de preguntas ni el porcentaje):**
+- El porcentaje sigue siendo la mejor regla de la carrera: puntaje de esa dimensión × nivel ÷ máximo.
+- **Desempate:** a igual porcentaje va primero la carrera cuya segunda mejor regla aporta más con la misma fórmula, como la segunda letra del código de Holland. Ejemplo: para un perfil RI, Ingeniería Civil (R e I) va antes que Autotrónica (solo R). Se usa solo la segunda regla: sumar todas premiaría a las carreras con más reglas cargadas.
+- **Carreras para ti:** se muestran todas las carreras cuya afinidad viene de una de las dos letras principales del código (para un perfil RI, 58 de 87). Las demás quedan en «Ver otras carreras de menor afinidad».
+- **Sin repetir institución:** entre carreras con el mismo porcentaje no se ponen seguidas dos de la misma única institución si hay alternativa. Una carrera de menor porcentaje nunca sube.
+
+**Limitación:** si en un mismo porcentaje solo una institución ofrece varias carreras (por ejemplo, las ciencias básicas, que en Cochabamba solo están en la UMSS), se muestran seguidas porque no hay otra opción.

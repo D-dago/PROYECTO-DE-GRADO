@@ -1,7 +1,7 @@
 import { downloadFile, request } from './api'
 
 export type Institution = { id: string; name: string; type: string; location?: string; municipality?: string; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; website?: string | null }
-export type Career = { id: string; name: string; area?: string; level?: string; modality?: string; durationMonths?: number; cost?: number; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; institutionId: string; institutionName: string; compatibility: number; compatibilityReason: string; institutionWebsite?: string | null }
+export type Career = { id: string; name: string; area?: string; level?: string; modality?: string; durationMonths?: number; cost?: number; status: string; source?: string; lastUpdatedUtc?: string; isActive: boolean; institutionId: string; institutionName: string; compatibility: number; compatibilityReason: string; institutionWebsite?: string | null; matchedDimension?: string | null; support?: number }
 export type DimensionInfo = { code: string; name: string; description: string; careerAreas: string[] }
 // areaSearchTerms: por cada area sugerida, los terminos con que el buscador encuentra sus carreras (ORION #32).
 export type ProfileInterpretation = { code: string; dimensions: DimensionInfo[]; summary: string; suggestedAreas: string[]; areaSearchTerms?: Record<string, string[]> }

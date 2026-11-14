@@ -3,7 +3,8 @@ import type { Career } from './appApi'
 // Busqueda y agrupacion de carreras del resultado (sin React), para el buscador y las areas afines.
 
 export type InstitutionOption = { id: string; name: string; website: string | null }
-export type CareerGroup = { key: string; name: string; areas: string; compatibility: number; reason: string; institutions: InstitutionOption[] }
+// dimension: letra RIASEC que dio la afinidad; support: lo que aportan las demas reglas (desempate, ORION #34).
+export type CareerGroup = { key: string; name: string; areas: string; compatibility: number; support: number; dimension?: string; reason: string; institutions: InstitutionOption[] }
 
 // La direccion viene de la base de datos: se vuelve a comprobar aqui para que nunca llegue a un enlace
 // o a la ventana interna algo que no sea una pagina web (por ejemplo "javascript:").
@@ -83,10 +84,13 @@ export function groupByCareer(careers: Career[]): CareerGroup[] {
     // 0 % significa que la carrera no tiene regla de compatibilidad: no es una recomendacion.
     if (career.compatibility <= 0) continue
     const key = careerKey(career.name)
-    const group = groups.get(key) ?? { key, name: career.name, areas: '', compatibility: 0, reason: career.compatibilityReason, institutions: [] }
+    const group = groups.get(key) ?? { key, name: career.name, areas: '', compatibility: 0, support: 0, reason: career.compatibilityReason, institutions: [] }
     if (career.area && !group.areas.includes(careerKey(career.area))) group.areas += ` ${careerKey(career.area)}`
-    if (career.compatibility > group.compatibility) {
+    const support = career.support ?? 0
+    if (career.compatibility > group.compatibility || (career.compatibility === group.compatibility && support > group.support)) {
       group.compatibility = career.compatibility
+      group.support = support
+      group.dimension = career.matchedDimension ?? undefined
       group.reason = career.compatibilityReason
     }
     if (!group.institutions.some((item) => item.id === career.institutionId)) {
@@ -94,7 +98,51 @@ export function groupByCareer(careers: Career[]): CareerGroup[] {
     }
     groups.set(key, group)
   }
-  return [...groups.values()]
+  const sorted = [...groups.values()]
     .map((group) => ({ ...group, institutions: [...group.institutions].sort((a, b) => a.name.localeCompare(b.name)) }))
-    .sort((a, b) => b.compatibility - a.compatibility || a.name.localeCompare(b.name))
+    // A igual afinidad, primero la carrera cuyas otras reglas tambien coinciden con el perfil (ORION #34).
+    .sort((a, b) => b.compatibility - a.compatibility || b.support - a.support || a.name.localeCompare(b.name))
+  return spreadInstitutions(sorted)
+}
+
+/** La unica institucion de la tarjeta, o null si la ofrecen varias. */
+function soleInstitution(group: CareerGroup) {
+  return group.institutions.length === 1 ? group.institutions[0].id : null
+}
+
+/**
+ * Entre tarjetas con la misma afinidad no pone seguidas dos de la misma unica institucion si hay otra opcion,
+ * para que el estudiante no vea la misma universidad una y otra vez (ORION #34). Respeta el orden por apoyo
+ * salvo para evitar esa repeticion, y nunca sube una carrera de menor afinidad.
+ */
+function spreadInstitutions(groups: CareerGroup[]) {
+  const result: CareerGroup[] = []
+  for (let start = 0; start < groups.length;) {
+    let end = start
+    while (end < groups.length && groups[end].compatibility === groups[start].compatibility) end++
+    const tie = groups.slice(start, end)
+    while (tie.length > 0) {
+      const previous = result.length > 0 ? soleInstitution(result[result.length - 1]) : null
+      // La institucion con mas tarjetas en el empate: si las demas ya no alcanzan para intercalarla
+      // (quedan menos que sus tarjetas), toca ponerla ahora; si no, se sigue el orden por apoyo.
+      const counts = new Map<string, number>()
+      for (const group of tie) { const sole = soleInstitution(group); if (sole) counts.set(sole, (counts.get(sole) ?? 0) + 1) }
+      const [crowded, crowdedCount] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0] ?? [null, 0]
+      const forced = crowded !== null && crowded !== previous && crowdedCount > tie.length - crowdedCount
+        ? tie.findIndex((group) => soleInstitution(group) === crowded)
+        : -1
+      const next = forced >= 0 ? forced : tie.findIndex((group) => previous === null || soleInstitution(group) !== previous)
+      result.push(tie.splice(next < 0 ? 0 : next, 1)[0])
+    }
+    start = end
+  }
+  return result
+}
+
+/**
+ * Carreras afines al perfil: las que deben su afinidad a una de las dos letras principales del codigo
+ * (p. ej. R o I en un perfil RI). Las demas se muestran aparte, como de menor afinidad (ORION #34).
+ */
+export function isProfileCareer(group: CareerGroup, profileLetters: string) {
+  return group.dimension !== undefined && profileLetters.toUpperCase().includes(group.dimension)
 }

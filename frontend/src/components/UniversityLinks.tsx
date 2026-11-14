@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Career } from '../services/appApi'
 import { SiteWindow } from './SiteWindow'
-import { areaTermsFor, groupByCareer, matchesArea, matchScore, searchWords, type InstitutionOption } from '../services/careerSearch'
+import { areaTermsFor, groupByCareer, isProfileCareer, matchesArea, matchScore, searchWords, type CareerGroup, type InstitutionOption } from '../services/careerSearch'
 
 const CARRERAS_INICIALES = 8
 export const CAREER_SEARCH_ID = 'buscador-carreras'
@@ -9,8 +9,10 @@ export const CAREER_SEARCH_ID = 'buscador-carreras'
 /**
  * La busqueda puede venir de fuera (al tocar un area afin del resultado): en ese caso el componente la
  * recibe en `query` y avisa cada cambio con `onQueryChange`. Sin esas props maneja su propia busqueda.
+ * Con `profileLetters` (las dos letras principales del perfil, p. ej. "RI") muestra completas las carreras
+ * afines a esas letras y deja las demas en una seccion aparte (ORION #34).
  */
-export function UniversityLinks({ careers, query: externalQuery, onQueryChange, areaTerms }: { careers: Career[]; query?: string; onQueryChange?: (query: string) => void; areaTerms?: Record<string, string[]> }) {
+export function UniversityLinks({ careers, query: externalQuery, onQueryChange, areaTerms, profileLetters }: { careers: Career[]; query?: string; onQueryChange?: (query: string) => void; areaTerms?: Record<string, string[]>; profileLetters?: string }) {
   const [open, setOpen] = useState<(InstitutionOption & { website: string }) | null>(null)
   const [showAll, setShowAll] = useState(false)
   const [ownQuery, setOwnQuery] = useState('')
@@ -32,8 +34,31 @@ export function UniversityLinks({ careers, query: externalQuery, onQueryChange, 
     return <p className="result-note">Todavía no hay carreras compatibles con tu perfil. Cuando el administrador las cargue aparecerán aquí.</p>
   }
 
-  // Al buscar se muestran todas las coincidencias, no solo las primeras.
-  const visible = showAll || searching ? found : found.slice(0, CARRERAS_INICIALES)
+  // Sin busqueda y con perfil: todas las carreras afines a sus dos letras principales, y aparte las de menor
+  // afinidad. Al buscar se muestran todas las coincidencias. Sin perfil (otras paginas), las 8 primeras.
+  const profile = profileLetters ? groups.filter((group) => isProfileCareer(group, profileLetters)) : []
+  const byProfile = !searching && profile.length > 0
+  const others = byProfile ? groups.filter((group) => !profile.includes(group)) : []
+  const visible = searching ? found : byProfile ? profile : showAll ? found : found.slice(0, CARRERAS_INICIALES)
+
+  const card = (group: CareerGroup) => (
+    <article className="university-card" key={group.key} title={group.reason}>
+      <header className="university-card-top">
+        <h3>{group.name}</h3>
+        <strong>{group.compatibility}%</strong>
+      </header>
+      <ul>
+        {group.institutions.map((institution) => (
+          <li key={institution.id}>
+            <span>{institution.name}</span>
+            {institution.website
+              ? <button type="button" onClick={() => setOpen({ ...institution, website: institution.website! })} aria-label={`Ver sitio oficial de ${institution.name}`}>Ver sitio</button>
+              : <small>Sin sitio oficial</small>}
+          </li>
+        ))}
+      </ul>
+    </article>
+  )
 
   return (
     <>
@@ -54,27 +79,17 @@ export function UniversityLinks({ careers, query: externalQuery, onQueryChange, 
               : `${found.length} ${found.length === 1 ? 'carrera coincide' : 'carreras coinciden'} con «${query.trim()}».`}
         </p>
       )}
-      <div className="university-grid">
-        {visible.map((group) => (
-          <article className="university-card" key={group.key} title={group.reason}>
-            <header className="university-card-top">
-              <h3>{group.name}</h3>
-              <strong>{group.compatibility}%</strong>
-            </header>
-            <ul>
-              {group.institutions.map((institution) => (
-                <li key={institution.id}>
-                  <span>{institution.name}</span>
-                  {institution.website
-                    ? <button type="button" onClick={() => setOpen({ ...institution, website: institution.website! })} aria-label={`Ver sitio oficial de ${institution.name}`}>Ver sitio</button>
-                    : <small>Sin sitio oficial</small>}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-      {!searching && groups.length > CARRERAS_INICIALES && (
+      {byProfile && <p className="university-count">{profile.length} carreras afines a tu perfil {profileLetters!.toUpperCase()}, de la más a la menos afín.</p>}
+      <div className="university-grid">{visible.map(card)}</div>
+      {byProfile && others.length > 0 && (
+        <>
+          <button type="button" className="university-more" onClick={() => setShowAll((current) => !current)}>
+            {showAll ? 'Ocultar las carreras de menor afinidad' : `Ver otras ${others.length} carreras de menor afinidad`}
+          </button>
+          {showAll && <div className="university-grid university-grid-others">{others.map(card)}</div>}
+        </>
+      )}
+      {!searching && !byProfile && groups.length > CARRERAS_INICIALES && (
         <button type="button" className="university-more" onClick={() => setShowAll((current) => !current)}>
           {showAll ? 'Ver menos carreras' : `Ver las ${groups.length} carreras`}
         </button>
