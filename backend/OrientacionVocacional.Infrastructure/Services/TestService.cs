@@ -257,18 +257,28 @@ public sealed class TestService(
     /// <summary>
     /// Sorteo por intento (ORION #30): 4 preguntas al azar entre las activas de cada dimension (24 en
     /// total), intercaladas R,I,A,S,E,C,R,I,A,S,E,C,... para que nunca aparezcan dos seguidas de la
-    /// misma dimension. Cada intento nuevo vuelve a sortear, asi que repetir el test trae otras
-    /// preguntas. Las elegidas quedan guardadas en el intento: si se reanuda, son las mismas.
+    /// misma dimension. Cada intento nuevo vuelve a sortear, primero entre las que ese estudiante aun no
+    /// respondio (ORION #36), asi que repetir el test trae otras preguntas. Las elegidas quedan guardadas
+    /// en el intento: si se reanuda, son las mismas.
     /// </summary>
     private async Task AssignQuestionsAsync(TestAttempt attempt, CancellationToken cancellationToken)
     {
         var pool = await dbContext.Questions
             .Where(question => question.IsActive)
             .ToListAsync(cancellationToken);
+        // Cuantas veces le toco ya cada pregunta a este estudiante en intentos anteriores (ORION #36). El sorteo
+        // sigue siendo al azar dentro de cada area, pero primero entre las que menos le tocaron: al repetir el test
+        // recibe preguntas nuevas, y en pocos intentos recorre las 10 de cada area (4 + 4 + 2).
+        var timesSeen = await dbContext.AssignedQuestions
+            .Where(assigned => assigned.TestAttempt.UserId == attempt.UserId && assigned.TestAttemptId != attempt.Id)
+            .GroupBy(assigned => assigned.QuestionId)
+            .Select(group => new { QuestionId = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(item => item.QuestionId, item => item.Count, cancellationToken);
         var byDimension = RiasecTestConstants.DimensionOrder.ToDictionary(
             dimension => dimension,
             dimension => pool.Where(question => question.Dimension == dimension)
-                .OrderBy(_ => Random.Shared.Next())
+                .OrderBy(question => timesSeen.GetValueOrDefault(question.Id))
+                .ThenBy(_ => Random.Shared.Next())
                 .Take(RiasecTestConstants.QuestionsPerDimensionPerAttempt)
                 .ToList());
 

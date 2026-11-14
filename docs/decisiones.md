@@ -167,3 +167,9 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 - La pantalla muestra la pregunta siguiente de inmediato y guarda las respuestas en segundo plano, en orden, con hasta 4 reintentos. Antes de calcular el resultado espera a que todas estén guardadas; si no puede, ofrece «Reintentar» sin perder nada. Si se cierra la página con respuestas sin guardar, el navegador avisa.
 - Tras mostrar una pregunta se ignoran los clics durante 0,6 s, para que varios clics seguidos no respondan la siguiente sin leerla.
 - Al recargar, el test sigue en la primera pregunta sin responder, según lo que el servidor tiene guardado.
+
+## 2026-11-14: al repetir el test, primero las preguntas que el estudiante no vio (ORION #36)
+
+**Decisión:** el sorteo de cada intento sigue siendo de 4 preguntas al azar por área entre las activas, pero primero entre las que ese estudiante recibió menos veces en sus intentos anteriores. Así el segundo intento no repite ninguna pregunta (quedan 6 sin ver por área) y con el tercero el estudiante ya recorrió las 10 de cada área (4 + 4 + 2).
+
+**Motivo:** el usuario pidió usar todas las preguntas del banco, al azar dentro de cada área. Con el sorteo puro, un estudiante podía recibir de nuevo preguntas que ya había respondido y no llegar nunca a otras.

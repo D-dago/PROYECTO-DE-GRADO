@@ -463,27 +463,35 @@ public sealed class RiasecTests
     }
 
     [Fact]
-    public async Task Repeating_the_test_draws_other_questions()
+    public async Task Repeating_the_test_draws_questions_the_student_has_not_seen_and_covers_the_whole_bank()
     {
         await using var context = CreateContext();
         var service = CreateService(context);
         var userId = await TestSupport.CreatePersistedStudentAsync(context);
-        var first = await service.CreateAttemptAsync(userId, CancellationToken.None);
-        var firstQuestions = await service.GetAssignedQuestionsAsync(userId, first.AttemptId, CancellationToken.None);
-        foreach (var question in firstQuestions!)
+
+        async Task<List<QuestionResponse>> CompleteNewAttempt()
         {
-            Assert.True((await service.SubmitAnswerAsync(userId, first.AttemptId, new() { QuestionId = question.Id, Value = 4 }, CancellationToken.None)).Success);
+            var attempt = await service.CreateAttemptAsync(userId, CancellationToken.None);
+            var questions = (await service.GetAssignedQuestionsAsync(userId, attempt.AttemptId, CancellationToken.None))!.ToList();
+            foreach (var question in questions)
+                Assert.True((await service.SubmitAnswerAsync(userId, attempt.AttemptId, new() { QuestionId = question.Id, Value = 4 }, CancellationToken.None)).Success);
+            Assert.True((await service.CompleteAsync(userId, attempt.AttemptId, CancellationToken.None)).Success);
+            return questions;
         }
-        Assert.True((await service.CompleteAsync(userId, first.AttemptId, CancellationToken.None)).Success);
 
-        var second = await service.CreateAttemptAsync(userId, CancellationToken.None);
-        var secondQuestions = await service.GetAssignedQuestionsAsync(userId, second.AttemptId, CancellationToken.None);
+        var first = await CompleteNewAttempt();
+        var second = await CompleteNewAttempt();
+        var third = await CompleteNewAttempt();
 
-        // Sorteo por intento (ORION #30): 4 de 10 por area da 210^6 combinaciones; repetir las mismas
-        // 24 es practicamente imposible.
-        Assert.NotEqual(first.AttemptId, second.AttemptId);
-        Assert.Equal(24, secondQuestions!.Count);
-        Assert.False(firstQuestions.Select(q => q.Id).ToHashSet().SetEquals(secondQuestions.Select(q => q.Id)));
+        // ORION #36: el segundo intento no repite ninguna (quedan 6 sin ver por area y se piden 4); con el tercero
+        // el estudiante ya respondio las 10 de cada area (4 + 4 + 2). Dentro de cada area el orden sigue al azar.
+        Assert.Equal(24, second.Count);
+        Assert.Empty(first.Select(q => q.Id).Intersect(second.Select(q => q.Id)));
+        var seen = first.Concat(second).Concat(third).ToList();
+        foreach (var dimension in RiasecTestConstants.DimensionOrder)
+            Assert.Equal(RiasecTestConstants.QuestionsPerDimension, seen.Where(q => q.Dimension == dimension).Select(q => q.Id).Distinct().Count());
+        // Cada intento sigue con 4 por area, intercaladas.
+        Assert.All(new[] { first, second, third }, questions => Assert.All(RiasecTestConstants.DimensionOrder, dimension => Assert.Equal(4, questions.Count(q => q.Dimension == dimension))));
     }
 
     [Fact]
