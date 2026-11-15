@@ -146,3 +146,37 @@ function spreadInstitutions(groups: CareerGroup[]) {
 export function isProfileCareer(group: CareerGroup, profileLetters: string) {
   return group.dimension !== undefined && profileLetters.toUpperCase().includes(group.dimension)
 }
+
+/** Si dos textos se diferencian en a lo sumo una letra: cambiada, faltante o sobrante. */
+function withinOneEdit(a: string, b: string) {
+  if (Math.abs(a.length - b.length) > 1) return false
+  let i = 0
+  let j = 0
+  let edits = 0
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue }
+    if (++edits > 1) return false
+    if (a.length > b.length) i++
+    else if (a.length < b.length) j++
+    else { i++; j++ }
+  }
+  return edits + (a.length - i) + (b.length - j) <= 1
+}
+
+/**
+ * Busqueda tolerante para el panel (ORION #41): la palabra puede venir pegada ("sansimon") o con una letra
+ * cambiada, faltante o sobrante ("samsimon" encuentra "San Simón"; "veterinria", "Veterinaria"). Solo tolera
+ * el error en palabras de 5 letras o mas, para que una sigla corta no encuentre cualquier cosa.
+ */
+export function looselyIncludes(text: string, word: string) {
+  if (text.includes(word)) return true
+  const compact = text.replace(/\s+/g, '')
+  if (compact.includes(word)) return true
+  if (word.length < 5) return false
+  for (const size of [word.length - 1, word.length, word.length + 1]) {
+    for (let start = 0; start + size <= compact.length; start++) {
+      if (withinOneEdit(compact.slice(start, start + size), word)) return true
+    }
+  }
+  return false
+}

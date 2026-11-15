@@ -15,6 +15,7 @@ const adminLinks = [
   { href: '/admin#resultados', label: 'Resultados' },
   { href: '/admin#preguntas', label: 'Preguntas' },
   { href: '/admin#carreras', label: 'Carreras' },
+  { href: '/admin#nueva-carrera', label: 'Nueva carrera' },
   { href: '/admin#estudiantes', label: 'Estudiantes' },
 ]
 

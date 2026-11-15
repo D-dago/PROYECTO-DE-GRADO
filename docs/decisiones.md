@@ -199,3 +199,12 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Decisión:** la página «Dónde estudiar tu carrera» (`/recomendaciones`) usa la misma lista que el resultado del test (ORION #34): todas las carreras afines a las dos letras del perfil, aparte las de menor afinidad, y búsqueda por áreas afines. Las fechas del historial y de los resultados del panel se muestran sin segundos («15/11/2026, 10:18»).
 
 **Motivo:** revisión de mejoras autorizada por el usuario. Esa página mostraba solo 8 carreras y escondía el resto, distinto al resultado; los segundos no aportan nada.
+## 2026-11-15: buscador tolerante y accesos directos en el panel (ORION #41)
+
+**Problema:** buscar «samsimon» en Carreras no encontraba nada (la institución es «San Simón»), el campo de búsqueda tenía el estilo del navegador y no el del sitio, al elegir «Carreras» en el menú la pantalla quedaba a mitad de página, y para agregar una carrera había que bajar hasta el final de la lista.
+
+**Decisión:**
+- La búsqueda del panel tolera que las palabras vayan pegadas y una letra cambiada, faltante o sobrante en palabras de 5 letras o más («samsimon», «veterinria»). Las siglas cortas siguen buscándose exactas.
+- El buscador usa el mismo diseño que el de carreras del resultado del test (lupa, ✕ y conteo debajo).
+- Cuando terminan de cargar las listas, el panel se ubica en la sección pedida (`/admin#carreras`, `#compatibilidades`), también al elegirla en el menú.
+- Botones «+ Agregar carrera» y «+ Agregar regla» bajo el título de cada sección, y opción «Nueva carrera» en el menú: llevan al formulario vacío con el cursor en el primer campo.

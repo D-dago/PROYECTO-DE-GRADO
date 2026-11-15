@@ -6,7 +6,7 @@ import type { AdminQuestion, AdminResult, AdminUser, Career, Compatibility, Inst
 import { QuestionsSection, ResultsSection } from './AdminExtras'
 import { useFormularioDeEdicion } from '../components/useFormularioDeEdicion'
 import { useLiveData } from '../services/liveData'
-import { careerKey } from '../services/careerSearch'
+import { careerKey, looselyIncludes } from '../services/careerSearch'
 
 const dashboardLabels: [keyof NonNullable<DashboardData>, string][] = [['students', 'Estudiantes registrados'], ['institutions', 'Instituciones'], ['careers', 'Carreras'], ['compatibilityRules', 'Reglas de compatibilidad']]
 const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
@@ -23,6 +23,7 @@ export function AdminPage() {
   const [students, setStudents] = useState<AdminUser[]>([])
   const [questions, setQuestions] = useState<AdminQuestion[]>([])
   const [results, setResults] = useState<AdminResult[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   function report(message: string, isError = false) {
     if (isError) { setError(message); setSuccess('') } else { setSuccess(message); setError('') }
@@ -46,6 +47,7 @@ export function AdminPage() {
       setCareers(careersData)
       setCompatibilities(compatibilitiesData)
       setStudents(usersData.filter((user) => user.role === 'ESTUDIANTE'))
+      setLoaded(true)
     } catch (loadError) {
       // Una actualizacion automatica que falla no debe tapar lo que el administrador esta haciendo: se reintenta sola.
       if (silent) throw loadError
@@ -54,6 +56,22 @@ export function AdminPage() {
   }
 
   useEffect(() => { void loadAll() }, [])
+
+  // Al abrir /admin#carreras el navegador busca la seccion antes de que carguen las listas, y al cargarse las de
+  // arriba la pantalla quedaba a mitad de pagina. Se vuelve a ubicar cuando ya estan los datos, y tambien al
+  // elegir otra seccion en el menu (ORION #41). "#nueva-carrera" pone ademas el cursor en el formulario.
+  useEffect(() => {
+    if (!loaded) return
+    const goToHash = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1))
+      if (!id) return
+      if (id.startsWith('nueva-')) goToForm(id)
+      else document.getElementById(id)?.scrollIntoView({ block: 'start' })
+    }
+    goToHash()
+    window.addEventListener('hashchange', goToHash)
+    return () => window.removeEventListener('hashchange', goToHash)
+  }, [loaded])
   useLiveData(['catalog', 'activity'], () => loadAll(true))
 
   const activeInstitutions = new Set(institutions.filter((item) => item.isActive).map((item) => item.id))
@@ -159,20 +177,34 @@ function useListSearch<T>(items: T[], text: (item: T) => string) {
   const [showAll, setShowAll] = useState(false)
   const words = careerKey(query).split(/\s+/).filter(Boolean)
   const searching = words.length > 0
-  const found = searching ? items.filter((item) => { const haystack = careerKey(text(item)); return words.every((word) => haystack.includes(word)) }) : items
+  const found = searching ? items.filter((item) => { const haystack = careerKey(text(item)); return words.every((word) => looselyIncludes(haystack, word)) }) : items
   const visible = searching || showAll ? found : found.slice(0, SHORT_LIST)
   return { query, setQuery, showAll, setShowAll, searching, found, visible }
 }
 
 type ListSearchState = { query: string; setQuery: (query: string) => void; showAll: boolean; setShowAll: (update: (current: boolean) => boolean) => void; searching: boolean; found: unknown[] }
 
+// Mismo buscador que el de carreras del resultado del test (lupa, borrar y conteo debajo).
 function ListSearch({ search, total, placeholder }: { search: ListSearchState; total: number; placeholder: string }) {
   return (
-    <label>Buscar
-      <input type="search" value={search.query} onChange={(event) => search.setQuery(event.target.value)} placeholder={placeholder} />
-      {search.searching && <small className="admin-count">{search.found.length} de {total} coinciden</small>}
-    </label>
+    <>
+      <label className="university-search">
+        <span aria-hidden="true">🔍</span>
+        <input type="search" value={search.query} onChange={(event) => search.setQuery(event.target.value)} placeholder={placeholder} aria-label="Buscar" />
+        {search.query && <button type="button" onClick={() => search.setQuery('')} aria-label="Borrar búsqueda">✕</button>}
+      </label>
+      {search.searching && <p className="university-count" aria-live="polite">{search.found.length} de {total} coinciden.</p>}
+    </>
   )
+}
+
+/** Lleva al formulario de alta vacio y pone el cursor en su primer campo (ORION #41). */
+function goToForm(id: string) {
+  window.requestAnimationFrame(() => {
+    const form = document.getElementById(id)
+    form?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    form?.querySelector<HTMLElement>('input:not([disabled]), select:not([disabled])')?.focus({ preventScroll: true })
+  })
 }
 
 function ShowAllButton({ search, noun }: { search: ListSearchState; noun: string }) {
@@ -230,6 +262,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
   return (
     <section className="admin-section" id="carreras">
       <h2>Carreras <small className="admin-count">{careers.filter(isVisible).length} de {careers.length} las ve el estudiante</small></h2>
+      <button type="button" className="admin-add" onClick={() => { setEditing(null); goToForm('nueva-carrera') }}>+ Agregar carrera</button>
       <ListSearch search={search} total={careers.length} placeholder="Carrera, institución, área o estado" />
       <div className="admin-list">
         {search.visible.map((career) => (
@@ -251,7 +284,7 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
         {search.searching && search.found.length === 0 && <p className="empty-state">Ninguna carrera coincide con «{search.query.trim()}».</p>}
       </div>
       <ShowAllButton search={search} noun="carreras" />
-      <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-career'}>
+      <form id="nueva-carrera" ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-career'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva carrera'}</h3>
         <small>El estudiante solo ve el nombre de la carrera y su compatibilidad. Área, modalidad, duración, costo y fuente son de uso interno.</small>
         <input name="name" placeholder="Nombre oficial" defaultValue={editing?.name} required maxLength={150} />
@@ -307,8 +340,9 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
   }
 
   return (
-    <section className="admin-section">
+    <section className="admin-section" id="compatibilidades">
       <h2>Compatibilidades por dimensión (RIASEC) <small className="admin-count">{compatibilities.length} reglas</small></h2>
+      <button type="button" className="admin-add" onClick={() => { setEditing(null); goToForm('nueva-regla') }}>+ Agregar regla</button>
       <ListSearch search={search} total={compatibilities.length} placeholder="Carrera, institución o letra (R, I, A, S, E, C)" />
       <div className="admin-list">
         {search.visible.map((compatibility) => (
@@ -327,7 +361,7 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
         {search.searching && search.found.length === 0 && <p className="empty-state">Ninguna regla coincide con «{search.query.trim()}».</p>}
       </div>
       <ShowAllButton search={search} noun="reglas" />
-      <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-compatibility'}>
+      <form id="nueva-regla" ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-compatibility'}>
         <h3>{editing ? 'Editar regla' : 'Nueva regla'}</h3>
         <label>Carrera
           <select name="careerId" defaultValue={editing?.careerId ?? ''} required disabled={Boolean(editing)}>

@@ -170,6 +170,7 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 /* Al apretar "Editar" la pagina baja hasta el formulario: el margen evita que la cabecera fija lo
    tape, y el borde deja claro que se esta editando un registro existente. */
 .simple-form { scroll-margin-top: 6rem; }
+.admin-section { scroll-margin-top: 6rem; }
 .simple-form.editando { padding: 1.2rem; border: 2px solid var(--accent); border-radius: 14px; background: rgba(236, 47, 143, .08); }
 .simple-form h2, .simple-form h3 { color: var(--cream); }
 .simple-form label { display: grid; grid-template-columns: minmax(0, 1fr); gap: .4rem; color: var(--cream-muted); min-width: 0; }
@@ -285,6 +286,9 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 .university-card small { flex: none; color: var(--muted); }
 .university-more { display: block; margin: 1.2rem auto 0; padding: .75rem 1.4rem; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; background: transparent; color: var(--cream); font-weight: 600; cursor: pointer; }
 .university-more:hover { background: rgba(255, 255, 255, .1); }
+/* Mismo aspecto que "Ver mas", pero alineado a la izquierda bajo el titulo de la seccion (ORION #41). */
+.admin-add { margin: .3rem 0 0; padding: .55rem 1.2rem; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; background: transparent; color: var(--cream); font: inherit; font-weight: 600; cursor: pointer; }
+.admin-add:hover, .admin-add:focus-visible { background: rgba(255, 255, 255, .1); }
 
 /* Ventana interna con el sitio oficial. Fondo blanco: es el que esperan las paginas externas. */
 html:has(.site-window[open]) { overflow: hidden; }
