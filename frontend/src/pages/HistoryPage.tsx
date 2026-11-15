@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { appApi } from '../services/appApi'
 import type { HistoryEntry } from '../services/appApi'
 import { InterpretationDetail } from '../components/InterpretationDetail'
+import { formatDateTime } from '../services/dateFormat'
 
 type ScoreKey = 'rScore' | 'iScore' | 'aScore' | 'sScore' | 'eScore' | 'cScore'
 const dimensionLabels: [ScoreKey, string][] = [
@@ -34,7 +35,7 @@ export function HistoryPage() {
           {items.map((item) => (
             <details className="history-card" key={item.id}>
               <summary className="history-card-top">
-                <strong>{new Date(item.createdAtUtc).toLocaleString()}</strong>
+                <strong>{formatDateTime(item.createdAtUtc)}</strong>
                 {item.primaryCode && <span className="result-code-mini">{item.primaryCode}<small>{item.secondaryCode}</small></span>}
                 <span className="history-toggle-hint">Ver detalle ▾</span>
               </summary>

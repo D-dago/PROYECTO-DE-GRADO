@@ -28,7 +28,9 @@ export function RecommendationsPage() {
         </>
       )}
       {!error && !recommendation && <p className="status-message">Buscando opciones compatibles...</p>}
-      {recommendation && <UniversityLinks careers={recommendation.items} />}
+      {/* Igual que el resultado del test (ORION #40): todas las carreras afines a las dos letras del perfil y
+          busqueda por areas afines. */}
+      {recommendation && <UniversityLinks careers={recommendation.items} areaTerms={recommendation.interpretation.areaSearchTerms} profileLetters={recommendation.interpretation.code.slice(0, 2)} />}
     </main>
   )
 }

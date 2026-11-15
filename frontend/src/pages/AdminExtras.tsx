@@ -4,6 +4,7 @@ import { appApi } from '../services/appApi'
 import type { AdminQuestion, AdminResult } from '../services/appApi'
 import { InterpretationDetail } from '../components/InterpretationDetail'
 import { useFormularioDeEdicion } from '../components/useFormularioDeEdicion'
+import { formatDateTime } from '../services/dateFormat'
 
 const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
 
@@ -27,7 +28,7 @@ export function ResultsSection({ results, report }: { results: AdminResult[]; re
           <details className="admin-row admin-row-result" key={result.attemptId}>
             <summary className="admin-row-main">
               <strong>{result.studentName} · {result.primaryCode}{result.secondaryCode}</strong>
-              <small>{result.email} · {new Date(result.completedAtUtc).toLocaleString()} · R{result.r} I{result.i} A{result.a} S{result.s} E{result.e} C{result.c} (sobre {result.maxScore})</small>
+              <small>{result.email} · {formatDateTime(result.completedAtUtc)} · R{result.r} I{result.i} A{result.a} S{result.s} E{result.e} C{result.c} (sobre {result.maxScore})</small>
             </summary>
             <div className="admin-result-detail">
               <h3>¿Qué significa este perfil?</h3>

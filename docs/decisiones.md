@@ -193,3 +193,9 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Decisión:** las secciones Carreras y Compatibilidades del panel tienen un buscador (todas las palabras escritas, sin importar tildes: nombre, institución, área, estado o letra RIASEC). Sin búsqueda muestran las primeras 25 filas y un botón para ver todas. Las reglas se ordenan por carrera e institución, así las de una misma carrera quedan juntas. El diseño no cambia: se usan los mismos campos y el mismo botón que ya existían.
 
 **Motivo:** con el catálogo completo (256 carreras y 510 reglas) el panel mostraba todo a la vez y medía unos 218.000 px de alto en el celular. Ahora mide unos 40.000 px (21.000 px en la computadora).
+
+## 2026-11-15: «Dónde estudiar» igual al resultado y fechas sin segundos (ORION #40)
+
+**Decisión:** la página «Dónde estudiar tu carrera» (`/recomendaciones`) usa la misma lista que el resultado del test (ORION #34): todas las carreras afines a las dos letras del perfil, aparte las de menor afinidad, y búsqueda por áreas afines. Las fechas del historial y de los resultados del panel se muestran sin segundos («15/11/2026, 10:18»).
+
+**Motivo:** revisión de mejoras autorizada por el usuario. Esa página mostraba solo 8 carreras y escondía el resto, distinto al resultado; los segundos no aportan nada.
