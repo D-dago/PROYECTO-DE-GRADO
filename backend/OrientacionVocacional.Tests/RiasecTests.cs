@@ -33,11 +33,12 @@ public sealed class RiasecTests
         Assert.Equal(17, legacy.Count);
         Assert.All(legacy, question => Assert.Contains(question.Dimension, new[] { "H", "D" }));
         Assert.All(legacy, question => Assert.True(question.Order >= 1000));
-        // Banco corregido por Ch'iti Wasi (revision de Gabriela Lino): todas preguntan por intereses y solo
-        // R02, R03, I09 y A02 conservan un ejemplo, tras "Ejemplo:".
+        // Banco corregido por Ch'iti Wasi (revision de Gabriela Lino): todas preguntan por intereses y ninguna
+        // lleva ejemplo, para que no guie la respuesta (ORION #37).
         Assert.All(active, question => Assert.StartsWith("¿Qué tanto te interesa", question.Text));
         Assert.All(active, question => Assert.DoesNotContain("(ej.:", question.Text));
-        Assert.Equal(new[] { "A02", "I09", "R02", "R03" }, active.Where(question => question.Text.Contains("Ejemplo:")).Select(question => question.Code).Order());
+        Assert.All(active, question => Assert.DoesNotContain("Ejemplo", question.Text));
+        Assert.All(active, question => Assert.EndsWith("?", question.Text));
         Assert.Equal(active.Count, active.Select(question => question.Text).Distinct().Count());
     }
 

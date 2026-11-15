@@ -173,3 +173,9 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Decisión:** el sorteo de cada intento sigue siendo de 4 preguntas al azar por área entre las activas, pero primero entre las que ese estudiante recibió menos veces en sus intentos anteriores. Así el segundo intento no repite ninguna pregunta (quedan 6 sin ver por área) y con el tercero el estudiante ya recorrió las 10 de cada área (4 + 4 + 2).
 
 **Motivo:** el usuario pidió usar todas las preguntas del banco, al azar dentro de cada área. Con el sorteo puro, un estudiante podía recibir de nuevo preguntas que ya había respondido y no llegar nunca a otras.
+
+## 2026-11-15: ninguna pregunta lleva ejemplo (ORION #37)
+
+**Decisión:** se quitaron los ejemplos de R02, R03, I09 y A02, los únicos que quedaban. El texto de cada pregunta no cambia, salvo que pierde el ejemplo. Migración `QuitarEjemplosRestantes`, aplicada en Neon y en la base local, con respaldo previo de las preguntas en `respaldos/`.
+
+**Motivo:** el usuario vio una pregunta con ejemplo en el test y eligió quitarlos todos, como dice el mensaje de la psicopedagoga: «se eliminan los ejemplos para que no guíen las respuestas». En la columna amarilla del Word esas 4 filas tenían un ejemplo reescrito; se priorizó el criterio general de la revisión.

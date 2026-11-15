@@ -5,16 +5,15 @@ namespace OrientacionVocacional.Domain.Seed;
 public static class RiasecQuestionSeed
 {
     // Banco corregido por Gabriela Lino (Ch'iti Wasi, 14-nov-2026, ORION #30): todas empiezan con
-    // "¿Que tanto te interesa...?" (preguntan por intereses, no por rasgos). Se quitaron los ejemplos para
-    // que no guien las respuestas; solo R02, R03, I09 y A02 conservan uno, reescrito por la revision, tras
-    // "Ejemplo:". La pantalla del test lo muestra debajo, en letra secundaria. I05 conserva la pregunta
-    // anterior sin ejemplo porque en el Word repetia el texto de I04.
+    // "¿Que tanto te interesa...?" (preguntan por intereses, no por rasgos) y ninguna lleva ejemplo, para
+    // que no guien las respuestas (los 4 que quedaban en R02, R03, I09 y A02 se quitaron en ORION #37).
+    // I05 conserva la pregunta anterior porque en el Word repetia el texto de I04.
     private static readonly (string Dimension, string[] Texts)[] Dimensions =
     [
         ("R", [
             "¿Qué tanto te interesa reparar y/o construir objetos utilizando herramientas?",
-            "¿Qué tanto te interesa aprender una actividad mediante la práctica? Ejemplo: aprender a utilizar un celular sin leer el manual.",
-            "¿Qué tanto te interesa desarmar objetos para descubrir cómo funcionan? Ejemplo: explorar piezas o mecanismos de algún aparato electrónico.",
+            "¿Qué tanto te interesa aprender una actividad mediante la práctica?",
+            "¿Qué tanto te interesa desarmar objetos para descubrir cómo funcionan?",
             "¿Qué tanto te interesa hacer trabajos manuales que requieren cuidado y atención?",
             "¿Qué tanto te interesa utilizar máquinas o equipos para realizar diferentes actividades?",
             "¿Qué tanto te interesa trabajar al aire libre de forma manual o práctica?",
@@ -32,12 +31,12 @@ public static class RiasecQuestionSeed
             "¿Qué tanto te interesa investigar por qué ocurren las cosas?",
             "¿Qué tanto te interesa investigar qué causa un problema antes de buscar una solución?",
             "¿Qué tanto te interesa explorar temas relacionados con la ciencia?",
-            "¿Qué tanto te interesa comprender cómo funciona un equipo antes de utilizarlo? Ejemplo: leer el manual antes de utilizar un aparato.",
+            "¿Qué tanto te interesa comprender cómo funciona un equipo antes de utilizarlo?",
             "¿Qué tanto te interesa buscar información para conocer más sobre un tema que te causa curiosidad?"
         ]),
         ("A", [
             "¿Qué tanto te interesa crear dibujos o diseños a partir de tus propias ideas?",
-            "¿Qué tanto te interesa imaginar ideas nuevas y diferentes para crear algo? Ejemplo: inventar alguna dinámica para una reunión.",
+            "¿Qué tanto te interesa imaginar ideas nuevas y diferentes para crear algo?",
             "¿Qué tanto te interesa combinar colores, formas y figuras para crear diseños?",
             "¿Qué tanto te interesa crear videos para contar una historia o transmitir una idea?",
             "¿Qué tanto te interesa expresar tus ideas mediante actividades artísticas?",

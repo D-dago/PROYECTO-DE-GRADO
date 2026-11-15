@@ -309,7 +309,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 7,
-                            Text = "¿Qué tanto te interesa aprender una actividad mediante la práctica? Ejemplo: aprender a utilizar un celular sin leer el manual."
+                            Text = "¿Qué tanto te interesa aprender una actividad mediante la práctica?"
                         },
                         new
                         {
@@ -327,7 +327,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "A",
                             IsActive = true,
                             Order = 9,
-                            Text = "¿Qué tanto te interesa imaginar ideas nuevas y diferentes para crear algo? Ejemplo: inventar alguna dinámica para una reunión."
+                            Text = "¿Qué tanto te interesa imaginar ideas nuevas y diferentes para crear algo?"
                         },
                         new
                         {
@@ -363,7 +363,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "R",
                             IsActive = true,
                             Order = 13,
-                            Text = "¿Qué tanto te interesa desarmar objetos para descubrir cómo funcionan? Ejemplo: explorar piezas o mecanismos de algún aparato electrónico."
+                            Text = "¿Qué tanto te interesa desarmar objetos para descubrir cómo funcionan?"
                         },
                         new
                         {
@@ -696,7 +696,7 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                             Dimension = "I",
                             IsActive = true,
                             Order = 50,
-                            Text = "¿Qué tanto te interesa comprender cómo funciona un equipo antes de utilizarlo? Ejemplo: leer el manual antes de utilizar un aparato."
+                            Text = "¿Qué tanto te interesa comprender cómo funciona un equipo antes de utilizarlo?"
                         },
                         new
                         {
