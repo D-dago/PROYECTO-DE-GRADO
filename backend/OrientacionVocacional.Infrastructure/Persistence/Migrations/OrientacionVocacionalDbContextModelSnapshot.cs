@@ -1125,6 +1125,13 @@ namespace OrientacionVocacional.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AvatarStyle")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("hombre");
+
                     b.Property<int>("Coins")
                         .HasColumnType("integer");
 

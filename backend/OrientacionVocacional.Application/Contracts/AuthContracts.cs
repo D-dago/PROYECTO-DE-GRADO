@@ -39,7 +39,8 @@ public sealed record UserProfileResponse(
     string? School,
     int? GraduationYear,
     int Coins,
-    string EquippedSkin);
+    string EquippedSkin,
+    string AvatarStyle = "hombre");
 
 public sealed class UpdateStudentProfileRequest
 {

@@ -19,6 +19,29 @@ public sealed class SkinTests
     }
 
     [Fact]
+    public async Task The_avatar_starts_as_male_and_can_switch_to_female_and_back_for_free()
+    {
+        await using var context = TestSupport.CreateContext();
+        var userId = await TestSupport.CreatePersistedStudentAsync(context);
+        var service = new SkinService(context);
+        var coins = (await context.Users.SingleAsync(user => user.Id == userId)).Coins;
+
+        Assert.Equal("hombre", (await service.GetShopAsync(userId, CancellationToken.None))!.AvatarStyle);
+
+        var female = await service.SetAvatarStyleAsync(userId, "mujer", CancellationToken.None);
+        var invalid = await service.SetAvatarStyleAsync(userId, "otro", CancellationToken.None);
+        var male = await service.SetAvatarStyleAsync(userId, "hombre", CancellationToken.None);
+
+        Assert.True(female.Success);
+        Assert.Equal("mujer", female.Shop!.AvatarStyle);
+        Assert.Equal("basic", female.Shop.EquippedSkin); // la ropa no cambia
+        Assert.False(invalid.Success);
+        Assert.True(male.Success);
+        Assert.Equal("hombre", (await service.GetShopAsync(userId, CancellationToken.None))!.AvatarStyle);
+        Assert.Equal(coins, (await context.Users.SingleAsync(user => user.Id == userId)).Coins); // es gratis
+    }
+
+    [Fact]
     public async Task Buying_without_enough_coins_is_rejected_and_keeps_the_balance()
     {
         await using var context = TestSupport.CreateContext();

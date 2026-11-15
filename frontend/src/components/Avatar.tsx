@@ -56,12 +56,21 @@ function outfitFor(skin: string): Outfit {
   }
 }
 
-export function Avatar({ skin, size = 120 }: { skin: string; size?: number }) {
+const HAIR = '#2b1b33'
+
+/**
+ * body: "hombre" (pelo corto, el avatar de siempre) o "mujer" (pelo largo y pestanas). Las skins son la misma
+ * ropa para los dos (ORION #38).
+ */
+export function Avatar({ skin, size = 120, body = 'hombre' }: { skin: string; size?: number; body?: string }) {
   const outfit = outfitFor(skin)
   const tone = '#f2c6a0'
+  const female = body === 'mujer'
 
   return (
-    <svg width={size} height={(size * 4) / 3} viewBox="0 0 120 160" role="img" aria-label={`Avatar con la skin ${skin}`}>
+    <svg width={size} height={(size * 4) / 3} viewBox="0 0 120 160" role="img" aria-label={`Avatar ${female ? 'mujer' : 'hombre'} con la skin ${skin}`}>
+      {/* Pelo largo por detras: lo tapan los brazos y el torso, y se ve a los lados del cuello. */}
+      {female && <path d="M33,40 C29,6 91,6 87,40 L93,84 Q60,96 27,84 Z" fill={HAIR} />}
       {!outfit.longSkirt && <><rect x="38" y="116" width="20" height="36" rx="7" fill={outfit.legs} /><rect x="62" y="116" width="20" height="36" rx="7" fill={outfit.legs} /></>}
       <ellipse cx="48" cy="153" rx="12" ry="5" fill="#241733" />
       <ellipse cx="72" cy="153" rx="12" ry="5" fill="#241733" />
@@ -73,9 +82,17 @@ export function Avatar({ skin, size = 120 }: { skin: string; size?: number }) {
       <circle cx="29" cy="118" r="8" fill={tone} />
       <circle cx="91" cy="118" r="8" fill={tone} />
       <circle cx="60" cy="40" r="25" fill={tone} />
-      <path d="M35,38 C35,12 85,12 85,38 C78,28 42,28 35,38 Z" fill="#2b1b33" />
+      {female
+        ? <>
+            {/* Flequillo de lado y mechones que enmarcan la cara. */}
+            <path d="M34,40 C33,4 87,4 86,40 C80,25 62,21 49,29 C44,32 39,36 34,40 Z" fill={HAIR} />
+            <path d="M35,35 C32,49 33,60 38,67 L42,65 C38,56 38,46 40,37 Z" fill={HAIR} />
+            <path d="M85,35 C88,49 87,60 82,67 L78,65 C82,56 82,46 80,37 Z" fill={HAIR} />
+          </>
+        : <path d="M35,38 C35,12 85,12 85,38 C78,28 42,28 35,38 Z" fill={HAIR} />}
       <circle cx="51" cy="43" r="2.6" fill="#2b1b33" />
       <circle cx="69" cy="43" r="2.6" fill="#2b1b33" />
+      {female && <path d="M48.8,41.4 L46.4,39.6 M71.2,41.4 L73.6,39.6" stroke={HAIR} strokeWidth="1.5" strokeLinecap="round" />}
       <circle cx="45" cy="50" r="4" fill="#ff8fb5" opacity=".35" />
       <circle cx="75" cy="50" r="4" fill="#ff8fb5" opacity=".35" />
       <path d="M52,52 Q60,59 68,52" stroke="#2b1b33" strokeWidth="2" fill="none" strokeLinecap="round" />

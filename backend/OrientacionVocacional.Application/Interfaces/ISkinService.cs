@@ -7,4 +7,5 @@ public interface ISkinService
     Task<SkinShopResponse?> GetShopAsync(Guid userId, CancellationToken cancellationToken);
     Task<(bool Success, string? Error, SkinShopResponse? Shop)> BuyAsync(Guid userId, string skinId, CancellationToken cancellationToken);
     Task<(bool Success, string? Error, SkinShopResponse? Shop)> EquipAsync(Guid userId, string skinId, CancellationToken cancellationToken);
+    Task<(bool Success, string? Error, SkinShopResponse? Shop)> SetAvatarStyleAsync(Guid userId, string style, CancellationToken cancellationToken);
 }

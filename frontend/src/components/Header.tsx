@@ -23,7 +23,7 @@ export function Header() {
   const role = token ? getTokenRole(token) : ''
   const isStudent = role === 'ESTUDIANTE'
   const path = window.location.pathname
-  const [profile, setProfile] = useState<{ firstName: string; coins: number; equippedSkin: string } | null>(null)
+  const [profile, setProfile] = useState<{ firstName: string; coins: number; equippedSkin: string; avatarStyle?: string } | null>(null)
   // El menu vive detras del boton de tres rayitas, en celular y en computadora: asi el encabezado
   // ocupa una sola linea y no se come media pantalla del celular.
   const [open, setOpen] = useState(false)
@@ -79,7 +79,7 @@ export function Header() {
           <nav id={panelId} className={`menu-panel${open ? ' is-open' : ''}`} aria-label="Menú principal" hidden={!open}>
             <div className="menu-account">
               {isStudent && profile
-                ? <a href="/skins" className="avatar-mini" title="Cambiar skin" onClick={() => setOpen(false)}><Avatar skin={profile.equippedSkin} size={30} /></a>
+                ? <a href="/skins" className="avatar-mini" title="Cambiar skin" onClick={() => setOpen(false)}><Avatar skin={profile.equippedSkin} body={profile.avatarStyle} size={30} /></a>
                 : <span className="avatar-mini menu-account-initial" aria-hidden="true">{name.slice(0, 1) || '·'}</span>}
               <div className="menu-account-text">
                 <strong>{name || 'Mi cuenta'}</strong>

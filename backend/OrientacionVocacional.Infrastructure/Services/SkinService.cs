@@ -49,6 +49,20 @@ public sealed class SkinService(OrientacionVocacionalDbContext dbContext) : ISki
         return (true, null, await BuildShopAsync(user, cancellationToken));
     }
 
+    /// <summary>Cambia el cuerpo del avatar (hombre o mujer). Es gratis y se puede cambiar cuando se quiera (ORION #38).</summary>
+    public async Task<(bool Success, string? Error, SkinShopResponse? Shop)> SetAvatarStyleAsync(
+        Guid userId, string style, CancellationToken cancellationToken)
+    {
+        if (!AvatarStyles.IsValid(style)) return (false, "El avatar solo puede ser hombre o mujer.", null);
+
+        var user = await dbContext.Users.SingleOrDefaultAsync(candidate => candidate.Id == userId, cancellationToken);
+        if (user is null) return (false, "El usuario no existe.", null);
+
+        user.AvatarStyle = style;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return (true, null, await BuildShopAsync(user, cancellationToken));
+    }
+
     // La skin gratis (precio 0) cuenta como propia sin necesidad de registrarla.
     private async Task<bool> IsOwnedAsync(Guid userId, SkinDefinition skin, CancellationToken cancellationToken) =>
         skin.Price == 0 || await dbContext.UserSkins.AnyAsync(owned => owned.UserId == userId && owned.SkinId == skin.Id, cancellationToken);
@@ -66,6 +80,6 @@ public sealed class SkinService(OrientacionVocacionalDbContext dbContext) : ISki
                 Owned: skin.Price == 0 || ownedIds.Contains(skin.Id),
                 Equipped: user.EquippedSkin == skin.Id))
             .ToList();
-        return new SkinShopResponse(user.Coins, user.EquippedSkin, skins);
+        return new SkinShopResponse(user.Coins, user.EquippedSkin, skins, user.AvatarStyle);
     }
 }

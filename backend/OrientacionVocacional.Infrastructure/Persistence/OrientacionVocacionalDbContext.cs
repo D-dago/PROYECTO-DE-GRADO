@@ -46,6 +46,7 @@ public sealed class OrientacionVocacionalDbContext(DbContextOptions<OrientacionV
             entity.Property(user => user.LastName).HasMaxLength(100).IsRequired();
             entity.HasIndex(user => user.Email).IsUnique();
             entity.Property(user => user.EquippedSkin).HasMaxLength(40).HasDefaultValue("basic").IsRequired();
+            entity.Property(user => user.AvatarStyle).HasMaxLength(10).HasDefaultValue(AvatarStyles.Male).IsRequired();
             entity.HasOne(user => user.Role)
                 .WithMany(role => role.Users)
                 .HasForeignKey(user => user.RoleId)

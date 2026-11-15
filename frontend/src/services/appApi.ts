@@ -6,9 +6,11 @@ export type DimensionInfo = { code: string; name: string; description: string; c
 // areaSearchTerms: por cada area sugerida, los terminos con que el buscador encuentra sus carreras (ORION #32).
 export type ProfileInterpretation = { code: string; dimensions: DimensionInfo[]; summary: string; suggestedAreas: string[]; areaSearchTerms?: Record<string, string[]> }
 export type Recommendation = { items: Career[]; historyId: string; aiMessage?: string; interpretation: ProfileInterpretation; aiGenerated: boolean }
-export type StudentProfile = { userId: string; email: string; firstName: string; lastName: string; role: string; phone?: string; city?: string; school?: string; graduationYear?: number; coins: number; equippedSkin: string }
+export type StudentProfile = { userId: string; email: string; firstName: string; lastName: string; role: string; phone?: string; city?: string; school?: string; graduationYear?: number; coins: number; equippedSkin: string; avatarStyle?: AvatarStyle }
 export type Skin = { id: string; name: string; description: string; price: number; owned: boolean; equipped: boolean }
-export type SkinShop = { coins: number; equippedSkin: string; skins: Skin[] }
+// Cuerpo del avatar (ORION #38): se elige gratis en Skins.
+export type AvatarStyle = 'hombre' | 'mujer'
+export type SkinShop = { coins: number; equippedSkin: string; skins: Skin[]; avatarStyle?: AvatarStyle }
 export type Compatibility = { id: string; careerId: string; careerName: string; dimension: string; compatibilityLevel: number; rule: string }
 export type HistoryEntry = {
   id: string; testAttemptId: string; createdAtUtc: string; filterSummary?: string
@@ -35,6 +37,7 @@ export const appApi = {
   skins: () => request<SkinShop>('/student/skins'),
   buySkin: (id: string) => request<SkinShop>(`/student/skins/${id}/buy`, { method: 'POST' }),
   equipSkin: (id: string) => request<SkinShop>(`/student/skins/${id}/equip`, { method: 'POST' }),
+  setAvatarStyle: (style: AvatarStyle) => request<SkinShop>(`/student/skins/avatar/${style}`, { method: 'POST' }),
   firebaseConfig: () => request<{ apiKey: string; authDomain: string; projectId: string; appId: string }>('/auth/firebase-config'),
   googleLogin: (idToken: string) => request<{ accessToken: string; role: string }>('/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
   getProfile: () => request<StudentProfile>('/student/profile'),

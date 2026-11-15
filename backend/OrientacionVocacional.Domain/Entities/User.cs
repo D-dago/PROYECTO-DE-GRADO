@@ -10,6 +10,8 @@ public sealed class User
     public bool IsActive { get; set; } = true;
     public int Coins { get; set; }
     public string EquippedSkin { get; set; } = "basic";
+    // Cuerpo del avatar: "hombre" o "mujer" (ORION #38).
+    public string AvatarStyle { get; set; } = Constants.AvatarStyles.Male;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public Guid RoleId { get; set; }
     public Role Role { get; set; } = null!;

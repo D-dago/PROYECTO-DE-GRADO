@@ -20,7 +20,7 @@ Para comprobar antes de empezar que todo está encendido: `GET /health` debe res
 6. Abre `/recomendaciones`; inicialmente puede mostrar que no existen alternativas si el catálogo está vacío.
 7. Muestra las carreras compatibles, con las universidades e institutos de Cochabamba que las ofrecen, y abre un sitio oficial en la ventana interna.
 8. Abre `/historial`: hay una entrada por test terminado y se despliega con el detalle completo del perfil.
-9. Abre `/skins` para mostrar las monedas ganadas y el cambio de avatar.
+9. Abre `/skins` para mostrar las monedas ganadas, elegir el avatar hombre o mujer (gratis) y cambiar su ropa.
 10. Cierra sesión con el botón "Salir".
 
 ## Flujo administrador

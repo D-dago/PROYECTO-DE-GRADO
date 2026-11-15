@@ -179,3 +179,11 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Decisión:** se quitaron los ejemplos de R02, R03, I09 y A02, los únicos que quedaban. El texto de cada pregunta no cambia, salvo que pierde el ejemplo. Migración `QuitarEjemplosRestantes`, aplicada en Neon y en la base local, con respaldo previo de las preguntas en `respaldos/`.
 
 **Motivo:** el usuario vio una pregunta con ejemplo en el test y eligió quitarlos todos, como dice el mensaje de la psicopedagoga: «se eliminan los ejemplos para que no guíen las respuestas». En la columna amarilla del Word esas 4 filas tenían un ejemplo reescrito; se priorizó el criterio general de la revisión.
+
+## 2026-11-15: avatar hombre o mujer (ORION #38)
+
+**Decisión:** en Skins el estudiante elige gratis si su avatar es hombre o mujer, y lo puede cambiar cuando quiera. La elección se guarda en `users.AvatarStyle` (`hombre` o `mujer`, por defecto `hombre`, así los estudiantes que ya existían conservan su avatar), se ve en el encabezado, la vista previa y las tarjetas de skins, y la ropa equipada no cambia. La versión mujer tiene pelo largo, flequillo de lado y pestañas; las 9 skins sirven para las dos. Migración `AvatarHombreMujer` (agrega la columna con su valor por defecto).
+
+**Motivo:** el usuario preguntó cómo cambiar el avatar de hombre a mujer y pidió avatares de mujer: hasta ahora había un solo cuerpo.
+
+**Publicación:** la migración debe aplicarse en Neon **antes** de publicar el código. El código nuevo lee la columna `AvatarStyle`, y sin ella fallarían el perfil y las skins.

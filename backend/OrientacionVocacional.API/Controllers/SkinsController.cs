@@ -33,5 +33,13 @@ public sealed class SkinsController(ISkinService skinService) : ControllerBase
         return result.Success ? Ok(result.Shop) : BadRequest(new { message = result.Error });
     }
 
+    // Cuerpo del avatar: "hombre" o "mujer" (ORION #38).
+    [HttpPost("avatar/{style}")]
+    public async Task<ActionResult<SkinShopResponse>> SetAvatarStyle(string style, CancellationToken cancellationToken)
+    {
+        var result = await skinService.SetAvatarStyleAsync(GetUserId(), style, cancellationToken);
+        return result.Success ? Ok(result.Shop) : BadRequest(new { message = result.Error });
+    }
+
     private Guid GetUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

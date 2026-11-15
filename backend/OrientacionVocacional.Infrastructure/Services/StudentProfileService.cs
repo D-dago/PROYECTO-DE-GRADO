@@ -52,5 +52,6 @@ public sealed class StudentProfileService(OrientacionVocacionalDbContext dbConte
         user.StudentProfile?.School,
         user.StudentProfile?.GraduationYear,
         user.Coins,
-        user.EquippedSkin);
+        user.EquippedSkin,
+        user.AvatarStyle);
 }

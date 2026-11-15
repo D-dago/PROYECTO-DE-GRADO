@@ -97,6 +97,10 @@ h1 { color: var(--cream); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .98;
 
 /* Skins */
 .skins-layout { display: grid; grid-template-columns: 15rem 1fr; gap: 1.6rem; margin-top: 1.6rem; align-items: start; }
+.avatar-body-switch { display: inline-flex; margin-top: .8rem; padding: .25rem; border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px; gap: .25rem; }
+.avatar-body-switch button { min-width: 5.5rem; padding: .45rem 1rem; border: 0; border-radius: 999px; background: transparent; color: var(--cream); font: inherit; font-weight: 600; cursor: pointer; }
+.avatar-body-switch button.is-active { background: var(--accent); color: #fff; }
+.avatar-body-switch button:not(.is-active):hover { background: rgba(255, 255, 255, .1); }
 .skin-preview { display: grid; justify-items: center; gap: .8rem; padding: 1.4rem 1rem; border-radius: 22px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); position: sticky; top: 6rem; text-align: center; }
 .skin-preview strong { color: var(--cream); }
 .skin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: 1rem; }
