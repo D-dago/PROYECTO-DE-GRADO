@@ -208,3 +208,12 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 - El buscador usa el mismo diseño que el de carreras del resultado del test (lupa, ✕ y conteo debajo).
 - Cuando terminan de cargar las listas, el panel se ubica en la sección pedida (`/admin#carreras`, `#compatibilidades`), también al elegirla en el menú.
 - Botones «+ Agregar carrera» y «+ Agregar regla» bajo el título de cada sección, y opción «Nueva carrera» en el menú: llevan al formulario vacío con el cursor en el primer campo.
+
+## 2026-11-15: la ventana del sitio oficial ya no se queda «Cargando…» (ORION #42)
+
+**Problema:** el sitio de TECBA se quedaba «Cargando el sitio oficial…» más de 30 minutos. https://tecba.edu.bo redirige a http://web.tecba.tech, y el navegador no muestra una página http dentro de una https. El servidor no lo detectaba porque .NET no sigue una redirección de https a http y leía la primera respuesta, que no prohíbe nada. Además, muchos sitios tardan de 10 a más de 40 s (medido el 2026-11-15: UCB 20 s, ULAT 32 s, UMSS, UPDS e INFOCAL más de 40 s, UPAL error 522), y la ventana esperaba sin límite.
+
+**Decisión:**
+- El servidor considera que un sitio no se puede mostrar dentro si redirige a una dirección http, y ofrece abrirlo en otra pestaña.
+- Si un sitio no termina de cargar en 12 s, la ventana avisa que está tardando y ofrece abrirlo en otra pestaña, sin dejar de cargarlo: si termina después, se ve normalmente.
+- El aviso de bloqueo dice «no se puede mostrar dentro de esta página» en vez de «no permite»: no siempre es una prohibición del sitio.

@@ -33,7 +33,7 @@ public sealed class SiteFramingService(OrientacionVocacionalDbContext db, IHttpC
             request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (compatible; OrientacionVocacional/1.0)");
             using var response = await httpClientFactory.CreateClient(HttpClientName)
                 .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            var embeddable = AllowsFraming(
+            var embeddable = !RedirectsToInsecure(response) && AllowsFraming(
                 response.Headers.TryGetValues("X-Frame-Options", out var frameOptions) ? frameOptions : [],
                 response.Headers.TryGetValues("Content-Security-Policy", out var policies) ? policies : []);
             return cache.Set(cacheKey, new SiteCheckResponse(embeddable), TimeSpan.FromHours(6));
@@ -45,6 +45,22 @@ public sealed class SiteFramingService(OrientacionVocacionalDbContext db, IHttpC
             // Se reintenta pronto para no castigar a un sitio que solo tuvo un mal momento.
             return cache.Set(cacheKey, new SiteCheckResponse(false, Verified: false), TimeSpan.FromMinutes(1));
         }
+    }
+
+    /// <summary>
+    /// Si el sitio lleva a una direccion http (ORION #42). Esta web se sirve por https y el navegador no muestra
+    /// una pagina http dentro de ella: la ventana se quedaba "Cargando..." para siempre (TECBA redirige de
+    /// https://tecba.edu.bo a http://web.tecba.tech). .NET no sigue una redireccion de https a http, asi que aqui
+    /// llega esa respuesta 3xx con su destino.
+    /// </summary>
+    public static bool RedirectsToInsecure(HttpResponseMessage response)
+    {
+        var requested = response.RequestMessage?.RequestUri;
+        if (requested?.Scheme == Uri.UriSchemeHttp) return true;
+        var status = (int)response.StatusCode;
+        if (status is < 300 or >= 400 || response.Headers.Location is not { } location) return false;
+        var target = location.IsAbsoluteUri ? location : requested is null ? null : new Uri(requested, location);
+        return target?.Scheme == Uri.UriSchemeHttp;
     }
 
     /// <summary>

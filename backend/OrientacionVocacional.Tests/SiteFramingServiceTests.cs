@@ -62,6 +62,40 @@ public sealed class SiteFramingServiceTests
     }
 
     [Fact]
+    public async Task Site_that_redirects_to_http_is_not_shown_inside()
+    {
+        // Como TECBA: https://tecba.edu.bo redirige a http://web.tecba.tech (ORION #42).
+        await using var context = TestSupport.CreateContext();
+        var (service, id) = await CrearAsync(context, new HandlerDePrueba(() =>
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.MovedPermanently);
+            response.Headers.Location = new Uri("http://web.tecba.tech/");
+            return response;
+        }));
+
+        var result = await service.CheckInstitutionAsync(id, CancellationToken.None);
+
+        Assert.False(result!.Embeddable);
+        Assert.True(result.Verified);
+    }
+
+    [Fact]
+    public async Task Redirect_to_https_keeps_the_site_inside()
+    {
+        await using var context = TestSupport.CreateContext();
+        var (service, id) = await CrearAsync(context, new HandlerDePrueba(() =>
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.Found);
+            response.Headers.Location = new Uri("/cochabamba/", UriKind.Relative);
+            return response;
+        }));
+
+        var result = await service.CheckInstitutionAsync(id, CancellationToken.None);
+
+        Assert.True(result!.Embeddable);
+    }
+
+    [Fact]
     public async Task Answer_is_reused_without_calling_the_site_again()
     {
         await using var context = TestSupport.CreateContext();
