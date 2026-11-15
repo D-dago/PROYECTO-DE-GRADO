@@ -6,6 +6,7 @@ import type { AdminQuestion, AdminResult, AdminUser, Career, Compatibility, Inst
 import { QuestionsSection, ResultsSection } from './AdminExtras'
 import { useFormularioDeEdicion } from '../components/useFormularioDeEdicion'
 import { useLiveData } from '../services/liveData'
+import { careerKey } from '../services/careerSearch'
 
 const dashboardLabels: [keyof NonNullable<DashboardData>, string][] = [['students', 'Estudiantes registrados'], ['institutions', 'Instituciones'], ['careers', 'Carreras'], ['compatibilityRules', 'Reglas de compatibilidad']]
 const dimensionOptions = ['R', 'I', 'A', 'S', 'E', 'C']
@@ -147,12 +148,51 @@ function InstitutionsSection({ institutions, onChanged, report }: { institutions
   )
 }
 
+const SHORT_LIST = 25
+
+/**
+ * Buscador y lista corta para las secciones largas del panel (ORION #39): con el catalogo completo, Carreras y
+ * Compatibilidades mostraban cientos de filas seguidas. Busca todas las palabras escritas, sin importar tildes.
+ */
+function useListSearch<T>(items: T[], text: (item: T) => string) {
+  const [query, setQuery] = useState('')
+  const [showAll, setShowAll] = useState(false)
+  const words = careerKey(query).split(/\s+/).filter(Boolean)
+  const searching = words.length > 0
+  const found = searching ? items.filter((item) => { const haystack = careerKey(text(item)); return words.every((word) => haystack.includes(word)) }) : items
+  const visible = searching || showAll ? found : found.slice(0, SHORT_LIST)
+  return { query, setQuery, showAll, setShowAll, searching, found, visible }
+}
+
+type ListSearchState = { query: string; setQuery: (query: string) => void; showAll: boolean; setShowAll: (update: (current: boolean) => boolean) => void; searching: boolean; found: unknown[] }
+
+function ListSearch({ search, total, placeholder }: { search: ListSearchState; total: number; placeholder: string }) {
+  return (
+    <label>Buscar
+      <input type="search" value={search.query} onChange={(event) => search.setQuery(event.target.value)} placeholder={placeholder} />
+      {search.searching && <small className="admin-count">{search.found.length} de {total} coinciden</small>}
+    </label>
+  )
+}
+
+function ShowAllButton({ search, noun }: { search: ListSearchState; noun: string }) {
+  if (search.searching || search.found.length <= SHORT_LIST) return null
+  return (
+    <button type="button" className="university-more" onClick={() => search.setShowAll((current) => !current)}>
+      {search.showAll ? `Ver solo las primeras ${SHORT_LIST}` : `Ver ${search.found.length === 1 ? 'la' : 'las'} ${search.found.length} ${noun}`}
+    </button>
+  )
+}
+
 function CareersSection({ careers, institutions, onChanged, report }: { careers: Career[]; institutions: Institution[]; onChanged: () => void; report: (message: string, isError?: boolean) => void }) {
   const [editing, setEditing] = useState<Career | null>(null)
   const formulario = useFormularioDeEdicion(editing)
   // Una carrera activa de una institucion inactiva no la ve nadie: marcarla "activa" hacia creer lo contrario.
   const institutionActive = new Map(institutions.map((item) => [item.id, item.isActive]))
   const isVisible = (career: Career) => career.isActive && institutionActive.get(career.institutionId) !== false
+  // Agrupadas por institucion y en orden fijo: la fila no se mueve al hacer clic.
+  const sorted = [...careers].sort((a, b) => a.institutionName.localeCompare(b.institutionName) || a.name.localeCompare(b.name))
+  const search = useListSearch(sorted, (career) => `${career.name} ${career.institutionName} ${career.area ?? ''} ${career.status}`)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -190,9 +230,9 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
   return (
     <section className="admin-section" id="carreras">
       <h2>Carreras <small className="admin-count">{careers.filter(isVisible).length} de {careers.length} las ve el estudiante</small></h2>
+      <ListSearch search={search} total={careers.length} placeholder="Carrera, institución, área o estado" />
       <div className="admin-list">
-        {/* Agrupadas por institucion y en orden fijo: la fila no se mueve al hacer clic. */}
-        {[...careers].sort((a, b) => a.institutionName.localeCompare(b.institutionName) || a.name.localeCompare(b.name)).map((career) => (
+        {search.visible.map((career) => (
           <div className="admin-row" key={career.id}>
             <div className="admin-row-main">
               <strong>{career.name}</strong>
@@ -208,7 +248,9 @@ function CareersSection({ careers, institutions, onChanged, report }: { careers:
           </div>
         ))}
         {careers.length === 0 && <p className="empty-state">Todavía no hay carreras cargadas.</p>}
+        {search.searching && search.found.length === 0 && <p className="empty-state">Ninguna carrera coincide con «{search.query.trim()}».</p>}
       </div>
+      <ShowAllButton search={search} noun="carreras" />
       <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-career'}>
         <h3>{editing ? `Editar: ${editing.name}` : 'Nueva carrera'}</h3>
         <small>El estudiante solo ve el nombre de la carrera y su compatibilidad. Área, modalidad, duración, costo y fuente son de uso interno.</small>
@@ -240,6 +282,9 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
   const formulario = useFormularioDeEdicion(editing)
   // Varias universidades ofrecen carreras con el mismo nombre: sin esto no se sabe de cual es la regla.
   const institutionOf = new Map(careers.map((career) => [career.id, career.institutionName]))
+  // Ordenadas por carrera e institucion: las reglas de una misma carrera quedan juntas (ORION #39).
+  const sorted = [...compatibilities].sort((a, b) => a.careerName.localeCompare(b.careerName) || (institutionOf.get(a.careerId) ?? '').localeCompare(institutionOf.get(b.careerId) ?? '') || a.dimension.localeCompare(b.dimension))
+  const search = useListSearch(sorted, (rule) => `${rule.careerName} ${institutionOf.get(rule.careerId) ?? ''} ${rule.dimension} ${rule.rule}`)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -263,9 +308,10 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
 
   return (
     <section className="admin-section">
-      <h2>Compatibilidades por dimensión (RIASEC)</h2>
+      <h2>Compatibilidades por dimensión (RIASEC) <small className="admin-count">{compatibilities.length} reglas</small></h2>
+      <ListSearch search={search} total={compatibilities.length} placeholder="Carrera, institución o letra (R, I, A, S, E, C)" />
       <div className="admin-list">
-        {compatibilities.map((compatibility) => (
+        {search.visible.map((compatibility) => (
           <div className="admin-row" key={compatibility.id}>
             <div className="admin-row-main">
               <strong>{compatibility.careerName} · {institutionOf.get(compatibility.careerId) ?? 'Sin institución'}</strong>
@@ -278,7 +324,9 @@ function CompatibilitiesSection({ compatibilities, careers, onChanged, report }:
           </div>
         ))}
         {compatibilities.length === 0 && <p className="empty-state">Todavía no hay reglas de compatibilidad.</p>}
+        {search.searching && search.found.length === 0 && <p className="empty-state">Ninguna regla coincide con «{search.query.trim()}».</p>}
       </div>
+      <ShowAllButton search={search} noun="reglas" />
       <form ref={formulario} className={editing ? 'simple-form editando' : 'simple-form'} onSubmit={submit} key={editing?.id ?? 'new-compatibility'}>
         <h3>{editing ? 'Editar regla' : 'Nueva regla'}</h3>
         <label>Carrera

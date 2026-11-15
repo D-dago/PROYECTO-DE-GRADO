@@ -187,3 +187,9 @@ UPEA e ITPM están en El Alto. INCOS y Álvarez Plata no tienen sitio oficial co
 **Motivo:** el usuario preguntó cómo cambiar el avatar de hombre a mujer y pidió avatares de mujer: hasta ahora había un solo cuerpo.
 
 **Publicación:** la migración debe aplicarse en Neon **antes** de publicar el código. El código nuevo lee la columna `AvatarStyle`, y sin ella fallarían el perfil y las skins.
+
+## 2026-11-15: buscador y lista corta en el panel de administrador (ORION #39)
+
+**Decisión:** las secciones Carreras y Compatibilidades del panel tienen un buscador (todas las palabras escritas, sin importar tildes: nombre, institución, área, estado o letra RIASEC). Sin búsqueda muestran las primeras 25 filas y un botón para ver todas. Las reglas se ordenan por carrera e institución, así las de una misma carrera quedan juntas. El diseño no cambia: se usan los mismos campos y el mismo botón que ya existían.
+
+**Motivo:** con el catálogo completo (256 carreras y 510 reglas) el panel mostraba todo a la vez y medía unos 218.000 px de alto en el celular. Ahora mide unos 40.000 px (21.000 px en la computadora).
